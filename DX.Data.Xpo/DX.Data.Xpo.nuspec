@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<licenseUrl>https://anykey.nl</licenseUrl>
+		<projectUrl>http://anykey.nl</projectUrl>
+		<iconUrl>http://anykey.nl/favicon.ico</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>$description$</description>
+		<releaseNotes>Initial version.</releaseNotes>
+		<copyright>Copyright 2017</copyright>
+		<tags>DXWeb Wibier AnyKey</tags>
+		<references>
+			<reference file="$TargetFileName$" />
+		</references>
+	</metadata>
+</package>

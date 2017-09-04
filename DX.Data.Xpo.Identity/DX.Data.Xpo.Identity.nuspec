@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>$id$</id>
+		<version>$version$</version>
+		<title>$title$</title>
+		<authors>$author$</authors>
+		<owners>$author$</owners>
+		<licenseUrl>https://anykey.nl</licenseUrl>
+		<projectUrl>http://anykey.nl</projectUrl>
+		<iconUrl>http://anykey.nl/favicon.ico</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>$description$</description>
+		<releaseNotes>Initial release of Identity Storage provider based on DevExpress XPO.</releaseNotes>
+		<copyright>Copyright 2017</copyright>
+		<tags>Microsoft Identity DevExpress XPO Advantage ASA ASE DB2 Firebird MSAccess MSSQL MSSQLCE MySQL Oracle Pervasive PostgreSQL SQLite VistaDB</tags>
+		<!--<dependencies>
+			<dependency id="DevExpress.Xpo" version="17.1.0.0" />
+		</dependencies>
+		<references>
+			<reference file="DevExpress.Xpo.v17.1" />
+		</references>-->
+	</metadata>
+</package>
