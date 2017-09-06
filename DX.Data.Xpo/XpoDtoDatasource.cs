@@ -235,7 +235,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				foreach (var item in items)
 				{
-					TXPOEntity dbItem = wrk.FindObject<TXPOEntity>(CriteriaOperator.Parse("[Id]==?", item.Key));
+					TXPOEntity dbItem = wrk.GetObjectByKey<TXPOEntity>(item.Key);
 					if (dbItem == null)
 					{
 						if (insertOnNotFound)
@@ -281,7 +281,7 @@ namespace DX.Data.Xpo.Identity
 
 			using (UnitOfWork wrk = database.GetUnitOfWork())
 			{
-				wrk.Delete(new XPCollection(wrk, typeof(TXPOEntity), new InOperator("Id", (from o in items select o.Key).ToArray()), null));
+				wrk.Delete(wrk.GetObjectsByKey(wrk.GetClassInfo<TXPOEntity>(), (from o in items select o.Key).ToArray(), false));
 				wrk.CommitChanges();
 			}
 		}
