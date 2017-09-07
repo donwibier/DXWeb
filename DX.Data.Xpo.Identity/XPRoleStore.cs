@@ -9,40 +9,44 @@ using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity
 {
-	public class DxRoleStore<TRole, TXPORole> : DxRoleStore<string, TRole, TXPORole>
+	public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
 		where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
 	{
-		public DxRoleStore() : base() { }
-		public DxRoleStore(string connectionName) : base(connectionName) { }
-		public DxRoleStore(string connectionString, string connectionName) : base(connectionString, connectionName) { }
-		public DxRoleStore(XpoDatabase database) : base(database) { }
+		public XPRoleStore() : 
+			base() { }
+		public XPRoleStore(string connectionName) : 
+			base(connectionName) { }
+		public XPRoleStore(string connectionString, string connectionName) : 
+			base(connectionString, connectionName) { }
+		public XPRoleStore(XpoDatabase database) : 
+			base(database) { }
 	}
 
-	public class DxRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
+	public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
 		IQueryableRoleStore<TRole, TKey>
 		where TKey : IEquatable<TKey>
 		where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
 		where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
 	{
-		public DxRoleStore() :
+		public XPRoleStore() :
 			base()
 		{
 
 		}
 
-		public DxRoleStore(string connectionName) :
+		public XPRoleStore(string connectionName) :
 			base(connectionName)
 		{
 
 		}
-		public DxRoleStore(string connectionString, string connectionName) :
+		public XPRoleStore(string connectionString, string connectionName) :
 			base(connectionString, connectionName)
 		{
 
 		}
 
-		public DxRoleStore(XpoDatabase database) :
+		public XPRoleStore(XpoDatabase database) :
 			base(database)
 		{
 

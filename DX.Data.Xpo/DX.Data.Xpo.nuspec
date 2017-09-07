@@ -6,14 +6,14 @@
 		<title>$title$</title>
 		<authors>$author$</authors>
 		<owners>$author$</owners>
-		<licenseUrl>https://anykey.nl</licenseUrl>
-		<projectUrl>http://anykey.nl</projectUrl>
-		<iconUrl>http://anykey.nl/favicon.ico</iconUrl>
+		<licenseUrl>https://github.com/donwibier/DXWeb/blob/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo</projectUrl>
+		<iconUrl>https://www.devexpress.com/favicon.ico</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
 		<releaseNotes>Initial version.</releaseNotes>
 		<copyright>Copyright 2017</copyright>
-		<tags>DXWeb Wibier AnyKey</tags>
+		<tags>DXWeb Wibier DevExpress XPO ORM Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</tags>
 		<references>
 			<reference file="$TargetFileName$" />
 		</references>

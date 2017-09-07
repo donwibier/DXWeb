@@ -6,14 +6,14 @@
 		<title>$title$</title>
 		<authors>$author$</authors>
 		<owners>$author$</owners>
-		<licenseUrl>https://anykey.nl</licenseUrl>
-		<projectUrl>http://anykey.nl</projectUrl>
-		<iconUrl>http://anykey.nl/favicon.ico</iconUrl>
+		<licenseUrl>https://github.com/donwibier/DXWeb/blob/master/LICENSE</licenseUrl>
+		<projectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</projectUrl>
+		<iconUrl>https://www.devexpress.com/favicon.ico</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
 		<releaseNotes>Initial release of Identity Storage provider based on DevExpress XPO.</releaseNotes>
-		<copyright>Copyright 2017</copyright>
-		<tags>Microsoft Identity DevExpress XPO Advantage ASA ASE DB2 Firebird MSAccess MSSQL MSSQLCE MySQL Oracle Pervasive PostgreSQL SQLite VistaDB</tags>
+		<copyright>Copyright 2017</copyright>		
+		<tags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</tags>
 		<!--<dependencies>
 			<dependency id="DevExpress.Xpo" version="17.1.0.0" />
 		</dependencies>

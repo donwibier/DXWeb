@@ -6,9 +6,9 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://anykey.nl</licenseUrl>
-    <projectUrl>http://anykey.nl</projectUrl>
-    <iconUrl>http://anykey.nl/favicon.ico</iconUrl>
+    <licenseUrl>https://github.com/donwibier/DXWeb/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</projectUrl>
+    <iconUrl>https://www.devexpress.com/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>This is the initial release of the package.</releaseNotes>

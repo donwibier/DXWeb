@@ -10,31 +10,55 @@ using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity
 {
-	public class DxUserStore<TUser, TXPOUser> :
-		 DxUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
-		 IUserStore<TUser>
-		 where TUser : XPIdentityUser<string, TXPOUser>, IUser<string>
-		 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+	public class XPUserStore<TUser> :
+		XPUserStore<TUser, XpoDxUser>
+		 where TUser : XPIdentityUser<string, XpoDxUser>, IUser<string>
 	{
-		public DxUserStore() :
-			base()
-		{
+		public XPUserStore() { }
 
-		}
-
-		public DxUserStore(string connectionName) :
+		public XPUserStore(string connectionName) :
 			base(connectionName)
 		{
-
 		}
 
-		public DxUserStore(string connectionString, string connectionName) : 
+		public XPUserStore(string connectionString, string connectionName) :
 			base(connectionString, connectionName)
 		{
 
 		}
 
-		public DxUserStore(XpoDatabase database) : 
+		public XPUserStore(XpoDatabase database) :
+			base(database)
+		{
+
+		}
+	}
+
+	public class XPUserStore<TUser, TXPOUser> :
+	 XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
+	 IUserStore<TUser>
+	 where TUser : XPIdentityUser<string, TXPOUser>, IUser<string>
+	 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+	{
+		public XPUserStore() :
+			base()
+		{
+
+		}
+
+		public XPUserStore(string connectionName) :
+			base(connectionName)
+		{
+
+		}
+
+		public XPUserStore(string connectionString, string connectionName) :
+			base(connectionString, connectionName)
+		{
+
+		}
+
+		public XPUserStore(XpoDatabase database) :
 			base(database)
 		{
 
@@ -44,7 +68,7 @@ namespace DX.Data.Xpo.Identity
 
 
 
-	public class DxUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XpoStore<TXPOUser, TKey>,
+	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XpoStore<TXPOUser, TKey>,
 		 IUserLoginStore<TUser, TKey>,
 		 IUserClaimStore<TUser, TKey>,
 		 IUserRoleStore<TUser, TKey>,
@@ -60,27 +84,27 @@ namespace DX.Data.Xpo.Identity
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
 		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
-		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>		
+		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
 	{
-		public DxUserStore() :
+		public XPUserStore() :
 			base()
 		{
 
 		}
 
-		public DxUserStore(string connectionName) :
+		public XPUserStore(string connectionName) :
 			base(connectionName)
 		{
 
 		}
 
-		public DxUserStore(string connectionString, string connectionName) : 
+		public XPUserStore(string connectionString, string connectionName) :
 			base(connectionString, connectionName)
 		{
 
 		}
 
-		public DxUserStore(XpoDatabase database) : 
+		public XPUserStore(XpoDatabase database) :
 			base(database)
 		{
 
@@ -122,9 +146,9 @@ namespace DX.Data.Xpo.Identity
 				xpoLogin.ProviderKey = login.ProviderKey;
 				xpoLogin.SetMemberValue("User", s.FindObject(XPOUserType, CriteriaOperator.Parse($"{KeyField} == ?", user.Id)));
 
-					//if (xpoLogin.User == null)
-					//	 throw new Exception(String.Format("The user with id '{0}' could not be found in the database", user.Id));
-					return 0;
+				//if (xpoLogin.User == null)
+				//	 throw new Exception(String.Format("The user with id '{0}' could not be found in the database", user.Id));
+				return 0;
 			}));
 		}
 
@@ -251,7 +275,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 
-			return Task.FromResult(XPOExecute<object>((db, wrk)=> 
+			return Task.FromResult(XPOExecute<object>((db, wrk) =>
 			{
 				TXPOUser u = wrk.FindObject(XPOUserType, CriteriaOperator.Parse($"{KeyField} == ?", user.Id)) as TXPOUser;
 				if (u != null)
@@ -507,7 +531,7 @@ namespace DX.Data.Xpo.Identity
 		public IQueryable<TUser> Users
 		{
 			get
-			{				
+			{
 				XPQuery<TXPOUser> q = new XPQuery<TXPOUser>(GetSession());
 				var result = from u in q
 							 select Activator.CreateInstance(typeof(TUser), u as TXPOUser) as TUser;

@@ -11,20 +11,23 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity
-{	
-	public class XPODxUser: XPIdentityUser<string, XpoDxUser>
+{
+	public class XPIdentityUser : XPIdentityUser<string, XpoDxUser>
 	{
-		public XPODxUser(XpoDxUser source) : base(source)
+		public XPIdentityUser(XpoDxUser source) :
+			base(source)
 		{
 
 		}
 
-		public XPODxUser(XpoDxUser source, int loadingFlags) : base(source, loadingFlags)
+		public XPIdentityUser(XpoDxUser source, int loadingFlags) :
+			base(source, loadingFlags)
 		{
 
 		}
 
-		public XPODxUser()
+		public XPIdentityUser() :
+			base()
 		{
 
 		}
