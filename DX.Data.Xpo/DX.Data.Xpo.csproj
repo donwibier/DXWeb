@@ -30,11 +30,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.Data.v17.1, Version=17.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Data.17.1.5.0\lib\DevExpress.Data.v17.1.dll</HintPath>
+    <Reference Include="DevExpress.Data.v16.2, Version=16.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Data.16.2.6.0\lib\DevExpress.Data.v16.2.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="DevExpress.Xpo.v17.1, Version=17.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Xpo.17.1.5.0\lib\DevExpress.Xpo.v17.1.dll</HintPath>
+    <Reference Include="DevExpress.Xpo.v16.2, Version=16.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Xpo.16.2.6.0\lib\DevExpress.Xpo.v16.2.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="DX.Utils, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DX.Utils.1.0.0.1\lib\net452\DX.Utils.dll</HintPath>
@@ -57,7 +59,9 @@
     <Compile Include="XpoStore.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DX.Data.Xpo.nuspec" />
+    <None Include="DX.Data.Xpo.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -11,7 +11,10 @@
 		<iconUrl>https://www.devexpress.com/favicon.ico</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>$description$</description>
-		<releaseNotes>Initial version.</releaseNotes>
+		<releaseNotes>
+			v1.0.0.1  - Initial version.
+			v16.2.6.0 - Version in-sync with DevExpress packages
+		</releaseNotes>
 		<copyright>Copyright 2017</copyright>
 		<tags>DXWeb Wibier DevExpress XPO ORM Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</tags>
 		<references>
