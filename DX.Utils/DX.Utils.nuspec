@@ -17,6 +17,18 @@
     <references>
       <reference file="$TargetFileName$" />
     </references>
+    <!--<dependencies>
+      <group targetFramework=".NETFramework4.0" />
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="NETStandard.Library" version="2.0.0" />
+        <dependency id="System.ComponentModel.Annotations" version="4.4.0" />
+        <dependency id="System.Reflection.Emit" version="4.3.0" />
+        <dependency id="System.Reflection.Emit.Lightweight" version="4.3.0" />
+        <dependency id="System.ServiceModel.Http" version="4.4.0" />
+        <dependency id="System.ServiceModel.Primitives" version="4.4.0" />
+        <dependency id="System.Text.Encoding.CodePages" version="4.4.0" />
+      </group>
+    </dependencies>-->
   </metadata>
   <files>
     <!--<file src="" target="content\" />-->
