@@ -20,5 +20,17 @@
 		<references>
 			<reference file="$TargetFileName$" />
 		</references>
-	</metadata>
+    <dependencies>
+      <group targetFramework=".NETFramework4.0" />
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="NETStandard.Library" version="2.0.0" />
+        <dependency id="DevExpress.Xpo" version="17.2.1.17279" />
+        <dependency id="DX.Utils" version="1.0.0.4" />
+      </group>
+    </dependencies>
+
+  </metadata>
+  <files>
+    <file src="..\NETStandard\DX.Data.Xpo.Std\bin\$Configuration$\netstandard2.0\DX.Data.Xpo.dll" target="lib\netstandard2.0\DX.Data.Xpo.dll" />
+  </files>
 </package>

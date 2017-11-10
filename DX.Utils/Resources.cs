@@ -3,6 +3,7 @@
 //
 // summary:	Implements the resources class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+#if (!NETSTANDARD2_0)
 
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace DX.Utils
     {
         const string rootUrl = "~/App_LocalResources";
 
-        #region Resource String Extension methods
+#region Resource String Extension methods
 
         public static string GetResourced(this string message)
         {
@@ -42,7 +43,7 @@ namespace DX.Utils
         {
             return GetText(message, cultureName, false, localResourceRootUrl);
         }
-        #endregion
+#endregion
 
         public static string GetResourced(string classKey, string resourceKey, string defaultValue, string cultureName = "", bool scriptEncode = false, string localResourceRootUrl = rootUrl)
         {
@@ -148,3 +149,4 @@ namespace DX.Utils
 
 
 }
+#endif

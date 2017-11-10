@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>DX.Data.Xpo.Identity</AssemblyName>
+    <RootNamespace>DX.Data.Xpo.Identity</RootNamespace>
+    <AssemblyVersion>17.2.1.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\DX.Data.Xpo.Identity\Bits.cs" Link="Bits.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\Interfaces.cs" Link="Interfaces.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPIdentityRole.cs" Link="XPIdentityRole.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPIdentityUser.cs" Link="XPIdentityUser.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPIdentityUserClaim.cs" Link="XPIdentityUserClaim.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPIdentityUserLogin.cs" Link="XPIdentityUserLogin.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPRoleStore.cs" Link="XPRoleStore.cs" />
+    <Compile Include="..\..\DX.Data.Xpo.Identity\XPUserStore.cs" Link="XPUserStore.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="XpoDiagramCode\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DX.Data.Xpo" Version="17.2.1" />
+  </ItemGroup>
+
+</Project>

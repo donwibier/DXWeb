@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+#if (!NETSTANDARD2_0)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +27,7 @@ namespace DX.Utils
             get
             {
                 string result = AppRelativeToFullDomainUrl(HostingEnvironment.ApplicationVirtualPath);
+
                 //// make sure there is a slash at the end
                 if (!result.EndsWith("/"))
                     result += "/";
@@ -258,3 +262,4 @@ namespace DX.Utils
 
     }
 }
+#endif

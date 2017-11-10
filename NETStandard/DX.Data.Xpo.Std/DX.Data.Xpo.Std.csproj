@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>DX.Data.Xpo</AssemblyName>
+    <RootNamespace>DX.Data.Xpo</RootNamespace>
+    <AssemblyVersion>17.2.1.0</AssemblyVersion>
+    <PackageReleaseNotes />
+    <FileVersion>17.2.1.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\DX.Data.Xpo\XpoDatabase.cs" Link="XpoDatabase.cs" />
+    <Compile Include="..\..\DX.Data.Xpo\XpoDtoDatasource.cs" Link="XpoDtoDatasource.cs" />
+    <Compile Include="..\..\DX.Data.Xpo\XpoInterfaces.cs" Link="XpoInterfaces.cs" />
+    <Compile Include="..\..\DX.Data.Xpo\XpoStore.cs" Link="XpoStore.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Xpo">
+      <Version>17.2.1.17279</Version>
+    </PackageReference>
+    <PackageReference Include="DX.Utils">
+      <Version>1.0.0.4</Version>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
