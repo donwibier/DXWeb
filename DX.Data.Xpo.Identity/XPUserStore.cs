@@ -1,16 +1,22 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
-using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DX.Data.Xpo.Identity.Persistent;
+#if (NETSTANDARD2_0)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPUserStore<TUser> :
+#if (!NETSTANDARD2_0)
+    public class XPUserStore<TUser> :
 		XPUserStore<TUser, XpoDxUser>
 		 where TUser : XPIdentityUser<string, XpoDxUser>, IUser<string>
 	{
@@ -111,7 +117,7 @@ namespace DX.Data.Xpo.Identity
 		}
 
 
-		#region Generic Helper methods and members
+#region Generic Helper methods and members
 
 		protected static Type XPOUserType { get { return typeof(TXPOUser); } }
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
@@ -122,10 +128,10 @@ namespace DX.Data.Xpo.Identity
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
 		protected static TXPOLogin XPOCreateLogin(Session s) { return Activator.CreateInstance(typeof(TXPOLogin), s) as TXPOLogin; }
 		protected static TXPOClaim XPOCreateClaim(Session s) { return Activator.CreateInstance(typeof(TXPOClaim), s) as TXPOClaim; }
-		#endregion
+#endregion
 
 
-		#region IUserLoginStore<TUser, TKey>
+#region IUserLoginStore<TUser, TKey>
 
 		public virtual Task AddLoginAsync(TUser user, UserLoginInfo login)
 		{
@@ -286,9 +292,9 @@ namespace DX.Data.Xpo.Identity
 				return null;
 			}));
 		}
-		#endregion
+#endregion
 
-		#region IUserClaimStore<TUser, TKey>
+#region IUserClaimStore<TUser, TKey>
 
 		public Task AddClaimAsync(TUser user, Claim claim)
 		{
@@ -349,9 +355,9 @@ namespace DX.Data.Xpo.Identity
 				return 0;
 			}));
 		}
-		#endregion
+#endregion
 
-		#region IUserRoleStore<TUser, TKey>
+#region IUserRoleStore<TUser, TKey>
 
 		public Task AddToRoleAsync(TUser user, string roleName)
 		{
@@ -443,9 +449,9 @@ namespace DX.Data.Xpo.Identity
 				return 0;
 			}));
 		}
-		#endregion
+#endregion
 
-		#region IUserPasswordStore<TUser, TKey>
+#region IUserPasswordStore<TUser, TKey>
 
 		public Task<string> GetPasswordHashAsync(TUser user)
 		{
@@ -493,9 +499,9 @@ namespace DX.Data.Xpo.Identity
 			user.PasswordHash = passwordHash;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.PasswordHash = user.PasswordHash, false));
 		}
-		#endregion
+#endregion
 
-		#region IUserSecurityStampStore<TUser, TKey>
+#region IUserSecurityStampStore<TUser, TKey>
 
 		public Task<string> GetSecurityStampAsync(TUser user)
 		{
@@ -525,9 +531,9 @@ namespace DX.Data.Xpo.Identity
 			user.SecurityStamp = stamp;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.SecurityStamp = user.SecurityStamp, false));
 		}
-		#endregion
+#endregion
 
-		#region IQueryableUserStore<TUser, TKey>
+#region IQueryableUserStore<TUser, TKey>
 		public IQueryable<TUser> Users
 		{
 			get
@@ -539,9 +545,9 @@ namespace DX.Data.Xpo.Identity
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region IUserEmailStore<TUser, TKey>
+#region IUserEmailStore<TUser, TKey>
 
 		public Task<TUser> FindByEmailAsync(string email)
 		{
@@ -595,9 +601,9 @@ namespace DX.Data.Xpo.Identity
 			user.EmailConfirmed = confirmed;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.EmailConfirmed = user.EmailConfirmed, false));
 		}
-		#endregion
+#endregion
 
-		#region IUserPhoneNumberStore<TUser, TKey>
+#region IUserPhoneNumberStore<TUser, TKey>
 
 		public Task<string> GetPhoneNumberAsync(TUser user)
 		{
@@ -640,9 +646,9 @@ namespace DX.Data.Xpo.Identity
 			user.PhoneNumberConfirmed = confirmed;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.PhoneNumberConfirmed = user.PhoneNumberConfirmed, false));
 		}
-		#endregion
+#endregion
 
-		#region IUserTwoFactorStore<TUser, TKey>
+#region IUserTwoFactorStore<TUser, TKey>
 
 		public Task<bool> GetTwoFactorEnabledAsync(TUser user)
 		{
@@ -664,9 +670,9 @@ namespace DX.Data.Xpo.Identity
 			user.TwoFactorEnabled = enabled;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.TwoFactorEnabled = user.TwoFactorEnabled, false));
 		}
-		#endregion
+#endregion
 
-		#region IUserLockoutStore<TUser, TKey>
+#region IUserLockoutStore<TUser, TKey>
 
 		public Task<int> GetAccessFailedCountAsync(TUser user)
 		{
@@ -746,8 +752,8 @@ namespace DX.Data.Xpo.Identity
 			user.LockoutEndDateUtc = lockoutEnd == DateTimeOffset.MinValue ? (DateTime?)null : lockoutEnd.UtcDateTime;
 			return Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.LockoutEndDateUtc = user.LockoutEndDateUtc, false));
 		}
-		#endregion
+#endregion
 	}
 
-
+#endif
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
+using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Data.Xpo.Identity
 {

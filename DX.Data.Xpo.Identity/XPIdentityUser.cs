@@ -1,14 +1,20 @@
-﻿using DevExpress.Data.Filtering;
-using DevExpress.Xpo;
-using DX.Utils;
-using Microsoft.AspNet.Identity;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DevExpress.Data.Filtering;
+using DevExpress.Xpo;
+using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils;
+#if(NETSTANDARD2_0)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
+
 
 namespace DX.Data.Xpo.Identity
 {

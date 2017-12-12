@@ -1,15 +1,20 @@
-﻿using DevExpress.Data.Filtering;
-using DevExpress.Xpo;
-using Microsoft.AspNet.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DevExpress.Data.Filtering;
+using DevExpress.Xpo;
+#if(NETSTANDARD2_0)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
+#if(!NETSTANDARD2_0)
+    public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
 		where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
 	{
@@ -32,7 +37,7 @@ namespace DX.Data.Xpo.Identity
 		public XPRoleStore() :
 			base()
 		{
-
+            
 		}
 
 		public XPRoleStore(string connectionName) :
@@ -161,4 +166,5 @@ namespace DX.Data.Xpo.Identity
 			}));
 		}
 	}
+#endif
 }

@@ -13,9 +13,56 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if (NETSTANDARD2_0)
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+#endif
+
 namespace DX.Data.Xpo
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+#if(NETSTANDARD2_0)
+    public static class XpoExtensions
+    {
+        public static IdentityBuilder AddXPOFrameworkStores(this IdentityBuilder builder, string connectionName)// where TContext : DbContext;
+        {
+            //Type userType = builder.UserType;
+            //Type roleType = builder.RoleType;
+            //var db = new XpoDatabase(connectionName);
+            
+            return builder;
+        }
+        //public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
+        //{
+        //    return serviceCollection.AddSingleton<XpoDatabase>(new XpoDatabase(connectionName));
+        //}
+        //public static IServiceCollection AddXpoDefaultUnitOfWork(this IServiceCollection serviceCollection)
+        //{
+        //    return serviceCollection.AddScoped<UnitOfWork>((sp) => new UnitOfWork());
+        //}
+        public static IServiceCollection AddXpoDefault(this IServiceCollection serviceCollection)
+        {
+            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase());
+        }
+        public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
+        {
+            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase(connectionName));
+        }
+        public static IServiceCollection AddXpoDatabaseConnectionString(this IServiceCollection serviceCollection, string connectionString, string connectionName)
+        {
+            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase(connectionString, connectionName));
+        }
+        //public static IApplicationBuilder UseXpoDemoData(this IApplicationBuilder app)
+        //{
+        //    using (var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+        //    {
+        //        XpoHelper.CreateDemoData(() => scope.ServiceProvider.GetService<UnitOfWork>());
+        //    }
+        //    return app;
+        //}
+    }
+#endif    
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 	public class XpoDataLayerAttribute : Attribute
 	{
 		public XpoDataLayerAttribute(string dataLayerName)
@@ -100,7 +147,7 @@ namespace DX.Data.Xpo
 		}
 
 		
-		#region Static Helpers
+        #region Static Helpers
 		public static Session GetSession(string connectionString, string dataLayerName)
 		{
 			return new Session(GetDataLayer(connectionString, dataLayerName));
@@ -126,7 +173,7 @@ namespace DX.Data.Xpo
 
 		//}
 		
-		#endregion
+        #endregion
 
 		private static IDataLayer createDataLayer(string connectionString, string datalayerName)
 		{
@@ -144,7 +191,7 @@ namespace DX.Data.Xpo
 			bool enableCachingNode = Conversion.GetConfigOption(connectionString, "EnableCachingNode", false);
 
 			XPDictionary dataDictionary = new ReflectionDictionary();
-			IDataStore dataStore = XpoDefault.GetConnectionProvider(connectionString, createOption);
+			IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(connectionString), createOption);
 
 			// Initialize the XPO dictionary
 			dataDictionary.GetDataStoreSchema(GetDataTypes(datalayerName));
@@ -210,7 +257,7 @@ namespace DX.Data.Xpo
 			return result.ToArray();
 		}
 
-		#region Cloning
+#region Cloning
 
 		public T[] CloneCollection<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
@@ -420,9 +467,9 @@ namespace DX.Data.Xpo
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region IDisposable Support
+#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
 
 		protected virtual void Dispose(bool disposing)
@@ -468,7 +515,7 @@ namespace DX.Data.Xpo
 			// TODO: uncomment the following line if the finalizer is overridden above.
 			// GC.SuppressFinalize(this);
 		}
-		#endregion
+#endregion
 
 	}
 }

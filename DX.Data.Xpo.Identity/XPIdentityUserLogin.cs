@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
+using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Data.Xpo.Identity
 {

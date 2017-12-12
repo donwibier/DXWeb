@@ -1,12 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27009.1
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Utils", "DX.Utils\DX.Utils.csproj", "{B1B46D04-F431-43E6-B06C-D78F70D73DC3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D} = {794F05D9-DCB3-415B-B5B5-DD51AD4B154D}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Utils", "DX.Utils\DX.Utils.csproj", "{B1B46D04-F431-43E6-B06C-D78F70D73DC3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{51F7105E-AD43-4DA1-9CF1-3EF4B4F88579}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,28 +16,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		DXWeb.cmd = DXWeb.cmd
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo", "DX.Data.Xpo\DX.Data.Xpo.csproj", "{94EDFF4D-1819-4D21-B779-C0C0B72DA44F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo", "DX.Data.Xpo\DX.Data.Xpo.csproj", "{94EDFF4D-1819-4D21-B779-C0C0B72DA44F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B1B46D04-F431-43E6-B06C-D78F70D73DC3} = {B1B46D04-F431-43E6-B06C-D78F70D73DC3}
-		{3F65604E-D1F3-41B2-9A4C-2E28384F53C5} = {3F65604E-D1F3-41B2-9A4C-2E28384F53C5}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo.Identity", "DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj", "{4A9EC437-F8F0-4C53-B288-DE26E58F061F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F56BA9DC-2F25-46F8-A395-A34C689556FA} = {F56BA9DC-2F25-46F8-A395-A34C689556FA}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Utils.Std", "NETStandard\DX.Utils.Std\DX.Utils.Std.csproj", "{794F05D9-DCB3-415B-B5B5-DD51AD4B154D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo.Std", "NETStandard\DX.Data.Xpo.Std\DX.Data.Xpo.Std.csproj", "{3F65604E-D1F3-41B2-9A4C-2E28384F53C5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D} = {794F05D9-DCB3-415B-B5B5-DD51AD4B154D}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo.Identity.Std", "NETStandard\DX.Data.Xpo.Identity.Std\DX.Data.Xpo.Identity.Std.csproj", "{F56BA9DC-2F25-46F8-A395-A34C689556FA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{94EDFF4D-1819-4D21-B779-C0C0B72DA44F} = {94EDFF4D-1819-4D21-B779-C0C0B72DA44F}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Identity", "DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj", "{4A9EC437-F8F0-4C53-B288-DE26E58F061F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,19 +40,6 @@ Global
 		{4A9EC437-F8F0-4C53-B288-DE26E58F061F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A9EC437-F8F0-4C53-B288-DE26E58F061F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A9EC437-F8F0-4C53-B288-DE26E58F061F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A9EC437-F8F0-4C53-B288-DE26E58F061F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{794F05D9-DCB3-415B-B5B5-DD51AD4B154D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F65604E-D1F3-41B2-9A4C-2E28384F53C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F65604E-D1F3-41B2-9A4C-2E28384F53C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F65604E-D1F3-41B2-9A4C-2E28384F53C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F65604E-D1F3-41B2-9A4C-2E28384F53C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F56BA9DC-2F25-46F8-A395-A34C689556FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F56BA9DC-2F25-46F8-A395-A34C689556FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F56BA9DC-2F25-46F8-A395-A34C689556FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F56BA9DC-2F25-46F8-A395-A34C689556FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

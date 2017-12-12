@@ -6,145 +6,317 @@ using System.ComponentModel;
 using System.Collections;
 using DX.Utils;
 
-namespace DX.Data.Xpo.Identity
+namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	public partial class XpoDxUser : IDxUser<string>
-	{
-		public XpoDxUser(Session session) : base(session) { }
-		public override void AfterConstruction() { base.AfterConstruction(); }
+    public partial class XpoDxUser : IDxUser<string>
+    {
+        public XpoDxUser(Session session) : base(session) { }
+        public override void AfterConstruction() { base.AfterConstruction(); }
 
-		#region Embedded Fields class
+        protected override void OnChanged(string propertyName, object oldValue, object newValue)
+        {
+            if (propertyName == "Email")
+                _EmailUpper = ((string)newValue ?? "").ToUpperInvariant();
+            else if (propertyName == "UserName")
+                _UserNameUpper = ((string)newValue ?? "").ToUpperInvariant();
 
-		public new class Fields : XpoDxBase.Fields
-		{
-			protected Fields() { }
-			public static OperandProperty UserName { get { return new OperandProperty("UserName"); } }
-			public static OperandProperty UserNameUpper { get { return new OperandProperty("UserNameUpper"); } }
-			public static OperandProperty PasswordHash { get { return new OperandProperty("PasswordHash"); } }
-			public static OperandProperty SecurityStamp { get { return new OperandProperty("SecurityStamp"); } }
-			public static OperandProperty Email { get { return new OperandProperty("Email"); } }
-			public static OperandProperty EmailUpper { get { return new OperandProperty("EmailUpper"); } }
-			public static OperandProperty EmailConfirmed { get { return new OperandProperty("EmailConfirmed"); } }
-			public static OperandProperty PhoneNumber { get { return new OperandProperty("PhoneNumber"); } }
-			public static OperandProperty PhoneNumberConfirmed { get { return new OperandProperty("PhoneNumberConfirmed"); } }
-			public static OperandProperty TwoFactorEnabled { get { return new OperandProperty("TwoFactorEnabled"); } }
-			public static OperandProperty LockoutEndDateUtc { get { return new OperandProperty("LockoutEndDateUtc"); } }
-			public static OperandProperty LockoutEnabled { get { return new OperandProperty("LockoutEnabled"); } }
-			public static OperandProperty AccessFailedCount { get { return new OperandProperty("AccessFailedCount"); } }
+            base.OnChanged(propertyName, oldValue, newValue);
+        }
 
-			public static OperandProperty Roles { get { return new OperandProperty("Roles"); } }
-			public static OperandProperty Logins { get { return new OperandProperty("Logins"); } }
-			public static OperandProperty Claims { get { return new OperandProperty("Claims"); } }
+        public IList RolesList { get { return Roles; } }
 
-		}
-		#endregion
+        public IList ClaimsList { get { return Claims; } }
 
-		protected override void OnChanged(string propertyName, object oldValue, object newValue)
-		{
-			if (propertyName == "Email")
-				_EmailUpper = ((string)newValue ?? "").ToUpperInvariant();
-			else if (propertyName == "UserName")
-				_UserNameUpper = ((string)newValue ?? "").ToUpperInvariant();
+        public IList LoginsList { get { return Logins; } }
 
-			base.OnChanged(propertyName, oldValue, newValue);
-		}
+        public override void Assign(object source, int loadingFlags)
+        {
+            base.Assign(source, loadingFlags);
+            IDxUser<string> src = source as IDxUser<string>;
+            if (src != null)
+            {
+                this.UserName = src.UserName;
+                //this.UserNameUpper = src.UserNameUpper;
+                this.PasswordHash = src.PasswordHash;
+                this.SecurityStamp = src.SecurityStamp;
+                this.Email = src.Email;
+                //this.EmailUpper = src.EmailUpper;
+                this.EmailConfirmed = src.EmailConfirmed;
+                this.PhoneNumber = src.PhoneNumber;
+                this.PhoneNumberConfirmed = src.PhoneNumberConfirmed;
+                this.TwoFactorEnabled = src.TwoFactorEnabled;
+                this.LockoutEndDateUtc = src.LockoutEndDateUtc;
+                this.LockoutEnabled = src.LockoutEnabled;
+                this.AccessFailedCount = src.AccessFailedCount;
 
-		public IList RolesList { get { return Roles; } }
+                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
+                    AssignRoles(src.RolesList);
+                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
+                    AssignLogins(src.LoginsList);
+                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
+                    AssignClaims(src.ClaimsList);
+            }
 
-		public IList ClaimsList { get { return Claims; } }
+        }
+        public void AssignRoles(IList roles)
+        {
+            if (roles == null)
+                return;
+            foreach (var role in new XPCollection(Session, typeof(XpoDxRole), XpoDxRole.Fields.Users[XpoDxUser.Fields.Id == Id], null))
+            {
+                Roles.Remove(role as XpoDxRole);
+            }
+            foreach (var r in roles)
+            {
+                IDxRole<string> role = r as IDxRole<string>;
+                if (role != null)
+                    Roles.Add(Session.FindObject(typeof(XpoDxRole), XpoDxRole.Fields.NameUpper == role.Name.ToUpperInvariant()) as XpoDxRole);
+            }
+        }
 
-		public IList LoginsList { get { return Logins; } }
+        public void AssignClaims(IList claims)
+        {
+            if (claims == null)
+                return;
+            foreach (var claim in new XPCollection(Session, typeof(XpoDxUserClaim), CriteriaOperator.Parse("[User!Key] == ?", Id), null))
+            {
+                Claims.Remove(claim as XpoDxUserClaim);
+            }
+            foreach (var c in claims)
+            {
+                IDxUserClaim<string> claim = c as IDxUserClaim<string>;
+                if (claim != null)
+                {
+                    Claims.Add(new XpoDxUserClaim(Session)
+                    {
+                        User = this,
+                        ClaimType = claim.ClaimType,
+                        ClaimValue = claim.ClaimValue
+                    });
+                }
+            }
+        }
+        public void AssignLogins(IList logins)
+        {
+            if (logins == null)
+                return;
+            foreach (var login in new XPCollection(Session, typeof(XpoDxUserLogin), CriteriaOperator.Parse("[User!Key] == ?", Id), null))
+                Logins.Remove(login as XpoDxUserLogin);
+            foreach (var l in logins)
+            {
+                IDxUserLogin<string> login = l as IDxUserLogin<string>;
+                if (l != null)
+                {
+                    Logins.Add(new XpoDxUserLogin(Session)
+                    {
+                        User = this,
+                        LoginProvider = login.LoginProvider,
+                        ProviderKey = login.ProviderKey
+                    });
+                }
+            }
+        }
 
-		public override void Assign(object source, int loadingFlags)
-		{
-			base.Assign(source, loadingFlags);
-			IDxUser<string> src = source as IDxUser<string>;
-			if (src != null)
-			{
-				this.UserName = src.UserName;
-				//this.UserNameUpper = src.UserNameUpper;
-				this.PasswordHash = src.PasswordHash;
-				this.SecurityStamp = src.SecurityStamp;
-				this.Email = src.Email;
-				//this.EmailUpper = src.EmailUpper;
-				this.EmailConfirmed = src.EmailConfirmed;
-				this.PhoneNumber = src.PhoneNumber;
-				this.PhoneNumberConfirmed = src.PhoneNumberConfirmed;
-				this.TwoFactorEnabled = src.TwoFactorEnabled;
-				this.LockoutEndDateUtc = src.LockoutEndDateUtc;
-				this.LockoutEnabled = src.LockoutEnabled;
-				this.AccessFailedCount = src.AccessFailedCount;
+        #region Embedded Fields class
+        public new class FieldsClass : XpoDxBase.FieldsClass
+        {
+            public FieldsClass()
+            {
 
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
-					AssignRoles(src.RolesList);
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
-					AssignLogins(src.LoginsList);
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
-					AssignClaims(src.ClaimsList);
-			}
+            }
 
-		}
-		public void AssignRoles(IList roles)
-		{
-			if (roles == null)
-				return;
-			foreach (var role in new XPCollection(Session, typeof(XpoDxRole), XpoDxRole.Fields.Users[XpoDxUser.Fields.Id == Id], null))
-			{
-				Roles.Remove(role as XpoDxRole);
-			}
-			foreach (var r in roles)
-			{
-				IDxRole<string> role = r as IDxRole<string>;
-				if (role != null)
-					Roles.Add(Session.FindObject(typeof(XpoDxRole), XpoDxRole.Fields.NameUpper == role.Name.ToUpperInvariant()) as XpoDxRole);
-			}
-		}
+            public FieldsClass(string propertyName) : base(propertyName)
+            {
 
-		public void AssignClaims(IList claims)
-		{
-			if (claims == null)
-				return;
-			foreach (var claim in new XPCollection(Session, typeof(XpoDxUserClaim), CriteriaOperator.Parse("[User!Key] == ?", Id), null))
-			{
-				Claims.Remove(claim as XpoDxUserClaim);
-			}
-			foreach (var c in claims)
-			{
-				IDxUserClaim<string> claim = c as IDxUserClaim<string>;
-				if (claim != null)
-				{
-					Claims.Add(new XpoDxUserClaim(Session)
-					{
-						User = this,
-						ClaimType = claim.ClaimType,
-						ClaimValue = claim.ClaimValue
+            }
 
-					});
-				}
-			}
-		}
+            public OperandProperty RolesList
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("RolesList"));
+                }
+            }
 
-		public void AssignLogins(IList logins)
-		{
-			if (logins == null)
-				return;
-			foreach (var login in new XPCollection(Session, typeof(XpoDxUserLogin), CriteriaOperator.Parse("[User!Key] == ?", Id), null))
-				Logins.Remove(login as XpoDxUserLogin);
-			foreach (var l in logins)
-			{
-				IDxUserLogin<string> login = l as IDxUserLogin<string>;
-				if (l != null)
-				{
-					Logins.Add(new XpoDxUserLogin(Session)
-					{
-						User = this,
-						LoginProvider = login.LoginProvider,
-						ProviderKey = login.ProviderKey
-					});
-				}
-			}
-		}
-	}
+            public OperandProperty ClaimsList
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("ClaimsList"));
+                }
+            }
+
+            public OperandProperty LoginsList
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("LoginsList"));
+                }
+            }
+
+            public OperandProperty Email
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("Email"));
+                }
+            }
+
+            public OperandProperty EmailConfirmed
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("EmailConfirmed"));
+                }
+            }
+
+            public OperandProperty PasswordHash
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("PasswordHash"));
+                }
+            }
+
+            public OperandProperty SecurityStamp
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("SecurityStamp"));
+                }
+            }
+
+            public OperandProperty PhoneNumber
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("PhoneNumber"));
+                }
+            }
+
+            public OperandProperty PhoneNumberConfirmed
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("PhoneNumberConfirmed"));
+                }
+            }
+
+            public OperandProperty TwoFactorEnabled
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("TwoFactorEnabled"));
+                }
+            }
+
+            public OperandProperty LockoutEndDateUtc
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("LockoutEndDateUtc"));
+                }
+            }
+
+            public OperandProperty LockoutEnabled
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("LockoutEnabled"));
+                }
+            }
+
+            public OperandProperty AccessFailedCount
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("AccessFailedCount"));
+                }
+            }
+
+            public OperandProperty UserName
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("UserName"));
+                }
+            }
+
+            public OperandProperty _EmailUpper
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("_EmailUpper"));
+                }
+            }
+
+            public OperandProperty EmailUpper
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("EmailUpper"));
+                }
+            }
+
+            public OperandProperty _UserNameUpper
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("_UserNameUpper"));
+                }
+            }
+
+            public OperandProperty UserNameUpper
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("UserNameUpper"));
+                }
+            }
+
+            public OperandProperty Roles
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("Roles"));
+                }
+            }
+
+            public OperandProperty Logins
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("Logins"));
+                }
+            }
+
+            public OperandProperty Claims
+            {
+                get
+                {
+                    return new OperandProperty(GetNestedName("Claims"));
+                }
+            }
+        }
+
+        public new static FieldsClass Fields
+        {
+            get
+            {
+                if (ReferenceEquals(_Fields, null))
+                {
+                    _Fields = new FieldsClass();
+                }
+
+                return _Fields;
+            }
+        }
+
+        static FieldsClass _Fields;
+
+        #endregion
+
+    }
 
 }

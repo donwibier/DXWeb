@@ -4,10 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if(NETSTANDARD2_0)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
 
 namespace DX.Data.Xpo.Identity
 {
-	public interface IDxUser<TKey> : IXPOKey<TKey>, Microsoft.AspNet.Identity.IUser<TKey>, IAssignable
+#if (NETSTANDARD2_0)
+    public interface IUser<TKey> : IAssignable
+         where TKey : IEquatable<TKey>
+    {
+        TKey Id { get; }
+        string UserName { get; set; }
+    }
+    public interface IRole<TKey> : IAssignable
+        where TKey : IEquatable<TKey>
+    {
+        TKey Id { get; }
+        string Name { get; set; }
+    }
+#endif
+    public interface IDxUser<TKey> : IXPOKey<TKey>, IUser<TKey>, IAssignable
 		 where TKey : IEquatable<TKey>
 	{
 		//Id
@@ -36,15 +55,16 @@ namespace DX.Data.Xpo.Identity
 		void AssignLogins(IList logins);
 	}
 
-	public interface IDxRole<TKey> : IXPOKey<TKey>, Microsoft.AspNet.Identity.IRole<TKey>, IAssignable
-	where TKey : IEquatable<TKey>
+	public interface IDxRole<TKey> : IXPOKey<TKey>, IRole<TKey>, IAssignable
+	    where TKey : IEquatable<TKey>
 	{
 		//Id
 		//Name
 		IList UsersList { get; }
-	}
-	public interface IDxUserLogin<TKey> : IXPOKey<TKey>, IAssignable
-   where TKey : IEquatable<TKey>
+    }
+
+    public interface IDxUserLogin<TKey> : IXPOKey<TKey>, IAssignable
+        where TKey : IEquatable<TKey>
 	{
 		//Id
 		TKey UserId { get; }
@@ -52,7 +72,7 @@ namespace DX.Data.Xpo.Identity
 		string ProviderKey { get; set; }
 	}
 	public interface IDxUserClaim<TKey> : IXPOKey<TKey>, IAssignable
-	where TKey : IEquatable<TKey>
+	    where TKey : IEquatable<TKey>
 	{
 		//Id
 		TKey UserId { get; }

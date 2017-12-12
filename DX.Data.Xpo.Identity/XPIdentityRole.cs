@@ -1,9 +1,14 @@
 ﻿using DevExpress.Xpo;
-using Microsoft.AspNet.Identity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+#if(NETSTANDARD2_0)
+
+#else
+using Microsoft.AspNet.Identity;
+#endif
+using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Data.Xpo.Identity
 {	

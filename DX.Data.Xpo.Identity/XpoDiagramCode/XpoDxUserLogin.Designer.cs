@@ -11,39 +11,39 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
-namespace DX.Data.Xpo.Identity
+namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	[Persistent(@"DXUserLogins")]
-	public partial class XpoDxUserLogin : XpoDxBase
-	{
-		string _LoginProvider;
-		[Indexed(@"User", Name = @"IdxUserLogin", Unique = true)]
-		[Size(150)]
-		public string LoginProvider
-		{
-			get { return _LoginProvider; }
-			set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
-		}
-		string _ProviderKey;
-		[Size(150)]
-		public string ProviderKey
-		{
-			get { return _ProviderKey; }
-			set { SetPropertyValue<string>("ProviderKey", ref _ProviderKey, value); }
-		}
-		XpoDxUser _User;
-		[Association(@"XpoDxUserLogins")]
-		public XpoDxUser User
-		{
-			get { return _User; }
-			set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
-		}
-		[PersistentAlias("[User!Key]")]
-		public string UserId
-		{
-			get { return (string)(EvaluateAlias("UserId")); }
-		}
-	}
+    [Persistent(@"DXUserLogins")]
+    public partial class XpoDxUserLogin : XpoDxBase
+    {
+        string _LoginProvider;
+        [Indexed(@"User", Name = @"IdxUserLogin", Unique = true)]
+        [Size(150)]
+        public string LoginProvider
+        {
+            get { return _LoginProvider; }
+            set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
+        }
+        string _ProviderKey;
+        [Size(150)]
+        public string ProviderKey
+        {
+            get { return _ProviderKey; }
+            set { SetPropertyValue<string>("ProviderKey", ref _ProviderKey, value); }
+        }
+        XpoDxUser _User;
+        [Association(@"XpoDxUserLogins")]
+        public XpoDxUser User
+        {
+            get { return _User; }
+            set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
+        }
+        [PersistentAlias("[User!Key]")]
+        public string UserId
+        {
+            get { return (string)(EvaluateAlias("UserId")); }
+        }
+    }
 
 }

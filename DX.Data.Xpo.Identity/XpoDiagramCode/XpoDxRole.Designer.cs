@@ -11,31 +11,31 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
-namespace DX.Data.Xpo.Identity
+namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	[Persistent(@"DXRoles")]
-	public partial class XpoDxRole : XpoDxBase
-	{
-		string _Name;
-		[Indexed(Name = @"IdxName", Unique = true)]
-		[Size(50)]
-		public string Name
-		{
-			get { return _Name; }
-			set { SetPropertyValue<string>("Name", ref _Name, value); }
-		}
-		[Indexed(Name = @"IdxNameUpper", Unique = true)]
-		[Size(50)]
-		[Persistent(@"NameUpper")]
-		string _NameUpper;
-		[PersistentAlias("_NameUpper")]
-		public string NameUpper
-		{
-			get { return _NameUpper; }
-		}
-		[Association(@"XpoDxUsersRoles")]
-		public XPCollection<XpoDxUser> Users { get { return GetCollection<XpoDxUser>("Users"); } }
-	}
+    [Persistent(@"DXRoles")]
+    public partial class XpoDxRole : XpoDxBase
+    {
+        string _Name;
+        [Indexed(Name = @"IdxName", Unique = true)]
+        [Size(50)]
+        public string Name
+        {
+            get { return _Name; }
+            set { SetPropertyValue<string>("Name", ref _Name, value); }
+        }
+        [Indexed(Name = @"IdxNameUpper", Unique = true)]
+        [Size(50)]
+        [Persistent(@"NameUpper")]
+        string _NameUpper;
+        [PersistentAlias("_NameUpper")]
+        public string NameUpper
+        {
+            get { return _NameUpper; }
+        }
+        [Association(@"XpoDxUsersRoles")]
+        public XPCollection<XpoDxUser> Users { get { return GetCollection<XpoDxUser>("Users"); } }
+    }
 
 }
