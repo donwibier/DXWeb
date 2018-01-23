@@ -73,14 +73,19 @@ namespace DX.Data.Xpo.Identity
 		///     Role name
 		/// </summary>
 		public string Name { get; set; }
-
-		public override void Assign(object source, int loadingFlags)
+#if (NETSTANDARD2_0)
+        public string NormalizedName { get; set; }
+#endif
+        public override void Assign(object source, int loadingFlags)
 		{
 			var src = CastSource(source);
 			if (src != null)
 			{
 				this.Id = src.Key;
 				this.Name = src.Name;
+#if (NETSTANDARD2_0)
+                this.NormalizedName = src.NormalizedName;
+#endif
 			}
 		}
 	}

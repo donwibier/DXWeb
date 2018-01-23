@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
@@ -13,7 +14,6 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-#if(!NETSTANDARD2_0)
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
 		where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
@@ -26,15 +26,24 @@ namespace DX.Data.Xpo.Identity
 			base(connectionString, connectionName) { }
 		public XPRoleStore(XpoDatabase database) : 
 			base(database) { }
-	}
+    }
 
-	public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
-		IQueryableRoleStore<TRole, TKey>
-		where TKey : IEquatable<TKey>
-		where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
-		where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
-	{
-		public XPRoleStore() :
+#if (NETSTANDARD2_0)
+    public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
+        IQueryableRoleStore<TRole>
+        //IRoleClaimStore<TRole>
+        where TKey : IEquatable<TKey>
+        where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
+        where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
+#else
+    public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
+    	IQueryableRoleStore<TRole, TKey>
+    	where TKey : IEquatable<TKey>
+    	where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
+    	where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
+#endif
+    {
+        public XPRoleStore() :
 			base()
 		{
             
@@ -57,19 +66,16 @@ namespace DX.Data.Xpo.Identity
 
 		}
 
-
-
-
-		#region Generic Helper methods and members
+#region Generic Helper methods and members
 
 		//protected static Type XPOUserType { get { return typeof(TXPOUser); } }
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
 
 		//protected static TXPOUser XPOCreateUser(Session s) { return Activator.CreateInstance(typeof(TXPOUser), s) as TXPOUser; }
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
-		#endregion
+#endregion
 
-		public IQueryable<TRole> Roles
+		public virtual IQueryable<TRole> Roles
 		{
 			get
 			{
@@ -80,7 +86,7 @@ namespace DX.Data.Xpo.Identity
 			}
 		}
 
-		public Task CreateAsync(TRole role)
+        public virtual Task CreateAsync(TRole role)
 		{
 			ThrowIfDisposed();
 			if (role == null)
@@ -96,8 +102,7 @@ namespace DX.Data.Xpo.Identity
 				return null;
 			}));
 		}
-
-		public Task DeleteAsync(TRole role)
+        public Task DeleteAsync(TRole role)
 		{
 			ThrowIfDisposed();
 			if (role == null)
@@ -112,7 +117,7 @@ namespace DX.Data.Xpo.Identity
 			}));
 		}
 
-		public Task<TRole> FindByIdAsync(TKey roleId)
+        public virtual Task<TRole> FindByIdAsync(TKey roleId)
 		{
 			ThrowIfDisposed();
 
@@ -124,7 +129,7 @@ namespace DX.Data.Xpo.Identity
 
 		}
 
-		public Task<TRole> FindByIdAsync(string roleId)
+        public virtual Task<TRole> FindByIdAsync(string roleId)
 		{
 			ThrowIfDisposed();
 
@@ -134,8 +139,7 @@ namespace DX.Data.Xpo.Identity
 				return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
 			}));
 		}
-
-		public Task<TRole> FindByNameAsync(string roleName)
+        public Task<TRole> FindByNameAsync(string roleName)
 		{
 			ThrowIfDisposed();
 			if (String.IsNullOrEmpty(roleName))
@@ -148,8 +152,7 @@ namespace DX.Data.Xpo.Identity
 			}));
 
 		}
-
-		public Task UpdateAsync(TRole role)
+        public Task UpdateAsync(TRole role)
 		{
 			ThrowIfDisposed();
 			if (role == null)
@@ -165,6 +168,113 @@ namespace DX.Data.Xpo.Identity
 				return null;
 			}));
 		}
-	}
+#if (NETSTANDARD2_0)
+        public async virtual Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await CreateAsync(role);
+            return IdentityResult.Success;
+        }
+        public async virtual Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await DeleteAsync(role);
+            return IdentityResult.Success;
+        }
+
+        public async virtual Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await FindByIdAsync(roleId);
+            return result;
+        }
+
+        public async virtual Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await FindByNameAsync(normalizedRoleName);
+            return result;
+        }
+
+        public async virtual Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await UpdateAsync(role);
+            }
+            catch (Exception err)
+            {
+                return IdentityResult.Failed(new IdentityError { Code = "100", Description = err.Message });
+            }
+            return IdentityResult.Success;
+        }
+        public virtual string ConvertIdToString(TKey id)
+        {
+            if (id.Equals(default(TKey)))
+            {
+                return null;
+            }
+            return id.ToString();
+        }
+        public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            return Task.FromResult(ConvertIdToString(role.Id));
+        }
+
+        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            return Task.FromResult(role.Name);
+
+        }
+
+        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            role.Name = roleName;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            return Task.FromResult(role.NormalizedName);
+        }
+
+        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            role.NormalizedName = normalizedName;
+            return Task.CompletedTask;
+        }
 #endif
+    }
+
 }

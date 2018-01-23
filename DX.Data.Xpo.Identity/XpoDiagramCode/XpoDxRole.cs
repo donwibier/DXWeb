@@ -12,7 +12,13 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxRole(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-
+#if (NETSTANDARD2_0)
+        public string NormalizedName
+        {
+            get { return NameUpper; }
+            set { _NameUpper = (value??"").ToUpperInvariant(); }
+        }
+#endif       
         protected override void OnChanged(string propertyName, object oldValue, object newValue)
         {
             if (propertyName == "Name")
@@ -49,6 +55,9 @@ namespace DX.Data.Xpo.Identity.Persistent
             if (src != null)
             {
                 this.Name = src.Name;
+#if (NETSTANDARD2_0)
+                this.NormalizedName = src.NormalizedName;
+#endif
                 //if (Bits.Has(loadingFlags, DxIdentityUserFlags.FLAG_USERS))										
             }
 

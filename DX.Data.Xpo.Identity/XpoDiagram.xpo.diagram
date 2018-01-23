@@ -18,7 +18,7 @@
         <elementListCompartment Id="29abf9d8-3cb9-4231-bf70-ff61ccc49b26" absoluteBounds="5.265, 5.71736989100774, 2.3096577409066281, 0.90942385047674179" name="Collections" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </xpObjectShape>
-    <manyToManyConnector Id="f1084594-1f0f-4a50-be30-595d73ec379d" edgePoints="[(9.375 : 2.03258628661434); (7.58965774090663 : 2.03258628661434)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <manyToManyConnector Id="f1084594-1f0f-4a50-be30-595d73ec379d" edgePoints="[(9.375 : 2.03258628661434); (7.58965774090663 : 2.03258628661434)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <manyToManyRelationshipMoniker Id="a134a7bf-c299-480f-a4b7-a273f08dd0ba" />
       <relativeChildShapes />
       <nodes>
@@ -100,7 +100,7 @@
         <xpObjectShapeMoniker Id="9ebaf483-1643-4ff2-b2f9-ed2b749ee1d2" />
       </nodes>
     </inheritaceConnector>
-    <inheritaceConnector Id="4bafbafd-32e3-4d95-92d8-bb64a2f310cb" edgePoints="[(9.375 : 0.84375); (2.125 : 0.84375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <inheritaceConnector Id="4bafbafd-32e3-4d95-92d8-bb64a2f310cb" edgePoints="[(9.375 : 0.84375); (2.125 : 0.84375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <inheritanceMoniker Id="b0da1772-cd1c-4d30-97d1-25011a348a81" />
       <nodes>
         <xpObjectShapeMoniker Id="efc2e5b2-298f-4cc2-b69b-098480478ed8" />

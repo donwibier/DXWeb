@@ -18,12 +18,14 @@ namespace DX.Data.Xpo.Identity
     {
         TKey Id { get; }
         string UserName { get; set; }
+        string NormalizedName { get; set; }
     }
     public interface IRole<TKey> : IAssignable
         where TKey : IEquatable<TKey>
     {
         TKey Id { get; }
         string Name { get; set; }
+        string NormalizedName { get; set; }
     }
 #endif
     public interface IDxUser<TKey> : IXPOKey<TKey>, IUser<TKey>, IAssignable

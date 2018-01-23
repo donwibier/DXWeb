@@ -1,25 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.0.5</Version>
-    <FileVersion>1.0.0.5</FileVersion>
+    <Version>1.0.0.6</Version>
+    <FileVersion>1.0.0.6</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <PackageLicenseUrl>https://github.com/donwibier/DXWeb/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
     <PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
-    <PackageReleaseNotes>Initial dual mode package for .NET Framework and .NET Standard 2.0
+    <PackageReleaseNotes>
+      1.0.0.6: Changed .NET Framework to v4.6.1
+      1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
 Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -36,7 +38,7 @@ Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Configuration.ConfigurationManager">
-      <Version>4.4.0</Version>
+      <Version>4.4.1</Version>
     </PackageReference>
   </ItemGroup>
 

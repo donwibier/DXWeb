@@ -1,25 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>17.2.3.1</Version>
-    <FileVersion>17.2.3.1</FileVersion>
+    <Version>17.2.4.2</Version>
+    <FileVersion>17.2.4.2</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <PackageLicenseUrl>https://github.com/donwibier/DXWeb/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
     <PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
-    <PackageReleaseNotes>Separation of XPO Persistent Types from the Storage provider</PackageReleaseNotes>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <PackageReleaseNotes>
+      17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
+      17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
+      Not operational on .NET Standard 2.0 yet</PackageReleaseNotes>
+      <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -37,12 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="17.2.3" />
+    <PackageReference Include="DevExpress.Xpo" Version="17.2.4" />
     <PackageReference Include="DX.Data.Xpo" Version="17.2.3.1" />
     <PackageReference Include="DX.Utils" Version="1.0.0.5" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.1" />
   </ItemGroup>
 </Project>

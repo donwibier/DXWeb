@@ -23,6 +23,13 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             base.OnChanged(propertyName, oldValue, newValue);
         }
+#if (NETSTANDARD2_0)
+        public string NormalizedName
+        {
+            get { return UserNameUpper; }
+            set { _UserNameUpper = (value ?? "").ToUpperInvariant(); }
+        }
+#endif       
 
         public IList RolesList { get { return Roles; } }
 
@@ -49,6 +56,9 @@ namespace DX.Data.Xpo.Identity.Persistent
                 this.LockoutEndDateUtc = src.LockoutEndDateUtc;
                 this.LockoutEnabled = src.LockoutEnabled;
                 this.AccessFailedCount = src.AccessFailedCount;
+#if (NETSTANDARD2_0)
+                this.NormalizedName = src.NormalizedName;
+#endif
 
                 if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
                     AssignRoles(src.RolesList);

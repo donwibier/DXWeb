@@ -100,11 +100,13 @@ namespace DX.Data.Xpo.Identity
 		///     User name
 		/// </summary>
 		public virtual string UserName { get; set; }
-
-		/// <summary>
-		///     Email
-		/// </summary>
-		public virtual string Email { get; set; }
+#if (NETSTANDARD2_0)
+        public virtual string NormalizedName { get; set; }
+#endif
+        /// <summary>
+        ///     Email
+        /// </summary>
+        public virtual string Email { get; set; }
 
 		/// <summary>
 		///     True if the email is confirmed, default is false
@@ -199,8 +201,11 @@ namespace DX.Data.Xpo.Identity
 				LockoutEndDateUtc = src.LockoutEndDateUtc;
 				LockoutEnabled = src.LockoutEnabled;
 				AccessFailedCount = src.AccessFailedCount;
-				
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
+#if (NETSTANDARD2_0)
+                this.NormalizedName = src.NormalizedName;
+#endif
+
+                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
 				{
 					AssignRoles(src.RolesList);
 				}
