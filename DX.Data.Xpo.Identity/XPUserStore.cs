@@ -72,8 +72,8 @@ namespace DX.Data.Xpo.Identity
 	}
 #if (NETSTANDARD2_0)
     public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XpoStore<TXPOUser, TKey>,
-         IUserLoginStore<TUser>/*,
-         IUserClaimStore<TUser>,
+         IUserLoginStore<TUser>,
+         IUserClaimStore<TUser>/*,
          IUserRoleStore<TUser>,
          IUserPasswordStore<TUser>,
          IUserSecurityStampStore<TUser>,
@@ -83,7 +83,7 @@ namespace DX.Data.Xpo.Identity
          IUserTwoFactorStore<TUser>,
          IUserLockoutStore<TUser>*/
          where TKey : IEquatable<TKey>
-         where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>
+         where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>, new()
          where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
          where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
          where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
@@ -939,7 +939,125 @@ namespace DX.Data.Xpo.Identity
             return result;
         }
 
+        public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            var result = await GetClaimsAsync(user);
+            return result;
+        }
+
+        public async virtual Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+            if (claims == null)
+            {
+                throw new ArgumentNullException("claims");
+            }
+
+            await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            {
+                foreach (var claim in claims)
+                {
+                    var xpoClaim = XPOCreateClaim(wrk);
+                    xpoClaim.SetMemberValue("User", wrk.GetObjectByKey(XPOUserType, user.Id));
+                    xpoClaim.ClaimType = claim.Type;
+                    xpoClaim.ClaimValue = claim.Value;
+                }
+                return null;
+            }));
+            //return Task.FromResult(false);
+        }
+
+        public async virtual Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            {
+                XPCollection xpoClaims = new XPCollection(typeof(XpoDxUserClaim),
+                    CriteriaOperator.Parse("[User!Id] == ?", user.Id) & 
+                    XpoDxUserClaim.Fields.ClaimValue == claim.Value &
+                    XpoDxUserClaim.Fields.ClaimType == claim.Type, null);
+
+                foreach (var item in xpoClaims)
+                {
+                    var xpoClaim = item as XpoDxUserClaim;
+                    if (xpoClaim != null) {
+                        xpoClaim.ClaimType = newClaim.Type;
+                        xpoClaim.ClaimValue = newClaim.Value;
+                    }
+                }
+                return null;
+            }));
+
+        }
+
+        public async virtual Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            {
+                foreach(var claim in claims)
+                {
+                    XPCollection xpoClaims = new XPCollection(wrk, typeof(XpoDxUserClaim),
+                        CriteriaOperator.Parse("[User!Id] == ?", user.Id) &
+                        XpoDxUserClaim.Fields.ClaimValue == claim.Value &
+                        XpoDxUserClaim.Fields.ClaimType == claim.Type, null);
+                    foreach(var item in xpoClaims)
+                    {
+                        var xpoClaim = item as XpoDxUserClaim;
+                        if (xpoClaim != null)
+                        {
+                            xpoClaim.User = null;
+                        }
+                    }
+                    wrk.Delete(xpoClaims);
+                }
+                return null;
+            }));
+        }
+
+        public async virtual Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if(claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
+
+            IList<TUser> result = await Task.FromResult(XPOExecute<IList<TUser>>((db, wrk) =>
+            {
+                XPCollection list = new XPCollection(wrk, typeof(XpoDxUser),
+                    XpoDxUser.Fields.Claims[
+                        XpoDxUserClaim.Fields.ClaimType == claim.Type & 
+                        XpoDxUserClaim.Fields.ClaimValue == claim.Value], null);
+
+                List<TUser> users = new List<TUser>();
+                foreach(var item in list)
+                {
+                    TUser usr = new TUser();
+                    usr.Assign(item, 0);
+                    users.Add(usr);
+                }
+                return users;
+            }));
+
+            return result;
+        }
+
 #endif
-#endregion
+        #endregion
     }
 }
