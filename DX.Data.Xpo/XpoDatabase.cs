@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using DX.Data.Xpo.Identity;
 
 #if (NETSTANDARD2_0)
 using Microsoft.Extensions.DependencyInjection;
@@ -24,14 +25,25 @@ namespace DX.Data.Xpo
 #if(NETSTANDARD2_0)
     public static class XpoExtensions
     {
+        public static IdentityBuilder AddXPOIdentity<TXPOUser, TXPORole>(this IdentityBuilder builder, string connectionName)            
+            where TXPOUser: XPBaseObject, IDxUser<string>           
+            where TXPORole: XPBaseObject, IDxUser<string>
+        {
+            return builder;
+        }
         public static IdentityBuilder AddXPOFrameworkStores(this IdentityBuilder builder, string connectionName)// where TContext : DbContext;
         {
+            //AddStores(builder.Services, builder.UserType, builder.RoleType, typeof(TContext));
+            
             //Type userType = builder.UserType;
             //Type roleType = builder.RoleType;
             //var db = new XpoDatabase(connectionName);
-            
+
             return builder;
         }
+
+        
+
         //public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
         //{
         //    return serviceCollection.AddSingleton<XpoDatabase>(new XpoDatabase(connectionName));

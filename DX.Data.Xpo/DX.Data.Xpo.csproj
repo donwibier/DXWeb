@@ -48,6 +48,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Microsoft.Extensions.Identity.Core">
       <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.identity.core\2.0.1\lib\netstandard2.0\Microsoft.Extensions.Identity.Core.dll</HintPath>
     </Reference>

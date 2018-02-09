@@ -14,30 +14,15 @@ using System.ComponentModel;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    [Persistent(@"DXUserClaims")]
-    public partial class XpoDxUserClaim : XpoDxBase
+    [MapInheritance(MapInheritanceType.ParentTable)]
+    public partial class XpoDxUserClaim : XpoDxBaseClaim
     {
         XpoDxUser _User;
-        [Indexed(@"ClaimType", Name = @"IdxUserClaim", Unique = true)]
-        [Association(@"XpoDxUserClaims")]
+        [Association(@"XpoDxUserClaimReferencesXpoDxUser")]
         public XpoDxUser User
         {
             get { return _User; }
             set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
-        }
-        string _ClaimType;
-        [Size(150)]
-        public string ClaimType
-        {
-            get { return _ClaimType; }
-            set { SetPropertyValue<string>("ClaimType", ref _ClaimType, value); }
-        }
-        string _ClaimValue;
-        [Size(150)]
-        public string ClaimValue
-        {
-            get { return _ClaimValue; }
-            set { SetPropertyValue<string>("ClaimValue", ref _ClaimValue, value); }
         }
         [PersistentAlias("[User!Key]")]
         public string UserId

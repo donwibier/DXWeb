@@ -23,13 +23,19 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             base.OnChanged(propertyName, oldValue, newValue);
         }
-#if (NETSTANDARD2_0)
-        public string NormalizedName
-        {
-            get { return UserNameUpper; }
-            set { _UserNameUpper = (value ?? "").ToUpperInvariant(); }
-        }
-#endif       
+//#if (NETSTANDARD2_0)
+//        public string NormalizedName
+//        {
+//            get { return UserNameUpper; }
+//            set { _UserNameUpper = (value ?? "").ToUpperInvariant(); }
+//        }
+
+//        public string NormalizedEmail
+//        {
+//            get { return EmailUpper; }
+//            set { _EmailUpper = (value ?? "").ToUpperInvariant(); }
+//        }
+//#endif       
 
         public IList RolesList { get { return Roles; } }
 
@@ -58,8 +64,8 @@ namespace DX.Data.Xpo.Identity.Persistent
                 this.AccessFailedCount = src.AccessFailedCount;
 #if (NETSTANDARD2_0)
                 this.NormalizedName = src.NormalizedName;
+                this.NormalizedEmail = src.NormalizedEmail;
 #endif
-
                 if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
                     AssignRoles(src.RolesList);
                 if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))

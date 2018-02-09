@@ -34,8 +34,17 @@ namespace DX.Data.Xpo.Identity.Persistent
         {
             get { return _NameUpper; }
         }
+        string _NormalizedName;
+        [Indexed(Name = @"IdxNormalizedName")]
+        public string NormalizedName
+        {
+            get { return _NormalizedName; }
+            set { SetPropertyValue<string>("NormalizedName", ref _NormalizedName, value); }
+        }
         [Association(@"XpoDxUsersRoles")]
         public XPCollection<XpoDxUser> Users { get { return GetCollection<XpoDxUser>("Users"); } }
+        [Association(@"XpoDxRoleClaimReferencesXpoDxRole"), Aggregated]
+        public XPCollection<XpoDxRoleClaim> Claims { get { return GetCollection<XpoDxRoleClaim>("Claims"); } }
     }
 
 }

@@ -102,6 +102,7 @@ namespace DX.Data.Xpo.Identity
 		public virtual string UserName { get; set; }
 #if (NETSTANDARD2_0)
         public virtual string NormalizedName { get; set; }
+        public virtual string NormalizedEmail { get; set; }
 #endif
         /// <summary>
         ///     Email
@@ -203,6 +204,7 @@ namespace DX.Data.Xpo.Identity
 				AccessFailedCount = src.AccessFailedCount;
 #if (NETSTANDARD2_0)
                 this.NormalizedName = src.NormalizedName;
+                this.NormalizedEmail = src.NormalizedEmail;
 #endif
 
                 if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))

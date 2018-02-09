@@ -111,11 +111,27 @@ namespace DX.Data.Xpo.Identity.Persistent
         {
             get { return _UserNameUpper; }
         }
+        string _NormalizedEmail;
+        [Indexed(Name = @"IdxNormalizedEmail")]
+        public string NormalizedEmail
+        {
+            get { return _NormalizedEmail; }
+            set { SetPropertyValue<string>("NormalizedEmail", ref _NormalizedEmail, value); }
+        }
+        string _NormalizedName;
+        [Indexed(Name = @"IdxNormalizedName")]
+        public string NormalizedName
+        {
+            get { return _NormalizedName; }
+            set { SetPropertyValue<string>("NormalizedName", ref _NormalizedName, value); }
+        }
         [Association(@"XpoDxUsersRoles")]
         public XPCollection<XpoDxRole> Roles { get { return GetCollection<XpoDxRole>("Roles"); } }
         [Association(@"XpoDxUserLogins"), Aggregated]
         public XPCollection<XpoDxUserLogin> Logins { get { return GetCollection<XpoDxUserLogin>("Logins"); } }
-        [Association(@"XpoDxUserClaims"), Aggregated]
+        [Association(@"XpoDxUserTokenReferencesXpoDxUser"), Aggregated]
+        public XPCollection<XpoDxUserToken> Tokens { get { return GetCollection<XpoDxUserToken>("Tokens"); } }
+        [Association(@"XpoDxUserClaimReferencesXpoDxUser"), Aggregated]
         public XPCollection<XpoDxUserClaim> Claims { get { return GetCollection<XpoDxUserClaim>("Claims"); } }
     }
 

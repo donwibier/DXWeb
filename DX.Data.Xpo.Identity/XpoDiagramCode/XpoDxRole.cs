@@ -12,13 +12,13 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxRole(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-#if (NETSTANDARD2_0)
-        public string NormalizedName
-        {
-            get { return NameUpper; }
-            set { _NameUpper = (value??"").ToUpperInvariant(); }
-        }
-#endif       
+//#if (NETSTANDARD2_0)
+//        public string NormalizedName
+//        {
+//            get { return NameUpper; }
+//            set { _NameUpper = (value??"").ToUpperInvariant(); }
+//        }
+//#endif       
         protected override void OnChanged(string propertyName, object oldValue, object newValue)
         {
             if (propertyName == "Name")

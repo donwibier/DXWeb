@@ -11,40 +11,23 @@ namespace DX.Data.Xpo.Identity.Persistent
         public XpoDxUserClaim(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
 
-        protected override void OnSaving()
-        {
-            if (!IsDeleted)
-            {
-                if (User == null)
-                    throw new Exception("User cannot be null");
-                if (String.IsNullOrEmpty(ClaimType))
-                    throw new Exception("ClaimType is required");
-            }
-            base.OnSaving();
-        }
         protected override void OnDeleting()
         {
-            User = null;
+            this.User = null;
             base.OnDeleting();
         }
-
         public override void Assign(object source, int loadingFlags)
         {
             base.Assign(source, loadingFlags);
             IDxUserClaim<string> src = source as IDxUserClaim<string>;
             if (src != null)
             {
-                this.ClaimType = src.ClaimType;
-                this.ClaimValue = src.ClaimValue;
-                this.User = Session.FindObject(typeof(XpoDxUser), XpoDxUser.Fields.Id == src.UserId) as XpoDxUser;
-                //this.UserId = src.UserId;
-
+                this.User = Session.GetObjectByKey(typeof(XpoDxUser), src.UserId) as XpoDxUser;
             }
         }
 
-        #region Embedded Fields class
-
-        public new class FieldsClass : XpoDxBase.FieldsClass
+        // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:17 AM
+        public new class FieldsClass : XpoDxBaseClaim.FieldsClass
         {
             public FieldsClass()
             {
@@ -61,22 +44,6 @@ namespace DX.Data.Xpo.Identity.Persistent
                 get
                 {
                     return new XpoDxUser.FieldsClass(GetNestedName("User"));
-                }
-            }
-
-            public OperandProperty ClaimType
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("ClaimType"));
-                }
-            }
-
-            public OperandProperty ClaimValue
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("ClaimValue"));
                 }
             }
 
@@ -103,7 +70,6 @@ namespace DX.Data.Xpo.Identity.Persistent
         }
 
         static FieldsClass _Fields;
-        #endregion
     }
 
 }

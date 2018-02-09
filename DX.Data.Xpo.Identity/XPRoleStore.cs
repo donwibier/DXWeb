@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
-#if(NETSTANDARD2_0)
+using DX.Data.Xpo.Identity.Persistent;
+#if (NETSTANDARD2_0)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -14,11 +16,17 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-    public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
-		where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
+#if (NETSTANDARD2_0)
+    public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
+        where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
-	{
-		public XPRoleStore() : 
+#else
+    public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
+        where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
+		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
+#endif
+    {
+        public XPRoleStore() : 
 			base() { }
 		public XPRoleStore(string connectionName) : 
 			base(connectionName) { }
@@ -29,12 +37,13 @@ namespace DX.Data.Xpo.Identity
     }
 
 #if (NETSTANDARD2_0)
-    public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
-        IQueryableRoleStore<TRole>
-        //IRoleClaimStore<TRole>
+    public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
+        IQueryableRoleStore<TRole>,
+        IRoleClaimStore<TRole>
         where TKey : IEquatable<TKey>
         where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
         where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
+        where TXPORoleClaim: XPBaseObject, IDxRoleClaim<TKey>
 #else
     public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XpoStore<TXPORole, TKey>,
     	IQueryableRoleStore<TRole, TKey>
@@ -67,15 +76,16 @@ namespace DX.Data.Xpo.Identity
 		}
 
 #region Generic Helper methods and members
-
-		//protected static Type XPOUserType { get { return typeof(TXPOUser); } }
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
-
-		//protected static TXPOUser XPOCreateUser(Session s) { return Activator.CreateInstance(typeof(TXPOUser), s) as TXPOUser; }
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
+
+#if (NETSTANDARD2_0)
+        protected static Type XPORoleClaimType { get { return typeof(TXPORoleClaim); } }
+        protected static TXPORoleClaim XPOCreateRoleClaim(Session s) { return Activator.CreateInstance(typeof(TXPORoleClaim), s) as TXPORoleClaim; }
+#endif
 #endregion
 
-		public virtual IQueryable<TRole> Roles
+        public virtual IQueryable<TRole> Roles
 		{
 			get
 			{
@@ -112,7 +122,7 @@ namespace DX.Data.Xpo.Identity
 
 			return Task.FromResult(XPOExecute<object>((db, wrk) =>
 			{
-				wrk.Delete(wrk.FindObject(XPORoleType, CriteriaOperator.Parse($"{KeyField} == ?", role.Id)));
+				wrk.Delete(wrk.GetObjectByKey(XPORoleType, role.Id));
 				return null;
 			}));
 		}
@@ -123,7 +133,7 @@ namespace DX.Data.Xpo.Identity
 
 			return Task.FromResult(XPOExecute((db, wrk) =>
 			{
-				var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse($"{KeyField} == ?", roleId));
+				var xpoRole = wrk.GetObjectByKey(XPORoleType, roleId);
 				return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
 			}));
 
@@ -135,7 +145,7 @@ namespace DX.Data.Xpo.Identity
 
 			return Task.FromResult(XPOExecute((db, wrk) =>
 			{
-				var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse($"{KeyField} == ?", roleId));
+				var xpoRole = wrk.GetObjectByKey(XPORoleType, roleId);
 				return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
 			}));
 		}
@@ -147,8 +157,12 @@ namespace DX.Data.Xpo.Identity
 
 			return Task.FromResult(XPOExecute((db, wrk) =>
 			{
-				var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse("NameUpper == ?", roleName.ToUpperInvariant()));
-				return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
+#if (NETSTANDARD2_0)
+                var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse("NormalizedName == ?", roleName));
+#else
+                var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse("NameUpper == ?", roleName.ToUpperInvariant()));
+#endif
+                return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
 			}));
 
 		}
@@ -160,7 +174,7 @@ namespace DX.Data.Xpo.Identity
 
 			return Task.FromResult(XPOExecute<object>((db, wrk) =>
 			{
-				TXPORole r = wrk.FindObject(XPORoleType, CriteriaOperator.Parse($"{KeyField} == ?", role.Id)) as TXPORole;
+				TXPORole r = wrk.GetObjectByKey(XPORoleType, role.Id) as TXPORole;
 				if (r != null)
 				{
 					r.Assign(role, 0);
@@ -273,6 +287,70 @@ namespace DX.Data.Xpo.Identity
             }
             role.NormalizedName = normalizedName;
             return Task.CompletedTask;
+        }
+
+        public async virtual Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException("role");
+            }
+            var result = await Task.FromResult(XPOExecute<IList<Claim>>((db, wrk) =>
+            {
+                var results = new List<Claim>();
+                foreach (var c in new XPCollection(wrk, XPORoleClaimType, CriteriaOperator.Parse("[Role!Key] == ?", role.Id)))
+                {
+                    TXPORoleClaim xpoClaim = c as TXPORoleClaim;
+                    results.Add(new Claim(xpoClaim.ClaimType, xpoClaim.ClaimValue));
+                }
+                return results;
+            }, false));
+            return result;
+        }
+
+        public async virtual Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException("role");
+            }
+            if (claim == null)
+            {
+                throw new ArgumentNullException("claim");
+            }
+            var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            {
+                var xpoClaim = XPOCreateRoleClaim(wrk);
+                xpoClaim.SetMemberValue("Role", wrk.GetObjectByKey(XPORoleType, role.Id));
+                xpoClaim.ClaimType = claim.Type;
+                xpoClaim.ClaimValue = claim.Value;
+                return null;
+            }));
+        }
+
+        public async virtual  Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (role == null)
+            {
+                throw new ArgumentNullException("role");
+            }
+            if (claim == null)
+            {
+                throw new ArgumentNullException("claim");
+            }
+            var result = await Task.FromResult(XPOExecute((db, wrk) =>
+            {
+                wrk.Delete(new XPCollection(wrk, XPORoleClaimType,
+                         CriteriaOperator.Parse("([Role!Key] == ?) AND (ClaimType == ?) AND (ClaimValue == ?)",
+                         role.Id, claim.Type, claim.Value)));
+                return 0;
+            }));
         }
 #endif
     }

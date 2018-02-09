@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
@@ -84,6 +85,17 @@ namespace DX.Data.Xpo.Identity
 				this.ClaimValue = src.ClaimValue;
 			}
 		}
-	}
+
+        public Claim ToClaim()
+        {
+            return new Claim(this.ClaimType, this.ClaimValue);
+        }
+
+        public void InitializeFromClaim(Claim other)
+        {
+            this.ClaimType = other.Type;
+            this.ClaimValue = other.Value;
+        }
+    }
 
 }
