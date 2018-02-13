@@ -43,19 +43,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="17.2.4" />
-    <PackageReference Include="DX.Utils" Version="1.0.0.5" />
+    <PackageReference Include="DevExpress.Xpo" Version="17.2.5" />
+    <PackageReference Include="DX.Utils" Version="1.0.0.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="Microsoft.Extensions.Identity.Core">
-      <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.identity.core\2.0.1\lib\netstandard2.0\Microsoft.Extensions.Identity.Core.dll</HintPath>
+      --><!--<HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.identity.core\2.0.1\lib\netstandard2.0\Microsoft.Extensions.Identity.Core.dll</HintPath>--><!--
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
   <!--<ItemGroup>
     <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">

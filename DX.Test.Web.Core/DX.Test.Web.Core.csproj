@@ -9,7 +9,8 @@
   <ItemGroup>
     <!--<PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" PrivateAssets="All" />-->
-    <PackageReference Include="DevExpress.Xpo" Version="17.2.4" />
+    <PackageReference Include="DevExpress.Xpo" Version="17.2.5" />
+    
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.0.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.ApplicationInsights.HostingStartup" Version="2.0.1" PrivateAssets="All" />
