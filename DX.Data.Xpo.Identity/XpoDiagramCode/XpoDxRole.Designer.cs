@@ -18,14 +18,14 @@ namespace DX.Data.Xpo.Identity.Persistent
     public partial class XpoDxRole : XpoDxBase
     {
         string _Name;
-        [Indexed(Name = @"IdxName", Unique = true)]
+        [Indexed(Name = @"IdxRoleName", Unique = true)]
         [Size(50)]
         public string Name
         {
             get { return _Name; }
             set { SetPropertyValue<string>("Name", ref _Name, value); }
         }
-        [Indexed(Name = @"IdxNameUpper", Unique = true)]
+        [Indexed(Name = @"IdxRoleNameUpper", Unique = true)]
         [Size(50)]
         [Persistent(@"NameUpper")]
         string _NameUpper;
@@ -35,7 +35,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             get { return _NameUpper; }
         }
         string _NormalizedName;
-        [Indexed(Name = @"IdxNormalizedName")]
+        [Indexed(Name = @"IdxNormalizedRoleName")]
         public string NormalizedName
         {
             get { return _NormalizedName; }

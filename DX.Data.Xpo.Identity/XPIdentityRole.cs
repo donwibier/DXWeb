@@ -11,10 +11,14 @@ using Microsoft.AspNet.Identity;
 using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Data.Xpo.Identity
-{	
-	public class XPIdentityRole : XPIdentityRole<string, XpoDxRole>
-	{
-		public XPIdentityRole(XpoDxRole source)
+{
+#if (NETSTANDARD2_0)
+    public class XPIdentityRole : XPIdentityRole<string, XpoDxRole, XpoDxRoleClaim>
+#else
+    public class XPIdentityRole : XPIdentityRole<string, XpoDxRole>
+#endif
+    {
+        public XPIdentityRole(XpoDxRole source)
 			  : base(source)
 		{
 
@@ -28,18 +32,49 @@ namespace DX.Data.Xpo.Identity
 		{
 
 		}
-	}
+    }
+#if (NETSTANDARD2_0)
+    public class XPIdentityRole<TXPORole> : XPIdentityRole<string, TXPORole, XpoDxRoleClaim>
+         where TXPORole : XPBaseObject, IDxRole<string>
+#else
+    public class XPIdentityRole<TXPORole> : XPIdentityRole<string, TXPORole>
+         where TXPORole : XPBaseObject, IDxRole<string>
+#endif
+    {
+        public XPIdentityRole(TXPORole source, int loadingFlags) : base(source, loadingFlags)
+        {
 
-	/// <summary>
-	///     Represents a Role entity
-	/// </summary>
-	/// <typeparam name="TKey"></typeparam>
-	/// <typeparam name="TUserRole"></typeparam>
-	public abstract class XPIdentityRole<TKey, TXPORole> : XpoDtoBaseEntity<TKey, TXPORole>, IRole<TKey>, IDxRole<TKey>
+        }
+
+        public XPIdentityRole(TXPORole source) : base(source)
+        {
+
+        }
+
+        public XPIdentityRole()
+        {
+
+        }
+    }
+        /// <summary>
+        ///     Represents a Role entity
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TUserRole"></typeparam>
+#if (NETSTANDARD2_0)
+    public abstract class XPIdentityRole<TKey, TXPORole, TXPORoleClaim> 
+        : XpoDtoBaseEntity<TKey, TXPORole>, IRole<TKey>, IDxRole<TKey>
 		 where TKey : IEquatable<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>
-	{
-		public XPIdentityRole(TXPORole source, int loadingFlags)
+         where TXPORoleClaim : XPBaseObject, IDxRoleClaim<TKey>
+#else
+    public abstract class XPIdentityRole<TKey, TXPORole> 
+        : XpoDtoBaseEntity<TKey, TXPORole>, IRole<TKey>, IDxRole<TKey>
+		 where TKey : IEquatable<TKey>
+		 where TXPORole : XPBaseObject, IDxRole<TKey>        
+#endif
+    {
+        public XPIdentityRole(TXPORole source, int loadingFlags)
 			  : base(source, loadingFlags)
 		{
 			Users = new List<IDxUser<TKey>>();
@@ -55,11 +90,10 @@ namespace DX.Data.Xpo.Identity
 		{
 
 		}
-
-		/// <summary>
-		///     Navigation property for users in the role
-		/// </summary>
-		public virtual ICollection<IDxUser<TKey>> Users { get; protected set; }
+        /// <summary>
+        ///     Navigation property for users in the role
+        /// </summary>
+        public virtual ICollection<IDxUser<TKey>> Users { get; protected set; }
 		public virtual IList UsersList { get { return Users.ToList(); } }
 
 		public override TKey Key { get { return Id; } }
@@ -73,8 +107,14 @@ namespace DX.Data.Xpo.Identity
 		///     Role name
 		/// </summary>
 		public string Name { get; set; }
+
 #if (NETSTANDARD2_0)
         public string NormalizedName { get; set; }
+
+        public virtual Type XPORoleClaimType
+        {
+            get { return typeof(TXPORoleClaim); }
+        }
 #endif
         public override void Assign(object source, int loadingFlags)
 		{

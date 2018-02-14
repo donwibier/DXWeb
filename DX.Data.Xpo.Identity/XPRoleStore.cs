@@ -18,7 +18,7 @@ namespace DX.Data.Xpo.Identity
 {
 #if (NETSTANDARD2_0)
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
-        where TRole : XPIdentityRole<string, TXPORole>, IRole<string>
+        where TRole : XPIdentityRole<string, TXPORole, XpoDxRoleClaim>, IRole<string>
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
 #else
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
@@ -41,7 +41,7 @@ namespace DX.Data.Xpo.Identity
         IQueryableRoleStore<TRole>,
         IRoleClaimStore<TRole>
         where TKey : IEquatable<TKey>
-        where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>
+        where TRole : XPIdentityRole<TKey, TXPORole, TXPORoleClaim>, IRole<TKey>
         where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
         where TXPORoleClaim: XPBaseObject, IDxRoleClaim<TKey>
 #else

@@ -21,7 +21,7 @@
         </superClass>
         <indexes>
           <xpObjectHasIndexes Id="6956855b-984f-49f6-8f80-be914b8c0c62">
-            <index Id="07574b20-f297-4576-bde0-adf13841b975" name="IdxName" unique="true">
+            <index Id="07574b20-f297-4576-bde0-adf13841b975" name="IdxRoleName" unique="true">
               <fieldsInIndex>
                 <indexReferencesFields Id="a93e4cc2-6a34-4a5f-8450-c1c66a05f31f">
                   <fieldMoniker Id="165da406-5dec-4916-a1b5-202e50210845" />
@@ -30,7 +30,7 @@
             </index>
           </xpObjectHasIndexes>
           <xpObjectHasIndexes Id="61cdb456-4219-44e7-b2c7-e53184a3a841">
-            <index Id="9795465f-e351-424f-8a6d-05363f6a7f31" name="IdxNameUpper" unique="true">
+            <index Id="9795465f-e351-424f-8a6d-05363f6a7f31" name="IdxRoleNameUpper" unique="true">
               <fieldsInIndex>
                 <indexReferencesFields Id="54c864d2-835d-4742-b004-c2abe83db12e">
                   <fieldMoniker Id="0fb41f5c-c452-41c0-854a-a81560064613" />
@@ -39,7 +39,7 @@
             </index>
           </xpObjectHasIndexes>
           <xpObjectHasIndexes Id="0075e0ae-c105-4c92-a51b-e7b99e082374">
-            <index Id="85df3b09-6b98-4515-b1c5-fe42f629e39c" name="IdxNormalizedName">
+            <index Id="85df3b09-6b98-4515-b1c5-fe42f629e39c" name="IdxNormalizedRoleName">
               <fieldsInIndex>
                 <indexReferencesFields Id="9ffd96a6-5160-4f42-b7d2-c7cf5e458ff2">
                   <fieldMoniker Id="c2532082-1e04-4fb8-84d9-aeb1ddd32e32" />

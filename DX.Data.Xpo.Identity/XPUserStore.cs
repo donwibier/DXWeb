@@ -202,10 +202,11 @@ namespace DX.Data.Xpo.Identity
 
         public virtual string ConvertIdToString(TKey id)
         {
-            if (id.Equals(default(TKey)))
-            {
+            if (id == null)
                 return null;
-            }
+            else if (id.Equals(default(TKey)))
+                return null;
+
             return id.ToString();
         }
 

@@ -18,26 +18,45 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPIdentityUser : XPIdentityUser<string, XpoDxUser>
-	{
-		public XPIdentityUser(XpoDxUser source) :
-			base(source)
-		{
+    public class XPIdentityUser : XPIdentityUser<string, XpoDxUser>
+    {
+        public XPIdentityUser(XpoDxUser source) :
+            base(source)
+        {
 
-		}
+        }
 
-		public XPIdentityUser(XpoDxUser source, int loadingFlags) :
-			base(source, loadingFlags)
-		{
+        public XPIdentityUser(XpoDxUser source, int loadingFlags) :
+            base(source, loadingFlags)
+        {
 
-		}
+        }
 
-		public XPIdentityUser() :
-			base()
-		{
+        public XPIdentityUser() :
+            base()
+        {
 
-		}
-	}
+        }
+    }
+
+    public class XPIdentityUser<TXPOUser>:XPIdentityUser<string, TXPOUser>
+        where TXPOUser : XPBaseObject, IDxUser<string>
+    {
+        public XPIdentityUser(TXPOUser source) : base(source)
+        {
+
+        }
+
+        public XPIdentityUser(TXPOUser source, int loadingFlags) : base(source, loadingFlags)
+        {
+
+        }
+
+        public XPIdentityUser()
+        {
+
+        }
+    }
 	public class XPIdentityUser<TKey, TXPOUser> : XPIdentityUser<TKey, TXPOUser, XPIdentityUserLogin, XPIdentityRole, XPIdentityUserClaim>
 		 where TKey : IEquatable<TKey>
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>

@@ -42,10 +42,15 @@
 
   <ItemGroup>
     <PackageReference Include="DevExpress.Xpo" Version="17.2.5" />
-    <PackageReference Include="DX.Data.Xpo" Version="17.2.4.2" />
-    <PackageReference Include="DX.Utils" Version="1.0.0.6" />
+    <!--<PackageReference Include="DX.Data.Xpo" Version="17.2.4.2" />
+    <PackageReference Include="DX.Utils" Version="1.0.0.6" />-->
   </ItemGroup>
-  
+  <ItemGroup>
+    <!--<ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />-->
+    <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+    <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.1" />
   </ItemGroup>

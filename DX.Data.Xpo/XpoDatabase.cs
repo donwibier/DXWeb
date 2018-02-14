@@ -17,75 +17,10 @@ using DX.Data.Xpo.Identity;
 #if (NETSTANDARD2_0)
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-//using Microsoft.AspNetCore.Identity;
 #endif
 
 namespace DX.Data.Xpo
 {
-#if (NETSTANDARD2_0)
-    public static class XpoExtensions
-    {
-        public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
-        {
-            return serviceCollection.AddSingleton<XpoDatabase>(new XpoDatabase(connectionName));
-        }
-        public static IServiceCollection AddXpoUnitOfWork(this IServiceCollection serviceCollection, string connectionName)
-        {
-            return serviceCollection.AddScoped<UnitOfWork>((sp) => sp.GetService<XpoDatabase>().GetUnitOfWork());
-        }
-    }
-#endif
-    //    public static class XpoExtensions
-    //    {
-    //        public static IdentityBuilder AddXPOIdentity<TXPOUser, TXPORole>(this IdentityBuilder builder, string connectionName)            
-    //            where TXPOUser: XPBaseObject, IDxUser<string>           
-    //            where TXPORole: XPBaseObject, IDxUser<string>
-    //        {
-    //            return builder;
-    //        }
-    //        public static IdentityBuilder AddXPOFrameworkStores(this IdentityBuilder builder, string connectionName)// where TContext : DbContext;
-    //        {
-    //            //AddStores(builder.Services, builder.UserType, builder.RoleType, typeof(TContext));
-
-    //            //Type userType = builder.UserType;
-    //            //Type roleType = builder.RoleType;
-    //            //var db = new XpoDatabase(connectionName);
-
-    //            return builder;
-    //        }
-
-
-
-    //        //public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
-    //        //{
-    //        //    return serviceCollection.AddSingleton<XpoDatabase>(new XpoDatabase(connectionName));
-    //        //}
-    //        //public static IServiceCollection AddXpoDefaultUnitOfWork(this IServiceCollection serviceCollection)
-    //        //{
-    //        //    return serviceCollection.AddScoped<UnitOfWork>((sp) => new UnitOfWork());
-    //        //}
-    //        public static IServiceCollection AddXpoDefault(this IServiceCollection serviceCollection)
-    //        {
-    //            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase());
-    //        }
-    //        public static IServiceCollection AddXpoDatabase(this IServiceCollection serviceCollection, string connectionName)
-    //        {
-    //            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase(connectionName));
-    //        }
-    //        public static IServiceCollection AddXpoDatabaseConnectionString(this IServiceCollection serviceCollection, string connectionString, string connectionName)
-    //        {
-    //            return serviceCollection.AddScoped<XpoDatabase>((sp) => new XpoDatabase(connectionString, connectionName));
-    //        }
-    //        //public static IApplicationBuilder UseXpoDemoData(this IApplicationBuilder app)
-    //        //{
-    //        //    using (var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-    //        //    {
-    //        //        XpoHelper.CreateDemoData(() => scope.ServiceProvider.GetService<UnitOfWork>());
-    //        //    }
-    //        //    return app;
-    //        //}
-    //    }
-
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 	public class XpoDataLayerAttribute : Attribute
 	{
@@ -111,16 +46,17 @@ namespace DX.Data.Xpo
 			: this("DefaultConnection")
 		{
 		}
-
 		public XpoDatabase(string connectionName):
 			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
-		/// <summary>
-		/// Constructor which takes the connection string name
-		/// </summary>
-		/// <param name="connectionString"></param>
-		public XpoDatabase(string connectionString, string connectionName)
+
+
+        /// <summary>
+        /// Constructor which takes the connection string name
+        /// </summary>
+        /// <param name="connectionString"></param>
+        public XpoDatabase(string connectionString, string connectionName)
 		{
 			if (String.IsNullOrEmpty(connectionString))
 				throw new ArgumentNullException("connectionString");
@@ -171,7 +107,7 @@ namespace DX.Data.Xpo
 		}
 
 		
-        #region Static Helpers
+#region Static Helpers
 		public static Session GetSession(string connectionString, string dataLayerName)
 		{
 			return new Session(GetDataLayer(connectionString, dataLayerName));
@@ -197,7 +133,7 @@ namespace DX.Data.Xpo
 
 		//}
 		
-        #endregion
+#endregion
 
 		private static IDataLayer createDataLayer(string connectionString, string datalayerName)
 		{

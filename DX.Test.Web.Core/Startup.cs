@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DX.Data.Xpo;
+using DX.Data.Xpo.Identity;
 using DX.Test.Web.Core.Data;
 using DX.Test.Web.Core.Models;
 using DX.Test.Web.Core.Services;
@@ -26,31 +27,26 @@ namespace DX.Test.Web.Core
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connStrName = "DefaultConnection";
+            string connStr = Configuration.GetSection("ConnectionStrings")[connStrName];
             //Initialize XPODataLayer / Database
             services
-                .AddXpoDatabase("DefaultConnection");
+                .AddXpoDatabase(connStrName, connStr);
             //Initialize identity to use XPO
             services
                 .AddIdentity<ApplicationUser, ApplicationRole>()
-                /*.AddXPOIdentity<XpoApplicationUser, XpoApplicationRole>("DefaultConnection")*/
+                .AddXpoIdentityStores<XpoApplicationUser, XpoApplicationRole>(connStrName, connStr)                
                 .AddDefaultTokenProviders();
 
-
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            //services.AddIdentity<ApplicationUser, IdentityRole>()
-            /*.AddEntityFrameworkStores<ApplicationDbContext>()*/
-            //    .AddDefaultTokenProviders();
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

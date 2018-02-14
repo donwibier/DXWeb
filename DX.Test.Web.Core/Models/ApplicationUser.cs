@@ -10,7 +10,7 @@ using DX.Data.Xpo.Identity.Persistent;
 namespace DX.Test.Web.Core.Models
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : XPIdentityUser<string, XpoApplicationUser>
+    public class ApplicationUser : XPIdentityUser<XpoApplicationUser>
     {
         public ApplicationUser(XpoApplicationUser source) : base(source)
         {}
@@ -34,7 +34,7 @@ namespace DX.Test.Web.Core.Models
         }
     }
 
-    public class ApplicationRole : XPIdentityRole<string, XpoApplicationRole>
+    public class ApplicationRole : XPIdentityRole<XpoApplicationRole>
     {
         public ApplicationRole(XpoApplicationRole source, int loadingFlags) : base(source, loadingFlags)
         {}

@@ -149,7 +149,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.1" PrivateAssets="All" />    
     
     
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" PrivateAssets="All" />    
+    
+    
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.107" />
   </ItemGroup>
 
   <ItemGroup>
