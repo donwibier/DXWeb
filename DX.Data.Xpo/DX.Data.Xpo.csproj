@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>17.2.4.2</Version>
-    <FileVersion>17.2.4.2</FileVersion>
+    <Version>17.2.5.2</Version>
+    <FileVersion>17.2.5.2</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+      17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
       17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
       17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
       Not operational on .NET Standard 2.0 yet
