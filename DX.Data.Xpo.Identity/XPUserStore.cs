@@ -433,8 +433,8 @@ namespace DX.Data.Xpo.Identity
                 var xpoUser = XPOCreateUser(wrk);
 
                 xpoUser.Assign(user, DxIdentityUserFlags.FLAG_FULL);
-                //wrk.CommitTransaction();
-                //user.Assign(xpoUser, DxIdentityUserFlags.FLAG_FULL);
+                wrk.CommitTransaction();
+                user.Assign(xpoUser, DxIdentityUserFlags.FLAG_FULL);
                 return 0;
             }));
 		}
@@ -1299,145 +1299,7 @@ namespace DX.Data.Xpo.Identity
 #endregion
 
 #if (NETSTANDARD2_0)
-        //protected virtual TXPOToken CreateUserToken(TUser user, string loginProvider, string name, string value)
-        //{
-        //    var token = XPOCreateToken(s);
-        //    //return new TXPOToken
-        //    //{
-        //    //    UserId = user.Id,
-        //    //    LoginProvider = loginProvider,
-        //    //    Name = name,
-        //    //    Value = value
-        //    //};
-
-        //    return token;
-        //}
-
-        //protected virtual Task<TXPOToken> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        //{
-
-        //    //=> UserTokens.FindAsync(new object[] { user.Id, loginProvider, name }, cancellationToken);
-        //    return Task.FromResult(null);
-        //}
-
-        //protected virtual Task AddUserTokenAsync(TXPOToken token)
-        //{
-        //    //UserTokens.Add(token);
-        //    return Task.CompletedTask;
-        //}
-
-        //protected virtual Task RemoveUserTokenAsync(TXPOToken token)
-        //{
-        //    //UserTokens.Remove(token);
-        //    return Task.CompletedTask;
-        //}
-        //public async virtual Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    ThrowIfDisposed();
-
-        //    if (user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-
-        //    var token = await FindTokenAsync(user, loginProvider, name, cancellationToken);
-        //    if (token == null)
-        //    {
-        //        await AddUserTokenAsync(CreateUserToken(user, loginProvider, name, value));
-        //    }
-        //    else
-        //    {
-        //        token.Value = value;
-        //    }
-        //}
-
-        //public async virtual Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    ThrowIfDisposed();
-
-        //    if (user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-        //    var entry = await FindTokenAsync(user, loginProvider, name, cancellationToken);
-        //    if (entry != null)
-        //    {
-        //        await RemoveUserTokenAsync(entry);
-        //    }
-        //}
-
-        //public virtual async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    ThrowIfDisposed();
-
-        //    if (user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-        //    var entry = await FindTokenAsync(user, loginProvider, name, cancellationToken);
-        //    return entry?.Value;
-        //}
-
-        //public virtual Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
-        //{
-        //    return SetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
-        //}
-
-        //public virtual Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
-        //{
-        //    return GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
-        //}
-
-        //public virtual Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
-        //{
-        //    var mergedCodes = string.Join(";", recoveryCodes);
-        //    return SetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, mergedCodes, cancellationToken);
-        //}
-
-        //public async virtual Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    ThrowIfDisposed();
-
-        //    if (user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-        //    if (code == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(code));
-        //    }
-
-        //    var mergedCodes = await GetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
-        //    var splitCodes = mergedCodes.Split(';');
-        //    if (splitCodes.Contains(code))
-        //    {
-        //        var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
-        //        await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        //public async virtual Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
-        //{
-        //    cancellationToken.ThrowIfCancellationRequested();
-        //    ThrowIfDisposed();
-
-        //    if (user == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(user));
-        //    }
-        //    var mergedCodes = await GetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
-        //    if (mergedCodes.Length > 0)
-        //    {
-        //        return mergedCodes.Split(';').Length;
-        //    }
-        //    return 0;
-        //}
+        
 
 #region IUserAuthenticationTokenStore<TUser>
 

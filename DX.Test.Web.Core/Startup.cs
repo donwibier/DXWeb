@@ -28,13 +28,17 @@ namespace DX.Test.Web.Core
         public void ConfigureServices(IServiceCollection services)
         {
             string connStrName = "DefaultConnection";
-            string connStr = Configuration.GetSection("ConnectionStrings")[connStrName];
+            string connStr = Configuration.GetConnectionString(connStrName);
             //Initialize XPODataLayer / Database
             services
                 .AddXpoDatabase(connStrName, connStr);
             //Initialize identity to use XPO
             services
-                .AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddIdentity<ApplicationUser, ApplicationRole>(options => {
+                    options.Lockout.AllowedForNewUsers = true;
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                    options.Lockout.MaxFailedAccessAttempts = 3;
+                })
                 .AddXpoIdentityStores<XpoApplicationUser, XpoApplicationRole>(connStrName, connStr)                
                 .AddDefaultTokenProviders();
 
