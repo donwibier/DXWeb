@@ -19,13 +19,25 @@ namespace DX.Data.Xpo.Identity
             public const string NotIdentityRole = "This class is not of type IdentityRole";
         }
         //TODO: Add some overloads in case you want to go nuts on custom XPO classes
-        public static IdentityBuilder AddXpoIdentityStores<TXPOUser>(this IdentityBuilder builder, string connectionName = "", string connectionString = "")
+        public static IdentityBuilder AddXpoIdentityStores<TXPOUser>(this IdentityBuilder builder)
+            where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+        {
+            return AddXpoIdentityStores<string, TXPOUser, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken, XpoDxRole, XpoDxRoleClaim>(builder, String.Empty, String.Empty);
+        }
+        public static IdentityBuilder AddXpoIdentityStores<TXPOUser>(this IdentityBuilder builder, string connectionName, string connectionString)
             where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
         {
             return AddXpoIdentityStores<string, TXPOUser, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken, XpoDxRole, XpoDxRoleClaim>(builder, connectionName, connectionString);
         }
 
-        public static IdentityBuilder AddXpoIdentityStores<TXPOUser, TXPORole>(this IdentityBuilder builder, string connectionName = "", string connectionString = "")
+        public static IdentityBuilder AddXpoIdentityStores<TXPOUser, TXPORole>(this IdentityBuilder builder)
+            where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+            where TXPORole : XpoDxRole, IDxRole<string>, IRole<string>
+        {
+            return AddXpoIdentityStores<string, TXPOUser, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken, TXPORole, XpoDxRoleClaim>(builder, String.Empty, String.Empty);
+        }
+
+        public static IdentityBuilder AddXpoIdentityStores<TXPOUser, TXPORole>(this IdentityBuilder builder, string connectionName, string connectionString)
             where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
             where TXPORole : XpoDxRole, IDxRole<string>, IRole<string>
         {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>17.2.5.3</Version>
-    <FileVersion>17.2.5.3</FileVersion>
+    <Version>17.2.6.4</Version>
+    <FileVersion>17.2.6.4</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,8 +15,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+      17.2.6.4: Database Namechange on BaseClaim, UserClaim and RoleClaim
+      17.2.6.3: Upgraded to DevExpress v17.2.6
       17.2.5.2: DI Extension methods for .NET Core 2 added and upgraded to DevExpress v17.2.5
-      17.2.4.3: Initial .NET Core v2 support 
+      17.2.4.3: Initial .NET Core v2 support
       17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
       17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
       Not operational on .NET Standard 2.0 yet</PackageReleaseNotes>
@@ -42,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="17.2.5" />
+    <PackageReference Include="DevExpress.Xpo" Version="17.2.6" />
     <!--<PackageReference Include="DX.Data.Xpo" Version="17.2.4.2" />
     <PackageReference Include="DX.Utils" Version="1.0.0.6" />-->
   </ItemGroup>

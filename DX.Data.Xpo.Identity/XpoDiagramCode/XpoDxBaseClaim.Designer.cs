@@ -14,6 +14,7 @@ using System.ComponentModel;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
+    [Persistent(@"DXClaims")]
     [MapInheritance(MapInheritanceType.OwnTable)]
     public partial class XpoDxBaseClaim : XpoDxBase
     {
