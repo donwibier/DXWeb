@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Utils", "DX.Utils\DX.Utils.csproj", "{B1B46D04-F431-43E6-B06C-D78F70D73DC3}"
 EndProject
@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo", "DX.Data.Xpo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Identity", "DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj", "{4A9EC437-F8F0-4C53-B288-DE26E58F061F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Test.Web.Core", "DX.Test.Web.Core\DX.Test.Web.Core.csproj", "{3CE1EC26-90CE-4A43-A835-759BD60937E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Test.Web.Core", "DX.Test.Web.Core\DX.Test.Web.Core.csproj", "{3CE1EC26-90CE-4A43-A835-759BD60937E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

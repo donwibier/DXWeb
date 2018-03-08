@@ -106,7 +106,10 @@ namespace DX.Data.Xpo.Identity
                 {
                     if (String.IsNullOrEmpty(connectionString) || String.IsNullOrEmpty(connectionName))
                     {
-                        return Activator.CreateInstance(userStoreType, sp.GetServices<XpoDatabase>());
+                        var db = sp.GetRequiredService(typeof(XpoDatabase)) as XpoDatabase;
+                        if (db == null)
+                            throw new NullReferenceException("XpoDatabase service could not return an instance for IUserStore<>");
+                        return Activator.CreateInstance(userStoreType, db);
                     }
                     else
                     {
@@ -118,7 +121,10 @@ namespace DX.Data.Xpo.Identity
                 {
                     if (String.IsNullOrEmpty(connectionString) || String.IsNullOrEmpty(connectionName))
                     {
-                        return Activator.CreateInstance(roleStoreType, sp.GetServices<XpoDatabase>());
+                        var db = sp.GetRequiredService(typeof(XpoDatabase)) as XpoDatabase;
+                        if (db == null)
+                            throw new NullReferenceException("XpoDatabase service could not return an instance for IUserStore<>");
+                        return Activator.CreateInstance(roleStoreType, db);
                     }
                     else
                     {

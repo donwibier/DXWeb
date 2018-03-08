@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>17.2.6.4</Version>
-    <FileVersion>17.2.6.4</FileVersion>
+    <Version>17.2.6.5</Version>
+    <FileVersion>17.2.6.5</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+      17.2.6.5: Small bug fixed in extension method to configure storage provider
       17.2.6.4: Database Namechange on BaseClaim, UserClaim and RoleClaim
       17.2.6.3: Upgraded to DevExpress v17.2.6
       17.2.5.2: DI Extension methods for .NET Core 2 added and upgraded to DevExpress v17.2.5
