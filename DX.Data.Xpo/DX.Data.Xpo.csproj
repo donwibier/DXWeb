@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>17.2.6.2</Version>
-    <FileVersion>17.2.6.2</FileVersion>
+    <Version>18.1.4.1</Version>
+    <FileVersion>18.1.4.1</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,12 +15,13 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
-      17.2.6.2: Upgrade to DevExpress v17.2.6
-      17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
-      17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
-      17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
-      Not operational on .NET Standard 2.0 yet
-    </PackageReleaseNotes>
+		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
+		17.2.6.2: Upgrade to DevExpress v17.2.6
+		17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
+		17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
+		17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
+		Not operational on .NET Standard 2.0 yet
+	</PackageReleaseNotes>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
   </PropertyGroup>
@@ -38,15 +39,15 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <Version>2.0.0</Version>
+      <Version>2.1.1</Version>
     </PackageReference>    
     <!--<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />-->
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="17.2.6" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.1.4" />
     <!--<PackageReference Include="DX.Utils" Version="1.0.0.6" />-->
   </ItemGroup>
   <ItemGroup>

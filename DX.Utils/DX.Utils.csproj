@@ -38,7 +38,7 @@ Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Configuration.ConfigurationManager">
-      <Version>4.4.1</Version>
+      <Version>4.5.0</Version>
     </PackageReference>
   </ItemGroup>
 

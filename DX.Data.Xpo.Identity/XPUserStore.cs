@@ -1176,8 +1176,13 @@ namespace DX.Data.Xpo.Identity
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            DateTimeOffset? result = new DateTimeOffset(user.LockoutEndDateUtc.Value);            
-            return Task.FromResult(result);
+			DateTimeOffset? result = null;
+			if (user.LockoutEndDateUtc.HasValue)
+				result = new DateTimeOffset(DateTime.SpecifyKind(user.LockoutEndDateUtc.Value, DateTimeKind.Utc));
+			//	result = new DateTimeOffset(user.LockoutEndDateUtc.Value);            
+				
+
+			return Task.FromResult(result);
         }
 
         public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
@@ -1245,7 +1250,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 
-            var result = user.LockoutEndDateUtc.HasValue 
+			var result = user.LockoutEndDateUtc.HasValue 
                 ? new DateTimeOffset(DateTime.SpecifyKind(user.LockoutEndDateUtc.Value, DateTimeKind.Utc)) 
                 : new DateTimeOffset();
 
