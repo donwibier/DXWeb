@@ -468,7 +468,7 @@ namespace DX.Data.Xpo.Identity
 		}
         public async virtual Task<TUser> FindByIdAsync(TKey userId)
         {
-            return await FindByIdAsync(userId);
+            return await FindByIdAsync((object)userId);
         }
 
         public async virtual Task<TUser> FindByNameAsync(string userName)
