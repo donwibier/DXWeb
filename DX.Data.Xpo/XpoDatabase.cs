@@ -38,8 +38,11 @@ namespace DX.Data.Xpo
 		private readonly static ConcurrentDictionary<string, IDataLayer> dataLayers =
 			new ConcurrentDictionary<string, IDataLayer>();
 
-		public string ConnectionString { get; private set; }
-		public string DataLayerName { get; private set; }
+		private readonly string connectionString;
+		public string ConnectionString { get { return connectionString; } }
+
+		private readonly string dataLayerName;
+		public string DataLayerName { get { return dataLayerName; } }
 		/// Default constructor which uses the "DefaultConnection" connectionString
 		/// </summary>
 		public XpoDatabase()
@@ -63,10 +66,10 @@ namespace DX.Data.Xpo
 			if (String.IsNullOrEmpty(connectionName))
 				throw new ArgumentNullException("connectionName");
 
-			ConnectionString = connectionString;
-			DataLayerName = connectionName;
+			this.connectionString = connectionString;
+			this.dataLayerName = connectionName;
 
-			IDataLayer dataLayer = GetDataLayer(ConnectionString, DataLayerName);
+			IDataLayer dataLayer = GetDataLayer(this.connectionString, this.dataLayerName);
 		}		
 
 		public virtual Session GetSession()
@@ -85,7 +88,9 @@ namespace DX.Data.Xpo
 			{
 				work(this, s);
 				if (transactional && commit && (s is UnitOfWork))
+				{
 					((UnitOfWork)s).CommitChanges();
+				}
 			}
 		}
 		public virtual T Execute<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
@@ -98,15 +103,19 @@ namespace DX.Data.Xpo
 					((UnitOfWork)s).CommitChanges();
 			}
 			return result;
-
-
 		}
-		public virtual Task<T> ExecuteAsync<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
-		{
-			return Task.FromResult<T>(Execute<T>(work, transactional, commit));
-		}
-
 		
+		public async virtual Task<T> ExecuteAsync<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
+		{
+			return await Task.FromResult<T>(Execute<T>(work, transactional, commit));
+		}
+
+		public async virtual Task ExecuteAsync(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
+		{
+			await Task.Run(() => { Execute(work, transactional, commit); });
+		}
+
+
 #region Static Helpers
 		public static Session GetSession(string connectionString, string dataLayerName)
 		{
@@ -147,8 +156,18 @@ namespace DX.Data.Xpo
 			XpoDefault.IdentityMapBehavior = IdentityMapBehavior.Strong;
 
 			// autocreate option in connectionstring
-			AutoCreateOption createOption = Conversion.GetConfigOption<AutoCreateOption>(connectionString, "AutoCreateOption", AutoCreateOption.DatabaseAndSchema);
-			bool enableCachingNode = Conversion.GetConfigOption(connectionString, "EnableCachingNode", false);
+			AutoCreateOption createOption = AutoCreateOption.None;
+			bool enableCachingNode = false;
+			try
+			{
+				createOption = Conversion.GetConfigOption<AutoCreateOption>(connectionString, "AutoCreateOption", AutoCreateOption.DatabaseAndSchema);
+				enableCachingNode = Conversion.GetConfigOption(connectionString, "EnableCachingNode", false);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(String.Format("XpoDatabase was unable to parse connectionString!\n{0}",
+					ex.InnerException == null ? ex.Message : ex.InnerException.Message));
+			}
 
 			XPDictionary dataDictionary = new ReflectionDictionary();
 			IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(connectionString), createOption);

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>18.1.4.1</Version>
-    <FileVersion>18.1.4.1</FileVersion>
+    <Version>18.1.4.3</Version>
+    <FileVersion>18.1.4.3</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		18.1.4.3: Abstract Generic DTO XPDataStore and XPValidator classes added 
+		18.1.4.2: Better exception message on invalid connection string
 		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
 		17.2.6.2: Upgrade to DevExpress v17.2.6
 		17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
@@ -47,7 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="18.1.4" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.1.5" />
     <!--<PackageReference Include="DX.Utils" Version="1.0.0.6" />-->
   </ItemGroup>
   <ItemGroup>

@@ -14,42 +14,43 @@ using System.ComponentModel;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxUserToken : XpoDxBase
-    {
-        XpoDxUser _User;
-        [Indexed(@"LoginProvider;Name", Name = @"IdxUserToken")]
-        [Association(@"XpoDxUserTokenReferencesXpoDxUser")]
-        public XpoDxUser User
-        {
-            get { return _User; }
-            set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
-        }
-        string _LoginProvider;
-        [Size(250)]
-        public string LoginProvider
-        {
-            get { return _LoginProvider; }
-            set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
-        }
-        string _Name;
-        [Size(250)]
-        public string Name
-        {
-            get { return _Name; }
-            set { SetPropertyValue<string>("Name", ref _Name, value); }
-        }
-        string _Value;
-        [Size(250)]
-        public string Value
-        {
-            get { return _Value; }
-            set { SetPropertyValue<string>("Value", ref _Value, value); }
-        }
-        [PersistentAlias("[User!Key]")]
-        public string UserId
-        {
-            get { return (string)(EvaluateAlias("UserId")); }
-        }
-    }
+	[Persistent(@"DXUserTokens")]
+	public partial class XpoDxUserToken : XpoDxBase
+	{
+		XpoDxUser _User;
+		[Indexed(@"LoginProvider;Name", Name = @"IdxUserToken")]
+		[Association(@"XpoDxUserTokenReferencesXpoDxUser")]
+		public XpoDxUser User
+		{
+			get { return _User; }
+			set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
+		}
+		string _LoginProvider;
+		[Size(250)]
+		public string LoginProvider
+		{
+			get { return _LoginProvider; }
+			set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
+		}
+		string _Name;
+		[Size(250)]
+		public string Name
+		{
+			get { return _Name; }
+			set { SetPropertyValue<string>("Name", ref _Name, value); }
+		}
+		string _Value;
+		[Size(250)]
+		public string Value
+		{
+			get { return _Value; }
+			set { SetPropertyValue<string>("Value", ref _Value, value); }
+		}
+		[PersistentAlias("[User!Key]")]
+		public string UserId
+		{
+			get { return (string)(EvaluateAlias("UserId")); }
+		}
+	}
 
 }
