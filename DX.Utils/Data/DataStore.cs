@@ -14,13 +14,13 @@ namespace DX.Utils.Data
 		public virtual Type ModelType => typeof(TModel);
 
 		public abstract TModel GetByKey(TKey key);
-		public abstract IEnumerable<TModel> Query();
+		protected abstract IEnumerable<TModel> Query();		
 
-		public async virtual Task<IEnumerable<TModel>> QueryAsync()
-		{
-			var result = await Task.FromResult(Query());
-			return result;
-		}
+		//public async virtual Task<IEnumerable<TModel>> QueryAsync()
+		//{
+		//	var result = await Task.FromResult(Query());
+		//	return result;
+		//}
 
 		public abstract void Create(IEnumerable<TModel> items);
 

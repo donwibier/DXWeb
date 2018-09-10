@@ -29,8 +29,8 @@ namespace DX.Utils.Data
 		Type KeyType { get; }
 		Type ModelType { get; }
 
-		IEnumerable<TModel> Query();
-		Task<IEnumerable<TModel>> QueryAsync();
+		//IEnumerable<TModel> Query();
+		//Task<IEnumerable<TModel>> QueryAsync();
 		TModel GetByKey(TKey key);
 
 		void Create(IEnumerable<TModel> items);

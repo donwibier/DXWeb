@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DX.Data.Xpo
@@ -19,7 +20,7 @@ namespace DX.Data.Xpo
 
 	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>
 		where TKey : IEquatable<TKey>
-		where TModel : class, IDataStoreModel<TKey>
+		where TModel : class, IDataStoreModel<TKey>, new()
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
 		private readonly XpoDatabase xpo;
@@ -35,10 +36,26 @@ namespace DX.Data.Xpo
 
 		public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
 
-		protected virtual TModel CreateModel(TXPOClass item)
+		protected virtual IQueryable<TXPOClass> Query(Session s)
 		{
-			TModel result = Activator.CreateInstance(typeof(TModel)) as TModel;
-			return Assign(item, result);
+			var result = from n in s.Query<TXPOClass>()
+						 select n;
+			return result;
+		}
+
+
+		//protected virtual TModel CreateModel(TXPOClass item)
+		//{
+		//	return CreateInstance(item);
+		//	//TModel result = Activator.CreateInstance(typeof(TModel)) as TModel;
+		//	//return Assign(item, result);
+		//}
+		protected virtual Func<TXPOClass, TModel> CreateModelInstance
+		{
+			get
+			{
+				return (x) => { return Assign(x, new TModel()); };
+			}
 		}
 
 		protected abstract TXPOClass Assign(TModel source, TXPOClass destination);
@@ -48,7 +65,7 @@ namespace DX.Data.Xpo
 			var result = DB.Execute((db, w) => {
 				TXPOClass item = w.GetObjectByKey<TXPOClass>(key);
 				if (item != null)
-					return CreateModel(item);
+					return CreateModelInstance(item);
 				return null;
 			});
 			return result;
@@ -146,79 +163,80 @@ namespace DX.Data.Xpo
 
 		}
 
-		protected virtual IEnumerable<TModel> Query(CriteriaOperator filter, SortProperty[] sorting = null, int pageNo = -1, int pageSize = -1)
-		{
-			List<TModel> results = new List<TModel>();
+		//protected virtual IEnumerable<TModel> Query(CriteriaOperator filter, SortProperty[] sorting = null, int pageNo = -1, int pageSize = -1)
+		//{
+		//	List<TModel> results = new List<TModel>();
 
-			DB.Execute((db, w) =>
-			{
-				XPCollection<TXPOClass> items = new XPCollection<TXPOClass>(w, filter, sorting);
-				if (pageNo > -1 && pageSize > 0)
-				{
-					items.SkipReturnedObjects = pageSize * pageNo;
-					items.TopReturnedObjects = pageSize;
-				}
-				foreach (TXPOClass item in items)
-				{
-					results.Add(CreateModel(item));
-				}
-			});
+		//	DB.Execute((db, w) =>
+		//	{
+		//		XPCollection<TXPOClass> items = new XPCollection<TXPOClass>(w, filter, sorting);
+		//		if (pageNo > -1 && pageSize > 0)
+		//		{
+		//			items.SkipReturnedObjects = pageSize * pageNo;
+		//			items.TopReturnedObjects = pageSize;
+		//		}
+		//		foreach (TXPOClass item in items)
+		//		{
+		//			results.Add(CreateModelInstance(item));
+		//		}
+		//	});
 
-			return results;
-		}
-		protected async virtual Task<IEnumerable<TModel>> QueryAsync(CriteriaOperator filter, SortProperty[] sorting, int pageNo = -1, int pageSize = -1)
-		{
-			var result = await Task.FromResult(Query(filter, sorting, pageNo, pageSize));
-			return result;
-		}
-		public class XPOrderBy
-		{
+		//	return results;
+		//}
+		//protected async virtual Task<IEnumerable<TModel>> QueryAsync(CriteriaOperator filter, SortProperty[] sorting, int pageNo = -1, int pageSize = -1)
+		//{
+		//	var result = await Task.FromResult(Query(filter, sorting, pageNo, pageSize));
+		//	return result;
+		//}
+		//public class XPOrderBy
+		//{
 
-			public XPOrderBy(Func<TXPOClass, object> orderBy, bool ascending = true)
-			{
-				OrderBy = orderBy;
-				Ascending = ascending;
-			}
-			public Func<TXPOClass, object> OrderBy { get; private set; }
-			public bool Ascending { get; private set; }
-		}
+		//	public XPOrderBy(Func<TXPOClass, object> orderBy, bool ascending = true)
+		//	{
+		//		OrderBy = orderBy;
+		//		Ascending = ascending;
+		//	}
+		//	public Func<TXPOClass, object> OrderBy { get; private set; }
+		//	public bool Ascending { get; private set; }
+		//}
 
-		protected async virtual Task<IEnumerable<TModel>> QueryAsync(
-			Func<TXPOClass, bool> filter = null,
-			XPOrderBy[] orderBy = null,
-			int pageNo = -1, int pageSize = -1)
-		{
-			var result = await xpo.ExecuteAsync((db, w) =>
-			{
-				var q = (filter == null) ? w.Query<TXPOClass>() : w.Query<TXPOClass>().Where(filter);
-				if (orderBy != null)
-				{
-					foreach (var o in orderBy)
-					{
-						bool first = true;
-						if (first)
-						{
-							q = o.Ascending ? q.OrderBy(o.OrderBy) : q.OrderByDescending(o.OrderBy);
-							first = false;
-						}
-						else
-						{
-							var z = q as IOrderedEnumerable<TXPOClass>;
-							q = o.Ascending ? z.ThenBy(o.OrderBy) : z.ThenByDescending(o.OrderBy);
-						}
-					}
-					//only works when OrderBy is used ??
+		//protected async virtual Task<IEnumerable<TModel>> QueryAsync(
+		//	Func<TXPOClass, bool> filter = null,
+		//	XPOrderBy[] orderBy = null,
+		//	int pageNo = -1, int pageSize = -1)
+		//{
+		//	var result = await xpo.ExecuteAsync((db, w) =>
+		//	{
+		//		var q = (filter == null) ? w.Query<TXPOClass>() : w.Query<TXPOClass>().Where(filter);
+		//		if (orderBy != null)
+		//		{
+		//			foreach (var o in orderBy)
+		//			{
+		//				bool first = true;
+		//				if (first)
+		//				{
+		//					q = o.Ascending ? q.OrderBy(o.OrderBy) : q.OrderByDescending(o.OrderBy);
+		//					first = false;
+		//				}
+		//				else
+		//				{
+		//					var z = q as IOrderedEnumerable<TXPOClass>;
+		//					q = o.Ascending ? z.ThenBy(o.OrderBy) : z.ThenByDescending(o.OrderBy);
+		//				}
+		//			}
+		//			//only works when OrderBy is used ??
 
-					if ((pageNo > -1) && (pageSize > 0))
-						q = q.Skip(pageNo * pageSize).Take(pageSize);
+		//			if ((pageNo > -1) && (pageSize > 0))
+		//				q = q.Skip(pageNo * pageSize).Take(pageSize);
 
-				}
+		//		}
 
-				var r = q.Select(s => CreateModel(s));
-				return r;
-			});
-			return result;
-		}
+		//		var r = q.Select(s => CreateModelInstance(s));
+		//		return r.ToList();
+		//	});
+		//	return result;
+		//}
 
+	
 	}
 }
