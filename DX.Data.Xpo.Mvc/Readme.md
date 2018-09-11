@@ -32,7 +32,7 @@ Also see Utils.Data.DataStore and Data.Xpo.XPDataStore.
 		{
 			{"ID", "ID"},
 			{"OrderDate", "OrderDate"},
-			{"CustomerID", "Customer.ID"},
+			{"CustomerID", "Customer.ID"}, /* You can use the XPView property notation (like the LINQ below) */
 			{"CustomerName", "Customer.Name"}
 			// ...
 		};
