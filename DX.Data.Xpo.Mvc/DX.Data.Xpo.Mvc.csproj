@@ -32,16 +32,6 @@
 		<Reference Include="System.Net.Http" />
 		<Reference Include="System.Xml" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="Readme.md" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Include="Readme.md">
-	    <SubType>Code</SubType>
-	  </Compile>
-	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="DevExpress.Xpo" Version="18.1.5" />
@@ -55,6 +45,12 @@
 
 	<ItemGroup>
 	  <Reference Include="System.Web" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Readme.md">
+	    <SubType>Code</SubType>
+	  </None>
 	</ItemGroup>
 
 
