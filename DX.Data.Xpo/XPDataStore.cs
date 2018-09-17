@@ -1,12 +1,8 @@
-﻿using DevExpress.Data.Filtering;
-using DevExpress.Xpo;
+﻿using DevExpress.Xpo;
 using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DX.Data.Xpo
 {
@@ -15,7 +11,7 @@ namespace DX.Data.Xpo
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
-		
+
 	}
 
 	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>
@@ -62,7 +58,8 @@ namespace DX.Data.Xpo
 		protected abstract TModel Assign(TXPOClass source, TModel destination);
 		public override TModel GetByKey(TKey key)
 		{
-			var result = DB.Execute((db, w) => {
+			var result = DB.Execute((db, w) =>
+			{
 				TXPOClass item = w.GetObjectByKey<TXPOClass>(key);
 				if (item != null)
 					return CreateModelInstance(item);
@@ -237,6 +234,6 @@ namespace DX.Data.Xpo
 		//	return result;
 		//}
 
-	
+
 	}
 }

@@ -10,9 +10,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
-using DX.Data.Xpo.Identity;
 
 #if (NETSTANDARD2_0)
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +19,7 @@ using Microsoft.AspNetCore.Builder;
 
 namespace DX.Data.Xpo
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 	public class XpoDataLayerAttribute : Attribute
 	{
 		public XpoDataLayerAttribute(string dataLayerName)
@@ -49,17 +47,17 @@ namespace DX.Data.Xpo
 			: this("DefaultConnection")
 		{
 		}
-		public XpoDatabase(string connectionName):
+		public XpoDatabase(string connectionName) :
 			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
 
 
-        /// <summary>
-        /// Constructor which takes the connection string name
-        /// </summary>
-        /// <param name="connectionString"></param>
-        public XpoDatabase(string connectionString, string connectionName)
+		/// <summary>
+		/// Constructor which takes the connection string name
+		/// </summary>
+		/// <param name="connectionString"></param>
+		public XpoDatabase(string connectionString, string connectionName)
 		{
 			if (String.IsNullOrEmpty(connectionString))
 				throw new ArgumentNullException("connectionString");
@@ -70,7 +68,7 @@ namespace DX.Data.Xpo
 			this.dataLayerName = connectionName;
 
 			IDataLayer dataLayer = GetDataLayer(this.connectionString, this.dataLayerName);
-		}		
+		}
 
 		public virtual Session GetSession()
 		{
@@ -94,7 +92,7 @@ namespace DX.Data.Xpo
 			}
 		}
 		public virtual T Execute<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
-		{			
+		{
 			T result = default(T);
 			using (Session s = transactional ? GetUnitOfWork() : GetSession())
 			{
@@ -104,7 +102,7 @@ namespace DX.Data.Xpo
 			}
 			return result;
 		}
-		
+
 		public async virtual Task<T> ExecuteAsync<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
 		{
 			return await Task.FromResult<T>(Execute<T>(work, transactional, commit));
@@ -116,7 +114,7 @@ namespace DX.Data.Xpo
 		}
 
 
-#region Static Helpers
+		#region Static Helpers
 		public static Session GetSession(string connectionString, string dataLayerName)
 		{
 			return new Session(GetDataLayer(connectionString, dataLayerName));
@@ -141,8 +139,8 @@ namespace DX.Data.Xpo
 		//{
 
 		//}
-		
-#endregion
+
+		#endregion
 
 		private static IDataLayer createDataLayer(string connectionString, string datalayerName)
 		{
@@ -185,7 +183,7 @@ namespace DX.Data.Xpo
 						// place code here to patch metadata              
 						session.UpdateSchema();
 						session.CreateObjectTypeRecords();
-						XpoDefault.DataLayer = new ThreadSafeDataLayer(session.Dictionary, dataStore);						
+						XpoDefault.DataLayer = new ThreadSafeDataLayer(session.Dictionary, dataStore);
 					}
 				}
 			}
@@ -198,14 +196,14 @@ namespace DX.Data.Xpo
 			return result;
 		}
 		static readonly string xpoName = XPClassInfo.GetShortAssemblyName(typeof(XPDictionary).Assembly);
-		private static Type[] GetDataTypes(string name="")
+		private static Type[] GetDataTypes(string name = "")
 		{
 			List<Type> result = new List<Type>();
 
 			foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				if (String.IsNullOrEmpty(name) ||
-					(XPClassInfo.GetShortAssemblyName(asm) == xpoName) || 
+					(XPClassInfo.GetShortAssemblyName(asm) == xpoName) ||
 					(asm.GetReferencedAssemblies().FirstOrDefault(a => a.Name == xpoName) != null))
 				{
 					foreach (Type tpe in asm.GetTypes())
@@ -236,13 +234,13 @@ namespace DX.Data.Xpo
 			return result.ToArray();
 		}
 
-#region Cloning
+		#region Cloning
 
 		public T[] CloneCollection<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
 			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
 			where T : IXPSimpleObject
-		{			
+		{
 			if (target == null)
 				throw new ArgumentNullException("target");
 			List<T> result = new List<T>();
@@ -274,8 +272,8 @@ namespace DX.Data.Xpo
 				synchronize, excludedClasses, synchronizeProperties));
 		}
 
-		public T Clone<T>(T source, XpoDatabase target, bool synchronize = true, 
-			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null) 
+		public T Clone<T>(T source, XpoDatabase target, bool synchronize = true,
+			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
 			if (source == null)
@@ -330,12 +328,12 @@ namespace DX.Data.Xpo
 			/// Initializes a new instance of the CloneIXPSimpleObjectHelper class.
 			/// </summary>
 			public Cloner(Session source, Session target)
-			{				
+			{
 				_source = source;
 				_target = target;
 			}
 
-			public Cloner(Session source, Session target, 
+			public Cloner(Session source, Session target,
 				IEnumerable<XPClassInfo> excludedclasses, IEnumerable<string> synchronizeproperties)
 			{
 				if (excludedclasses != null)
@@ -446,9 +444,9 @@ namespace DX.Data.Xpo
 			}
 		}
 
-#endregion
+		#endregion
 
-#region IDisposable Support
+		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
 
 		protected virtual void Dispose(bool disposing)
@@ -494,7 +492,7 @@ namespace DX.Data.Xpo
 			// TODO: uncomment the following line if the finalizer is overridden above.
 			// GC.SuppressFinalize(this);
 		}
-#endregion
+		#endregion
 
 	}
 }

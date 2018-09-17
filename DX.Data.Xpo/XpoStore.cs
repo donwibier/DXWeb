@@ -18,11 +18,11 @@ namespace DX.Data.Xpo
 			  : this("DefaultConnection")
 		{
 		}
-		public XpoStore(string connectionName):
+		public XpoStore(string connectionName) :
 			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
-		public XpoStore(string connectionString, string name):
+		public XpoStore(string connectionString, string name) :
 			this(new XpoDatabase(connectionString, name))
 		{
 		}
@@ -44,7 +44,7 @@ namespace DX.Data.Xpo
 			_Database.Execute(work, transactional);
 		}
 		protected virtual T XPOExecute<T>(Func<XpoDatabase, Session, T> work, bool transactional = true)
-		{			
+		{
 			return _Database.Execute(work, transactional);
 		}
 
@@ -70,7 +70,7 @@ namespace DX.Data.Xpo
 		}
 		protected virtual T[] XPOSelectAndUpdate<T>(CriteriaOperator selectCriteria, SortProperty[] sortProperties, Func<TXPOMainEntity, T> work, out int affectedItems)
 		{
-			int count = 0;			
+			int count = 0;
 			List<T> results = new List<T>();
 			using (UnitOfWork wrk = _Database.GetUnitOfWork())
 			{

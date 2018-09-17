@@ -1,6 +1,6 @@
-﻿using DevExpress.Xpo;
-using System;
+﻿using System;
 using System.Linq;
+using DevExpress.Xpo;
 
 #if (NETSTANDARD2_0)
 using Microsoft.Extensions.DependencyInjection;

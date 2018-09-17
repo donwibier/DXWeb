@@ -43,7 +43,7 @@ namespace DX.Data.Xpo.Identity
 			return (TXPOEntity)source;
 		}
 		//public abstract void Assign(TXPOEntity source, int loadingFlags);
-		public abstract void Assign(object source, int loadingFlags);		
+		public abstract void Assign(object source, int loadingFlags);
 	}
 	//[DataObject(true)]
 	public class XpoDtoDatasource<TKey, TXPOEntity, TDTOEntity>
@@ -57,7 +57,7 @@ namespace DX.Data.Xpo.Identity
 
 		}
 		public XpoDtoDatasource(string connectionStringName)
-			:this()
+			: this()
 		{
 			_XpoDatabase = new XpoDatabase(connectionStringName);
 		}
@@ -75,7 +75,7 @@ namespace DX.Data.Xpo.Identity
 		[DataObjectMethod(DataObjectMethodType.Select, false)]
 		public static List<TDTOEntity> Select(XpoDatabase database, CriteriaOperator criteria = null, int pageSize = -1, int pageIndex = -1, params SortProperty[] sortProperties)
 		{
-			List<TDTOEntity> result = new List<TDTOEntity>();			
+			List<TDTOEntity> result = new List<TDTOEntity>();
 			using (UnitOfWork wrk = database.GetUnitOfWork())
 			{
 				XPCollection<TXPOEntity> items = new XPCollection<TXPOEntity>(wrk, criteria, sortProperties);
@@ -87,7 +87,7 @@ namespace DX.Data.Xpo.Identity
 				}
 				foreach (TXPOEntity item in items)
 				{
-					TDTOEntity dto = Activator.CreateInstance(typeof(TDTOEntity), (item as TXPOEntity)) as TDTOEntity;
+					TDTOEntity dto = Activator.CreateInstance(typeof(TDTOEntity), item) as TDTOEntity;
 					if (dto != null)
 						result.Add(dto);
 				}
@@ -99,7 +99,7 @@ namespace DX.Data.Xpo.Identity
 		private static ICriteriaToExpressionConverter exprConverter = new CriteriaToExpressionConverter();
 		public static IQueryable<TXPOEntity> Select(Session session, string filterExpression)
 		{
-			return (IQueryable<TXPOEntity>)session.Query<TXPOEntity>().AppendWhere(exprConverter, CriteriaOperator.Parse(filterExpression));				
+			return (IQueryable<TXPOEntity>)session.Query<TXPOEntity>().AppendWhere(exprConverter, CriteriaOperator.Parse(filterExpression));
 		}
 		//==
 
@@ -114,7 +114,7 @@ namespace DX.Data.Xpo.Identity
 				{
 					tmp = tmp.Skip(pageSize * pageIndex).Take(pageSize);
 				}
-				result = tmp.Select((xpo, i) => Activator.CreateInstance(typeof(TDTOEntity), (xpo as TXPOEntity)) as TDTOEntity);
+				result = tmp.Select((xpo, i) => Activator.CreateInstance(typeof(TDTOEntity), xpo) as TDTOEntity);
 			}
 
 			return result;
@@ -146,7 +146,7 @@ namespace DX.Data.Xpo.Identity
 				if ((item == null) && raiseExceptionNotFound)
 					throw new Exception(String.Format("{0} Item not found on '{1}' not found", typeof(TXPOEntity).FullName, criteria.ToString()));
 
-				result = Activator.CreateInstance(typeof(TDTOEntity), (item as TXPOEntity), loadingFlags) as TDTOEntity;
+				result = Activator.CreateInstance(typeof(TDTOEntity), item, loadingFlags) as TDTOEntity;
 			}
 			return result;
 		}
