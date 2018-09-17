@@ -9,10 +9,12 @@ namespace DX.Data.Xpo.Mvc
 {
     public interface IPagedDataStore
     {
-		void GetGridCustomDataRowCount(GridViewCustomBindingGetDataRowCountArgs e);
-		void GetGridCustomUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e);
-		void GetGridCustomGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e);
-		void GetGridCustomData(GridViewCustomBindingGetDataArgs e);
-		void GetGridCustomSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e);
+		void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e);
+		void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e);
+		void GetGridViewGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e);
+		void GetGridViewData(GridViewCustomBindingGetDataArgs e);
+		void GetGridViewSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e);
+
+		void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e);
 	}
 }

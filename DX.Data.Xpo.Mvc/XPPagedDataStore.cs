@@ -24,6 +24,7 @@ namespace DX.Data.Xpo.Mvc
 
 		}
 
+
 		#region Preparations for advanced gridview paging and sorting
 
 		static Regex regexFilter = new Regex("\\[.*?\\]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
@@ -33,7 +34,8 @@ namespace DX.Data.Xpo.Mvc
 		protected virtual string PrepareProperty(string dtoProperty, Dictionary<string, string> map = null)
 		{
 			if (String.IsNullOrEmpty(dtoProperty))
-				throw new ArgumentNullException("dtoProperty");
+				return dtoProperty;
+
 			map = map ?? PropertyMap;
 			var key = regexBrackets.Replace(dtoProperty, "");
 			return map.ContainsKey(key) ? regexBrackets.Replace(map[key], "") : key;
@@ -41,6 +43,9 @@ namespace DX.Data.Xpo.Mvc
 
 		protected virtual string PrepareFilterExpression(string filterExpression, Dictionary<string, string> propertyMap = null)
 		{
+			if (String.IsNullOrEmpty(filterExpression))
+				return filterExpression;
+
 			string result = regexFilter.Replace(filterExpression, m =>
 			{
 				string f = m.ToString();
@@ -49,8 +54,30 @@ namespace DX.Data.Xpo.Mvc
 			return result;
 		}
 
+		protected virtual List<GridViewSummaryItemState> PrepareSummaryItems(List<GridViewSummaryItemState> summaryItems)
+		{
+			foreach (var summary in summaryItems)
+				summary.FieldName = PrepareProperty(summary.FieldName);
+			return summaryItems;
+		}
+
+		protected virtual IList<GridViewGroupInfo> PrepareGroupInfoList(IList<GridViewGroupInfo> groupInfoList)
+		{
+			foreach (var group in groupInfoList)
+				group.FieldName = PrepareProperty(group.FieldName);
+			return groupInfoList;
+		}
+		protected virtual IEnumerable<GridViewColumnState> PrepareSorting(IEnumerable<GridViewColumnState> sortedColumns)
+		{
+			foreach (var column in sortedColumns)
+				column.FieldName = PrepareProperty(column.FieldName);
+			return sortedColumns;
+		}
+
 
 		#endregion
+
+		#region GridView Caching
 		protected virtual Dictionary<string, int> CacheCount
 		{
 			get
@@ -75,8 +102,10 @@ namespace DX.Data.Xpo.Mvc
 		{
 			CacheCount[key] = count;
 		}
+		#endregion
 
-		public virtual void GetGridCustomDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)
+		#region GridView CustomBinding Methods
+		public virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)    		     
 		{
 			int rowCount;
 			if (CacheTryGetCount(e.FilterExpression, out rowCount))
@@ -85,7 +114,7 @@ namespace DX.Data.Xpo.Mvc
 				e.DataRowCount = DB.Execute((db, w) => Query(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());				
 		}
 
-		public virtual void GetGridCustomUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
+		public virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
 		{
 			var result = DB.Execute((db, w) =>
 			{
@@ -95,7 +124,7 @@ namespace DX.Data.Xpo.Mvc
 			});
 			e.Data = result;
 		}
-		public virtual void GetGridCustomGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e)
+		public virtual void GetGridViewGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e)
 		{
 			var result = DB.Execute((db, w) =>
 			{
@@ -107,7 +136,7 @@ namespace DX.Data.Xpo.Mvc
 			e.Data = result;
 		}
 		
-		public virtual void GetGridCustomData(GridViewCustomBindingGetDataArgs e)
+		public virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)				 
 		{
 			var result = DB.Execute((db, w) =>
 			{
@@ -124,7 +153,7 @@ namespace DX.Data.Xpo.Mvc
 			e.Data = result;
 		}
 
-		public virtual void GetGridCustomSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e)
+		public virtual void GetGridViewSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e)
 		{
 			var result = DB.Execute((db, w) =>
 			{
@@ -135,7 +164,6 @@ namespace DX.Data.Xpo.Mvc
 
 				List<GridViewSummaryItemState> summaryItems = e.SummaryItems;
 				var summaryValues = query.CalculateSummary(PrepareSummaryItems(summaryItems));
-				//e.Data = summaryValues;
 
 				var countSummaryItem = summaryItems.FirstOrDefault(i => i.SummaryType == SummaryItemType.Count);
 				if (e.GroupInfoList.Count == 0 && countSummaryItem != null)
@@ -150,25 +178,27 @@ namespace DX.Data.Xpo.Mvc
 			e.Data = result;
 		}
 
-		protected virtual List<GridViewSummaryItemState> PrepareSummaryItems(List<GridViewSummaryItemState> summaryItems)
+		#endregion
+
+		#region GridLookup Custom Binding Methods
+
+		public virtual void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e)
 		{
-			foreach (var summary in summaryItems)
-				summary.FieldName = PrepareProperty(summary.FieldName);
-			return summaryItems;
+			var n = default(TKey);
+			if (e.KeyValues.Count() == 0)
+			{
+				e.RowValues = new TModel[] { GetByKey(n) };
+			}
+			else
+			{
+				e.RowValues = DB.Execute((db, w) => {
+					var r = Query(w).Where(c => e.KeyValues.Contains(c.ID)).Select(CreateModelInstance);
+					return r;
+				});
+			}
 		}
 
-		protected virtual IList<GridViewGroupInfo> PrepareGroupInfoList(IList<GridViewGroupInfo> groupInfoList)
-		{
-			foreach (var group in groupInfoList)
-				group.FieldName = PrepareProperty(group.FieldName);
-			return groupInfoList;
-		}
-		protected virtual IEnumerable<GridViewColumnState> PrepareSorting(IEnumerable<GridViewColumnState> sortedColumns)
-		{
-			foreach (var column in sortedColumns)
-				column.FieldName = PrepareProperty(column.FieldName);
-			return sortedColumns;
-		}
+		#endregion
 
-	}	
+	}
 }
