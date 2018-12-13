@@ -16,15 +16,15 @@ namespace DX.Data.Xpo.Identity.Persistent
             this.User = null;
             base.OnDeleting();
         }
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxUserClaim<string> src = source as IDxUserClaim<string>;
-            if (src != null)
-            {
-                this.User = Session.GetObjectByKey(typeof(XpoDxUser), src.UserId) as XpoDxUser;
-            }
-        }
+        //public override void Assign(object source, int loadingFlags)
+        //{
+        //    base.Assign(source, loadingFlags);
+        //    IDxUserClaim<string> src = source as IDxUserClaim<string>;
+        //    if (src != null)
+        //    {
+        //        this.User = Session.GetObjectByKey(typeof(XpoDxUser), src.UserId) as XpoDxUser;
+        //    }
+        //}
 
         // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:17 AM
         public new class FieldsClass : XpoDxBaseClaim.FieldsClass

@@ -11,13 +11,12 @@ namespace DX.Data.Xpo
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
-
 	}
 
 	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>
 		where TKey : IEquatable<TKey>
 		where TModel : class, IDataStoreModel<TKey>, new()
-		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>		
 	{
 		private readonly XpoDatabase xpo;
 		private readonly XPDataValidator<TKey, TModel, TXPOClass> val;
@@ -30,7 +29,7 @@ namespace DX.Data.Xpo
 
 		public Type XpoType => typeof(TXPOClass);
 
-		public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
+		//public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
 
 		protected virtual IQueryable<TXPOClass> Query(Session s)
 		{
@@ -68,171 +67,116 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
-		public override void Create(IEnumerable<TModel> items)
+		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
 		{
 			if (items == null)
-				throw new ArgumentNullException("items");
+				throw new ArgumentNullException("items");			
+			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 			try
 			{
-				var result = xpo.Execute((db, w) =>
+				result = xpo.Execute((db, w) =>
 				{
+					var r = new DataValidationResults<TKey>();
 					foreach (var item in items)
-					{
-						bool ok = val.Inserting(item);
-						if (!ok)
-							throw new Exception(String.Format("Validator failed on Inserting on '{0}'", XpoType.Name));
+					{						
+						val?.Inserting(item, r);
+
+						//bool ok = val.Inserting(item);
+						//if (!ok)
+						//	throw new Exception(String.Format("Validator failed on Inserting on '{0}'", XpoType.Name));
 
 						var newItem = Assign(item, Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
 						//TODO: Move to Validator Inserted
 						//newItem.AddStampUTC = DateTime.UtcNow;
 						//newItem.ModStampUTC = DateTime.UtcNow;
-						ok = val.Inserted(item, newItem);
-						if (!ok)
-							throw new Exception(String.Format("Validator failed on Inserted on '{0}'", XpoType.Name));
+						val?.Inserted(item, newItem, r);
+						//ok = val.Inserted(item, newItem);
+						//if (!ok)
+						//	throw new Exception(String.Format("Validator failed on Inserted on '{0}'", XpoType.Name));
+						w.FailedCommitTransaction += (s, e) =>
+						{
+							r.Add(new DataValidationResult<TKey>
+							{
+								ResultType = DataValidationResultType.Error,
+								Message = e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message
+							});
+							e.Handled = true;
+						};
 					}
-					return 0;
+					return r;
 				});
 			}
 			catch (Exception ex)
 			{
-				throw ex;
+				result.Add(new DataValidationResult<TKey>
+				{
+					ResultType = DataValidationResultType.Error,
+					Message = ex.InnerException != null ? ex.InnerException.Message : ex.Message
+				});
 			}
-
+			return result;
 		}
 
-		public override void Update(IEnumerable<TModel> items)
+		public override IDataValidationResults<TKey> Update(IEnumerable<TModel> items)
 		{
 			if (items == null)
 				throw new ArgumentNullException("items");
+
+			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 			try
 			{
-				xpo.Execute((db, w) =>
+				result = xpo.Execute((db, w) =>
 				{
+					var r = new DataValidationResults<TKey>();
 					foreach (var item in items)
 					{
-						bool ok = val.Updating(item);
-						if (!ok)
-							throw new Exception(String.Format("{0}.OnUpdating failed on '{1}'", this.GetType().Name, XpoType.Name));
+						val?.Updating(item, r);
 
 						var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
 						if (updatedItem == null)
-							throw new Exception(String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID));
+							r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
 
 						Assign(item, updatedItem);
 						// Move to Validator Updated
 						//updatedItem.ModStampUTC = DateTime.UtcNow;
-						ok = val.Updated(item, updatedItem);
-						if (!ok)
-							throw new Exception(String.Format("{0}.OnUpdated failed on '{1}'", this.GetType().Name, XpoType.Name));
-
+						val?.Updated(item, updatedItem, r);
 					}
-					return 0;
+					return r;
 				});
 			}
 			catch (Exception ex)
 			{
-				throw ex;
+				result.Add(new DataValidationResult<TKey>
+				{
+					ResultType = DataValidationResultType.Error,
+					Message = ex.InnerException != null ? ex.InnerException.Message : ex.Message
+				});
 			}
-
+			return result;
 		}
 
-		public override void Delete(IEnumerable<TKey> ids)
+		public override IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids)
 		{
-			var r = xpo.Execute((db, w) =>
-			{
+			var result = xpo.Execute((db, w) =>
+			{ 
+				var r = new DataValidationResults<TKey>();
 				foreach (var id in ids)
 				{
 
 					var item = w.GetObjectByKey<TXPOClass>(id);
 					if (item == null)
-						throw new Exception(String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, id));
-					bool ok = val.Deleting(item);
-					if (!ok)
-						throw new Exception(String.Format("{0}.OnDeleting failed on '{1}'", this.GetType().Name, XpoType.Name));
+						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
 
+					val.Deleting(id, item, r);
 					item.Delete();
-					ok = val.Deleted(item);
-					if (!ok)
-						throw new Exception(String.Format("{0}.OnDeleted failed on '{1}'", this.GetType().Name, XpoType.Name));
+					val.Deleted(id, item, r);
 				}
-				return 0;
+				return r;
 			});
-
+			return result;
 		}
 
-		//protected virtual IEnumerable<TModel> Query(CriteriaOperator filter, SortProperty[] sorting = null, int pageNo = -1, int pageSize = -1)
-		//{
-		//	List<TModel> results = new List<TModel>();
-
-		//	DB.Execute((db, w) =>
-		//	{
-		//		XPCollection<TXPOClass> items = new XPCollection<TXPOClass>(w, filter, sorting);
-		//		if (pageNo > -1 && pageSize > 0)
-		//		{
-		//			items.SkipReturnedObjects = pageSize * pageNo;
-		//			items.TopReturnedObjects = pageSize;
-		//		}
-		//		foreach (TXPOClass item in items)
-		//		{
-		//			results.Add(CreateModelInstance(item));
-		//		}
-		//	});
-
-		//	return results;
-		//}
-		//protected async virtual Task<IEnumerable<TModel>> QueryAsync(CriteriaOperator filter, SortProperty[] sorting, int pageNo = -1, int pageSize = -1)
-		//{
-		//	var result = await Task.FromResult(Query(filter, sorting, pageNo, pageSize));
-		//	return result;
-		//}
-		//public class XPOrderBy
-		//{
-
-		//	public XPOrderBy(Func<TXPOClass, object> orderBy, bool ascending = true)
-		//	{
-		//		OrderBy = orderBy;
-		//		Ascending = ascending;
-		//	}
-		//	public Func<TXPOClass, object> OrderBy { get; private set; }
-		//	public bool Ascending { get; private set; }
-		//}
-
-		//protected async virtual Task<IEnumerable<TModel>> QueryAsync(
-		//	Func<TXPOClass, bool> filter = null,
-		//	XPOrderBy[] orderBy = null,
-		//	int pageNo = -1, int pageSize = -1)
-		//{
-		//	var result = await xpo.ExecuteAsync((db, w) =>
-		//	{
-		//		var q = (filter == null) ? w.Query<TXPOClass>() : w.Query<TXPOClass>().Where(filter);
-		//		if (orderBy != null)
-		//		{
-		//			foreach (var o in orderBy)
-		//			{
-		//				bool first = true;
-		//				if (first)
-		//				{
-		//					q = o.Ascending ? q.OrderBy(o.OrderBy) : q.OrderByDescending(o.OrderBy);
-		//					first = false;
-		//				}
-		//				else
-		//				{
-		//					var z = q as IOrderedEnumerable<TXPOClass>;
-		//					q = o.Ascending ? z.ThenBy(o.OrderBy) : z.ThenByDescending(o.OrderBy);
-		//				}
-		//			}
-		//			//only works when OrderBy is used ??
-
-		//			if ((pageNo > -1) && (pageSize > 0))
-		//				q = q.Skip(pageNo * pageSize).Take(pageSize);
-
-		//		}
-
-		//		var r = q.Select(s => CreateModelInstance(s));
-		//		return r.ToList();
-		//	});
-		//	return result;
-		//}
+		
 
 
 	}

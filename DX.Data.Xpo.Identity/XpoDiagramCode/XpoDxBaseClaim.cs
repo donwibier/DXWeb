@@ -13,16 +13,16 @@ namespace DX.Data.Xpo.Identity.Persistent
         public XpoDxBaseClaim(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
 
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxBaseClaim<string> src = source as IDxBaseClaim<string>;
-            if (src != null)
-            {
-                this.ClaimType = src.ClaimType;
-                this.ClaimValue = src.ClaimValue;
-            }
-        }
+        //public override void Assign(object source, int loadingFlags)
+        //{
+        //    base.Assign(source, loadingFlags);
+        //    IDxBaseClaim<string> src = source as IDxBaseClaim<string>;
+        //    if (src != null)
+        //    {
+        //        this.ClaimType = src.ClaimType;
+        //        this.ClaimValue = src.ClaimValue;
+        //    }
+        //}
 
         public virtual void InitializeFromClaim(Claim other)
         {

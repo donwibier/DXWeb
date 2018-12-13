@@ -5,7 +5,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-#if(NETSTANDARD2_0)
+using DX.Utils.Data;
+#if (NETSTANDARD2_0)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -14,7 +15,7 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 #if (NETSTANDARD2_0)
-    public interface IUser<TKey> : IAssignable
+    public interface IUser<TKey> 
          where TKey : IEquatable<TKey>
     {
         TKey Id { get; }
@@ -22,7 +23,7 @@ namespace DX.Data.Xpo.Identity
         string NormalizedName { get; set; }
         string NormalizedEmail { get; set; }
     }
-    public interface IRole<TKey> : IAssignable
+    public interface IRole<TKey> 
         where TKey : IEquatable<TKey>
     {
         TKey Id { get; }
@@ -31,7 +32,7 @@ namespace DX.Data.Xpo.Identity
     }
 
 #endif
-    public interface IDxUser<TKey> : IXPOKey<TKey>, IUser<TKey>, IAssignable
+    public interface IDxUser<TKey> : IDataStoreModel<TKey>, IUser<TKey>
          where TKey : IEquatable<TKey>
     {
         //Id
@@ -51,16 +52,16 @@ namespace DX.Data.Xpo.Identity
 
         string SecurityStamp { get; set; }
         string PasswordHash { get; set; }
-        IList RolesList { get; }
-        IList ClaimsList { get; }
-        IList LoginsList { get; }
+		IList RolesList { get; }
+		IList ClaimsList { get; }
+		IList LoginsList { get; }
 
-        void AssignRoles(IList roles);
-        void AssignClaims(IList claims);
-        void AssignLogins(IList logins);
-    }
+		void AssignRoles(IList roles);
+		void AssignClaims(IList claims);
+		void AssignLogins(IList logins);
+	}
 
-    public interface IDxRole<TKey> : IXPOKey<TKey>, IRole<TKey>, IAssignable
+    public interface IDxRole<TKey> : IDataStoreModel<TKey>, IRole<TKey>
         where TKey : IEquatable<TKey>
     {
         //Id
@@ -68,7 +69,7 @@ namespace DX.Data.Xpo.Identity
         IList UsersList { get; }
     }
 
-    public interface IDxUserLogin<TKey> : IXPOKey<TKey>, IAssignable
+    public interface IDxUserLogin<TKey> : IDataStoreModel<TKey>
         where TKey : IEquatable<TKey>
     {
         //Id
@@ -77,7 +78,7 @@ namespace DX.Data.Xpo.Identity
         string ProviderKey { get; set; }
     }
 
-    public interface IDxBaseClaim<TKey> : IXPOKey<TKey>, IAssignable
+    public interface IDxBaseClaim<TKey> : IDataStoreModel<TKey>
         where TKey : IEquatable<TKey>
     {
         string ClaimType { get; set; }
@@ -94,7 +95,7 @@ namespace DX.Data.Xpo.Identity
         TKey UserId { get; }
     }
 
-    public interface IDxUserToken<TKey> : IXPOKey<TKey>, IAssignable
+    public interface IDxUserToken<TKey> : IDataStoreModel<TKey>
         where TKey : IEquatable<TKey>
     {
         TKey UserId { get; }

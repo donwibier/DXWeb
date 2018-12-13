@@ -39,29 +39,29 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         protected override void OnDeleting()
         {
-            int userCount = (int)Session.Evaluate(typeof(XpoDxUser),
-                CriteriaOperator.Parse("Count"),
-                CriteriaOperator.Parse("Roles[Id == ?]", this.Id));
-            if (userCount > 0)
-                throw new Exception(String.Format("Role '{0}' cannot be deleted because there are users in this Role", this.Name));
+            //int userCount = (int)Session.Evaluate(typeof(XpoDxUser),
+            //    CriteriaOperator.Parse("Count"),
+            //    CriteriaOperator.Parse("Roles[Id == ?]", this.Id));
+            //if (userCount > 0)
+            //    throw new Exception(String.Format("Role '{0}' cannot be deleted because there are users in this Role", this.Name));
 
             base.OnDeleting();
         }
 
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxRole<string> src = source as IDxRole<string>;
-            if (src != null)
-            {
-                this.Name = src.Name;
-#if (NETSTANDARD2_0)
-                this.NormalizedName = src.NormalizedName;
-#endif
-                //if (Bits.Has(loadingFlags, DxIdentityUserFlags.FLAG_USERS))										
-            }
+//        public override void Assign(object source, int loadingFlags)
+//        {
+//            base.Assign(source, loadingFlags);
+//            IDxRole<string> src = source as IDxRole<string>;
+//            if (src != null)
+//            {
+//                this.Name = src.Name;
+//#if (NETSTANDARD2_0)
+//                this.NormalizedName = src.NormalizedName;
+//#endif
+//                //if (Bits.Has(loadingFlags, DxIdentityUserFlags.FLAG_USERS))										
+//            }
 
-        }
+//        }
         public IList UsersList
         {
             get { return Users; }

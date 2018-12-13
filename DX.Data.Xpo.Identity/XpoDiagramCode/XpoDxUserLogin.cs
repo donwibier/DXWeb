@@ -27,18 +27,18 @@ namespace DX.Data.Xpo.Identity.Persistent
             User = null;
             base.OnDeleting();
         }
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxUserLogin<string> src = source as IDxUserLogin<string>;
-            if (src != null)
-            {
-                this.LoginProvider = src.LoginProvider;
-                this.ProviderKey = src.ProviderKey;
-                this.User = Session.FindObject(typeof(XpoDxUser), XpoDxUser.Fields.Id == src.UserId) as XpoDxUser;
+        //public override void Assign(object source, int loadingFlags)
+        //{
+        //    base.Assign(source, loadingFlags);
+        //    IDxUserLogin<string> src = source as IDxUserLogin<string>;
+        //    if (src != null)
+        //    {
+        //        this.LoginProvider = src.LoginProvider;
+        //        this.ProviderKey = src.ProviderKey;
+        //        this.User = Session.FindObject(typeof(XpoDxUser), XpoDxUser.Fields.Id == src.UserId) as XpoDxUser;
 
-            }
-        }
+        //    }
+        //}
 
         #region Embedded Fields class
         public new class FieldsClass : XpoDxBase.FieldsClass

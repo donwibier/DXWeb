@@ -18,16 +18,16 @@ namespace DX.Data.Xpo.Identity.Persistent
             this.Role = null;
             base.OnDeleting();
         }
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxRoleClaim<string> src = source as IDxRoleClaim<string>;
-            if (src != null)
-            {
-                this.Role = Session.GetObjectByKey(typeof(XpoDxRole), src.RoleId) as XpoDxRole;
-            }
+        //public override void Assign(object source, int loadingFlags)
+        //{
+        //    base.Assign(source, loadingFlags);
+        //    IDxRoleClaim<string> src = source as IDxRoleClaim<string>;
+        //    if (src != null)
+        //    {
+        //        this.Role = Session.GetObjectByKey(typeof(XpoDxRole), src.RoleId) as XpoDxRole;
+        //    }
 
-        }
+        //}
 
         // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:16 AM
         public new class FieldsClass : XpoDxBaseClaim.FieldsClass

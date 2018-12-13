@@ -8,12 +8,17 @@ namespace DX.Utils.Data
 {
 	public abstract class DataStore<TKey, TModel> : IDataStore<TKey, TModel>, IDisposable
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
+		where TModel : IDataStoreModel<TKey>		
 	{
 		public virtual Type KeyType => typeof(TKey);
 		public virtual Type ModelType => typeof(TModel);
 
 		public abstract TModel GetByKey(TKey key);
+		public async virtual Task<TModel> GetByKeyAsync(TKey key)
+		{
+			var result = await Task.FromResult(GetByKey(key));
+			return result;
+		}
 		protected abstract IEnumerable<TModel> Query();		
 
 		//public async virtual Task<IEnumerable<TModel>> QueryAsync()
@@ -22,56 +27,86 @@ namespace DX.Utils.Data
 		//	return result;
 		//}
 
-		public abstract void Create(IEnumerable<TModel> items);
+		public abstract IDataValidationResults<TKey> Create(IEnumerable<TModel> items);
 
-		public virtual void Create(TModel item)
+		public virtual IDataValidationResults<TKey> Create(TModel item)
 		{
-			Create(new TModel[] { item });
+			return Create(new TModel[] { item });
 		}
 
-		public async virtual Task CreateAsync(IEnumerable<TModel> items)
+		public async virtual Task<IDataValidationResults<TKey>> CreateAsync(IEnumerable<TModel> items)
 		{
-			await Task.Run(() => Create(items));
+			var result = await Task.FromResult(Create(items));
+			return result;
+			
 		}
-		public async virtual Task CreateAsync(TModel item)
+		public async virtual Task<IDataValidationResults<TKey>> CreateAsync(TModel item)
 		{
-			await CreateAsync(new TModel[] { item });
+			return await CreateAsync(new TModel[] { item });
 		}
-		public abstract void Update(IEnumerable<TModel> items);
-		public void Update(TKey id, TModel item)
+		public abstract IDataValidationResults<TKey> Update(IEnumerable<TModel> items);
+		public IDataValidationResults<TKey> Update(TKey id, TModel item)
 		{
 			item.ID = id;
-			Update(new TModel[] { item });
+			return Update(new TModel[] { item });
 		}
-		public async virtual Task UpdateAsync(IEnumerable<TModel> items)
+		public IDataValidationResults<TKey> Update(TModel item)
 		{
-			await Task.Run(() => Update(items));
+			return Update(new TModel[] { item });
 		}
-		public async virtual Task UpdateAsync(TKey id, TModel item)
+		public async virtual Task<IDataValidationResults<TKey>> UpdateAsync(IEnumerable<TModel> items)
 		{
-			await Task.Run(() => Update(id, item));
+			var result = await Task.FromResult(Update(items));
+			return result;			
 		}
-		public abstract void Delete(IEnumerable<TKey> ids);
-		public virtual void Delete(IEnumerable<TModel> items)
+		public async virtual Task<IDataValidationResults<TKey>> UpdateAsync(TKey id, TModel item)
 		{
-			Delete(from n in items select n.ID);
+			var result = await Task.FromResult(Update(id, item));
+			return result;			
 		}
-		public virtual void Delete(TKey id)
+		public async virtual Task<IDataValidationResults<TKey>> UpdateAsync(TModel item)
 		{
-			Delete(new TKey[] { id });
+			var result = await Task.FromResult(Update(item));
+			return result;			
 		}
-		public async virtual Task DeleteAsync(TKey id)
+		public abstract IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids);
+		public virtual IDataValidationResults<TKey> Delete(IEnumerable<TModel> items)
 		{
-			await Task.Run(() => Delete(id));
+			return Delete(from n in items select n.ID);
 		}
-		public async virtual Task DeleteAsync(IEnumerable<TKey> ids)
+		public virtual IDataValidationResults<TKey> Delete(TKey id)
 		{
-			await Task.Run(() => Delete(ids));
+			return Delete(new TKey[] { id });
 		}
-		public async virtual Task DeleteAsync(IEnumerable<TModel> items)
+		public async virtual Task<IDataValidationResults<TKey>> DeleteAsync(TKey id)
 		{
-			await Task.Run(() => Delete(items));
+			var result = await Task.FromResult(Delete(id));
+			return result;
 		}
+		public async virtual Task<IDataValidationResults<TKey>> DeleteAsync(IEnumerable<TKey> ids)
+		{
+			var result = await Task.FromResult(Delete(ids));
+			return result;
+		}
+		public async virtual Task<IDataValidationResults<TKey>> DeleteAsync(IEnumerable<TModel> items)
+		{
+			var result = await Task.FromResult(Delete(items));
+			return result;
+		}
+		public async virtual Task<IDataValidationResults<TKey>> DeleteAsync(TModel item)
+		{
+			var result = await Task.FromResult(Delete(new TModel[] { item }));
+			return result;
+		}
+
+		protected virtual void ThrowIfDisposed()
+		{
+			if (disposedValue)
+			{
+				throw new ObjectDisposedException(GetType().Name);
+			}
+		}
+
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls

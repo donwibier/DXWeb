@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils.Data;
 
 namespace DX.Data.Xpo.Identity
 {
@@ -13,17 +14,18 @@ namespace DX.Data.Xpo.Identity
 	 /// </summary>
 	 public class XPIdentityUserLogin : XPIdentityUserLogin<string, XpoDxUserLogin>, IDxUserLogin<string>
 	 {
-		  public XPIdentityUserLogin(XpoDxUserLogin source)
-				: base(source)
-		  {
+		  //public XPIdentityUserLogin(XpoDxUserLogin source)
+				//: base(source)
+		  //{
 				
-		  }
-		  public XPIdentityUserLogin(XpoDxUserLogin source, int loadingFlags)
-				: base(source, loadingFlags)
-		  {
+		  //}
+		  //public XPIdentityUserLogin(XpoDxUserLogin source, int loadingFlags)
+				//: base(source, loadingFlags)
+		  //{
 				
-		  }
+		  //}
 		  public XPIdentityUserLogin()
+			: base()
 		  {
 				
 		  }
@@ -34,26 +36,27 @@ namespace DX.Data.Xpo.Identity
 	 ///     Entity type for a user's login (i.e. facebook, google)
 	 /// </summary>
 	 /// <typeparam name="TKey"></typeparam>
-	 public abstract class XPIdentityUserLogin<TKey, TXPOLogin> : XpoDtoBaseEntity<TKey, TXPOLogin>, IDxUserLogin<TKey>
+	 public abstract class XPIdentityUserLogin<TKey, TXPOLogin> : IDataStoreModel<TKey>, IDxUserLogin<TKey>
 		  where TKey : IEquatable<TKey>
 		  where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
 	 {
-		  public XPIdentityUserLogin(TXPOLogin source)
-				: base(source)
-		  {
+		  //public XPIdentityUserLogin(TXPOLogin source)
+				//: base(source)
+		  //{
 				
-		  }
-		  public XPIdentityUserLogin(TXPOLogin source, int loadingFlags)
-				: base(source, loadingFlags)
-		  {
+		  //}
+		  //public XPIdentityUserLogin(TXPOLogin source, int loadingFlags)
+				//: base(source, loadingFlags)
+		  //{
 				
-		  }
+		  //}
 		  public XPIdentityUserLogin()
+			:base()
 		  {
 				
 		  }
 
-		  public override TKey Key { get { return Id; } }
+		  public virtual TKey ID { get => Id; set => Id = value; }
 		
 		  public virtual TKey Id { get; set; }
 
@@ -72,18 +75,18 @@ namespace DX.Data.Xpo.Identity
 		  /// </summary>
 		  public virtual string ProviderKey { get; set; }
 
-		public override void Assign(object source, int loadingFlags)
-		{
-			var src = CastSource(source);
-			if (src != null)
-			{
-				this.Id = src.Key;
-				this.UserId = src.UserId;
-				this.LoginProvider = src.LoginProvider;
-				this.ProviderKey = src.ProviderKey;
-			}
+		//public override void Assign(object source, int loadingFlags)
+		//{
+		//	var src = CastSource(source);
+		//	if (src != null)
+		//	{
+		//		this.Id = src.Key;
+		//		this.UserId = src.UserId;
+		//		this.LoginProvider = src.LoginProvider;
+		//		this.ProviderKey = src.ProviderKey;
+		//	}
 
-		}
+		//}
 	}
 
 

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils.Data;
 
 namespace DX.Data.Xpo.Identity
 {
@@ -15,17 +16,18 @@ namespace DX.Data.Xpo.Identity
 	 /// </summary>
 	 public class XPIdentityUserClaim : XPIdentityUserClaim<string, XpoDxUserClaim>
 	 {
-		  public XPIdentityUserClaim(XpoDxUserClaim source)
-				: base(source)
-		  {
+		  //public XPIdentityUserClaim(XpoDxUserClaim source)
+				//: base(source)
+		  //{
 				
-		  }
-		  public XPIdentityUserClaim(XpoDxUserClaim source, int loadingFlags)
-				: base(source, loadingFlags)
-		  {
+		  //}
+		  //public XPIdentityUserClaim(XpoDxUserClaim source, int loadingFlags)
+				//: base(source, loadingFlags)
+		  //{
 				
-		  }
+		  //}
 		  public XPIdentityUserClaim()
+			:base()
 		  {
 				
 		  }
@@ -35,32 +37,33 @@ namespace DX.Data.Xpo.Identity
 	///     EntityType that represents one specific user claim
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
-	public abstract class XPIdentityUserClaim<TKey, TXPOClaim> : XpoDtoBaseEntity<TKey, TXPOClaim>, IDxUserClaim<TKey>
+	public abstract class XPIdentityUserClaim<TKey, TXPOClaim> : IDataStoreModel<TKey>, IDxUserClaim<TKey>
 		 where TKey : IEquatable<TKey>
 		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
 	{
-		public XPIdentityUserClaim(TXPOClaim source)
-			  : base(source)
-		{
+		//public XPIdentityUserClaim(TXPOClaim source)
+		//	  : base(source)
+		//{
 
-		}
-		public XPIdentityUserClaim(TXPOClaim source, int loadingFlags)
-			  : base(source, loadingFlags)
-		{
+		//}
+		//public XPIdentityUserClaim(TXPOClaim source, int loadingFlags)
+		//	  : base(source, loadingFlags)
+		//{
 
-		}
+		//}
 		public XPIdentityUserClaim()
 		{
 
 		}
-		public override TKey Key { get { return Id; } }
+
+		public virtual TKey ID { get => Id; set => Id = value; }		
 		/// <summary>
 		///     Primary key
 		/// </summary>
 		public virtual TKey Id { get; set; }
 
 		/// <summary>
-		///     User Id for the user who owns this login
+		///     User Id for the user who owns this claim
 		/// </summary>
 		public virtual TKey UserId { get; set; }
 
@@ -74,17 +77,17 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public virtual string ClaimValue { get; set; }
 
-		public override void Assign(object source, int loadingFlags)
-		{
-			var src = CastSource(source);
-			if (src != null)
-			{
-				this.Id = src.Key;
-				this.UserId = src.UserId;
-				this.ClaimType = src.ClaimType;
-				this.ClaimValue = src.ClaimValue;
-			}
-		}
+		//public override void Assign(object source, int loadingFlags)
+		//{
+		//	var src = CastSource(source);
+		//	if (src != null)
+		//	{
+		//		this.Id = src.Key;
+		//		this.UserId = src.UserId;
+		//		this.ClaimType = src.ClaimType;
+		//		this.ClaimValue = src.ClaimValue;
+		//	}
+		//}
 
         public Claim ToClaim()
         {

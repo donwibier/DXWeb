@@ -9,7 +9,8 @@ using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
 using DX.Utils;
-#if(NETSTANDARD2_0)
+using DX.Utils.Data;
+#if (NETSTANDARD2_0)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -20,39 +21,40 @@ namespace DX.Data.Xpo.Identity
 {
     public class XPIdentityUser : XPIdentityUser<string, XpoDxUser>
     {
-        public XPIdentityUser(XpoDxUser source) :
-            base(source)
-        {
+        //public XPIdentityUser(XpoDxUser source) :
+        //    base(source)
+        //{
 
-        }
+        //}
 
-        public XPIdentityUser(XpoDxUser source, int loadingFlags) :
-            base(source, loadingFlags)
-        {
+        //public XPIdentityUser(XpoDxUser source, int loadingFlags) :
+        //    base(source, loadingFlags)
+        //{
 
-        }
+        //}
 
-        public XPIdentityUser() :
-            base()
-        {
+		public XPIdentityUser()
+			: base()
+		{
 
-        }
+		}
     }
 
     public class XPIdentityUser<TXPOUser>:XPIdentityUser<string, TXPOUser>
         where TXPOUser : XPBaseObject, IDxUser<string>
     {
-        public XPIdentityUser(TXPOUser source) : base(source)
-        {
+        //public XPIdentityUser(TXPOUser source) : base(source)
+        //{
 
-        }
+        //}
 
-        public XPIdentityUser(TXPOUser source, int loadingFlags) : base(source, loadingFlags)
-        {
+        //public XPIdentityUser(TXPOUser source, int loadingFlags) : base(source, loadingFlags)
+        //{
 
-        }
+        //}
 
         public XPIdentityUser()
+			:base()
         {
 
         }
@@ -61,16 +63,16 @@ namespace DX.Data.Xpo.Identity
 		 where TKey : IEquatable<TKey>
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>
 	{
-		public XPIdentityUser(TXPOUser source)
-			  : base(source)
-		{
+		//public XPIdentityUser(TXPOUser source)
+		//	  : base(source)
+		//{
 
-		}
-		public XPIdentityUser(TXPOUser source, int loadingFlags)
-			  : base(source, loadingFlags)
-		{
+		//}
+		//public XPIdentityUser(TXPOUser source, int loadingFlags)
+		//	  : base(source, loadingFlags)
+		//{
 
-		}
+		//}
 		public XPIdentityUser()
 			  : base()
 		{
@@ -86,30 +88,39 @@ namespace DX.Data.Xpo.Identity
 	/// <typeparam name="TLogin"></typeparam>
 	/// <typeparam name="TRole"></typeparam>
 	/// <typeparam name="TClaim"></typeparam>
-	public abstract class XPIdentityUser<TKey, TXPOUser, TLogin, TRole, TClaim> : XpoDtoBaseEntity<TKey, TXPOUser>, IUser<TKey>, IDxUser<TKey>
+	//public abstract class XPIdentityUser<TKey, TXPOUser, TLogin, TRole, TClaim> : XpoDtoBaseEntity<TKey, TXPOUser>, IUser<TKey>, IDxUser<TKey>
+	public abstract class XPIdentityUser<TKey, TXPOUser, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IDxUser<TKey> //, TXPOUser>, IUser<TKey>, IDxUser<TKey>
 		 where TKey : IEquatable<TKey>
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>
 		 where TRole : class
 		 where TLogin : class
 		 where TClaim : class		
 	{
-		public XPIdentityUser(TXPOUser source, int loadingFlags)
-			  : base(source, loadingFlags)
+		//public XPIdentityUser(TXPOUser source, int loadingFlags)
+		//	  : base(source, loadingFlags)
+		//{
+		//	Claims = new List<TClaim>();
+		//	Roles = new List<TRole>();
+		//	Logins = new List<TLogin>();
+		//}
+		//public XPIdentityUser(TXPOUser source)
+		//	  : this(source, 0)
+		//{
+
+		//}
+		//public XPIdentityUser()
+		//	  : this(null, 0)
+		//{
+		//}
+		public XPIdentityUser()
 		{
 			Claims = new List<TClaim>();
 			Roles = new List<TRole>();
 			Logins = new List<TLogin>();
-		}
-		public XPIdentityUser(TXPOUser source)
-			  : this(source, 0)
-		{
 
 		}
-		public XPIdentityUser()
-			  : this(null, 0)
-		{
-		}
-		public override TKey Key { get { return Id; } }
+
+		public TKey ID { get => Id; set => Id = value; }
 		/// <summary>
 		///     User ID (Primary Key)
 		/// </summary>
@@ -173,20 +184,23 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public virtual int AccessFailedCount { get; set; }
 
+		private ICollection<TRole> _Roles = new List<TRole>();
 		/// <summary>
 		///     Navigation property for user roles
 		/// </summary>
-		public virtual ICollection<TRole> Roles { get; protected set; }
+		public virtual ICollection<TRole> Roles { get => _Roles; set => _Roles = value; }
 
 		/// <summary>
 		///     Navigation property for user claims
 		/// </summary>
-		public virtual ICollection<TClaim> Claims { get; protected set; }
+		private ICollection<TClaim> _Claims = new List<TClaim>();
+		public virtual ICollection<TClaim> Claims { get => _Claims; set => _Claims = value; }
 
+		private ICollection<TLogin> _Logins = new List<TLogin>();
 		/// <summary>
 		///     Navigation property for user logins
 		/// </summary>
-		public virtual ICollection<TLogin> Logins { get; protected set; }
+		public virtual ICollection<TLogin> Logins { get=>_Logins; set=>_Logins = value; }
 
 		/// <summary>
 		///     Navigation property for user roles
@@ -204,46 +218,42 @@ namespace DX.Data.Xpo.Identity
 		public virtual IList LoginsList { get; protected set; }
 
 
-		public override void Assign(object source, int loadingFlags)
-		{
-			var src = CastSource(source);
-			if (src != null)
-			{
-				Id = src.Id;
-				UserName = src.UserName;
-				Email = src.Email;
-				EmailConfirmed = src.EmailConfirmed;
-				PasswordHash = src.PasswordHash;
-				SecurityStamp = src.SecurityStamp;
-				PhoneNumber = src.PhoneNumber;
-				PhoneNumberConfirmed = src.PhoneNumberConfirmed;
-				TwoFactorEnabled = src.TwoFactorEnabled;
-				LockoutEndDateUtc = src.LockoutEndDateUtc;
-				LockoutEnabled = src.LockoutEnabled;
-				AccessFailedCount = src.AccessFailedCount;
-#if (NETSTANDARD2_0)
-                this.NormalizedName = src.NormalizedName;
-                this.NormalizedEmail = src.NormalizedEmail;
-#endif
+//		public override void Assign(object source, int loadingFlags)
+//		{
+//			var src = CastSource(source);
+//			if (src != null)
+//			{
+//				Id = src.Id;
+//				UserName = src.UserName;
+//				Email = src.Email;
+//				EmailConfirmed = src.EmailConfirmed;
+//				PasswordHash = src.PasswordHash;
+//				SecurityStamp = src.SecurityStamp;
+//				PhoneNumber = src.PhoneNumber;
+//				PhoneNumberConfirmed = src.PhoneNumberConfirmed;
+//				TwoFactorEnabled = src.TwoFactorEnabled;
+//				LockoutEndDateUtc = src.LockoutEndDateUtc;
+//				LockoutEnabled = src.LockoutEnabled;
+//				AccessFailedCount = src.AccessFailedCount;
+//#if (NETSTANDARD2_0)
+//                this.NormalizedName = src.NormalizedName;
+//                this.NormalizedEmail = src.NormalizedEmail;
+//#endif
 
-                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
-				{
-					AssignRoles(src.RolesList);
-				}
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
-				{
-					AssignClaims(src.ClaimsList);
-				}
-				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
-				{
-					AssignLogins(src.LoginsList);
-				}
-			}
-		}
-
-
-
-
+//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
+//				{
+//					AssignRoles(src.RolesList);
+//				}
+//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
+//				{
+//					AssignClaims(src.ClaimsList);
+//				}
+//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
+//				{
+//					AssignLogins(src.LoginsList);
+//				}
+//			}
+//		}
 
 		public void AssignRoles(IList roles)
 		{

@@ -43,38 +43,38 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         public IList LoginsList { get { return Logins; } }
 
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            IDxUser<string> src = source as IDxUser<string>;
-            if (src != null)
-            {
-                this.UserName = src.UserName;
-                //this.UserNameUpper = src.UserNameUpper;
-                this.PasswordHash = src.PasswordHash;
-                this.SecurityStamp = src.SecurityStamp;
-                this.Email = src.Email;
-                //this.EmailUpper = src.EmailUpper;
-                this.EmailConfirmed = src.EmailConfirmed;
-                this.PhoneNumber = src.PhoneNumber;
-                this.PhoneNumberConfirmed = src.PhoneNumberConfirmed;
-                this.TwoFactorEnabled = src.TwoFactorEnabled;
-                this.LockoutEndDateUtc = src.LockoutEndDateUtc;
-                this.LockoutEnabled = src.LockoutEnabled;
-                this.AccessFailedCount = src.AccessFailedCount;
-#if (NETSTANDARD2_0)
-                this.NormalizedName = src.NormalizedName;
-                this.NormalizedEmail = src.NormalizedEmail;
-#endif
-                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
-                    AssignRoles(src.RolesList);
-                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
-                    AssignLogins(src.LoginsList);
-                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
-                    AssignClaims(src.ClaimsList);
-            }
+//        public override void Assign(object source, int loadingFlags)
+//        {
+//            base.Assign(source, loadingFlags);
+//            IDxUser<string> src = source as IDxUser<string>;
+//            if (src != null)
+//            {
+//                this.UserName = src.UserName;
+//                //this.UserNameUpper = src.UserNameUpper;
+//                this.PasswordHash = src.PasswordHash;
+//                this.SecurityStamp = src.SecurityStamp;
+//                this.Email = src.Email;
+//                //this.EmailUpper = src.EmailUpper;
+//                this.EmailConfirmed = src.EmailConfirmed;
+//                this.PhoneNumber = src.PhoneNumber;
+//                this.PhoneNumberConfirmed = src.PhoneNumberConfirmed;
+//                this.TwoFactorEnabled = src.TwoFactorEnabled;
+//                this.LockoutEndDateUtc = src.LockoutEndDateUtc;
+//                this.LockoutEnabled = src.LockoutEnabled;
+//                this.AccessFailedCount = src.AccessFailedCount;
+//#if (NETSTANDARD2_0)
+//                this.NormalizedName = src.NormalizedName;
+//                this.NormalizedEmail = src.NormalizedEmail;
+//#endif
+//                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
+//                    AssignRoles(src.RolesList);
+//                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
+//                    AssignLogins(src.LoginsList);
+//                if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
+//                    AssignClaims(src.ClaimsList);
+//            }
 
-        }
+//        }
         public void AssignRoles(IList roles)
         {
             if (roles == null)

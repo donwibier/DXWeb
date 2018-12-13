@@ -8,6 +8,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using DX.Data.Xpo.Identity.Persistent;
 using System.Threading;
+using DX.Utils.Data;
+using System.Configuration;
 #if (NETSTANDARD2_0)
 using Microsoft.AspNetCore.Identity;
 #else
@@ -16,11 +18,83 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-    public class XPUserStore<TUser> :
+	public class XPUserStoreValidator<TKey, TUser, TXPOUser> : XPDataValidator<TKey, TUser, TXPOUser>
+		where TKey : IEquatable<TKey>
+		where TUser : IDataStoreModel<TKey>
+		where TXPOUser : XPBaseObject, IDataStoreModel<TKey>
+	{
+		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = id
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = id
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Inserted(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = dbModel.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Inserting(TUser model, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Updated(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Updating(TUser model, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+	}
+
+
+	public class XPUserStore<TUser> :
 		XPUserStore<TUser, XpoDxUser>
 		 where TUser : XPIdentityUser<string, XpoDxUser>, IUser<string>, new()
 	{
-		public XPUserStore() { }
 
 		public XPUserStore(string connectionName) :
 			base(connectionName)
@@ -53,11 +127,6 @@ namespace DX.Data.Xpo.Identity
      where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
 #endif
     {
-        public XPUserStore() :
-			base()
-		{
-
-		}
 
 		public XPUserStore(string connectionName) :
 			base(connectionName)
@@ -78,7 +147,7 @@ namespace DX.Data.Xpo.Identity
 		}
 	}
 #if (NETSTANDARD2_0)
-    public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XpoStore<TXPOUser, TKey>,
+    public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,
          IUserLoginStore<TUser>,
          IUserClaimStore<TUser>,
          IUserRoleStore<TUser>,
@@ -100,7 +169,7 @@ namespace DX.Data.Xpo.Identity
          where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
          where TXPOToken: XPBaseObject, IDxUserToken<TKey>
 #else
-    public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XpoStore<TXPOUser, TKey>,
+    public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,
 		 IUserLoginStore<TUser, TKey>,
 		 IUserClaimStore<TUser, TKey>,
 		 IUserRoleStore<TUser, TKey>,
@@ -112,7 +181,7 @@ namespace DX.Data.Xpo.Identity
 		 IUserTwoFactorStore<TUser, TKey>,
 		 IUserLockoutStore<TUser, TKey>
 		 where TKey : IEquatable<TKey>
-		 where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>
+		 where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>, new()
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
 		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
@@ -120,32 +189,89 @@ namespace DX.Data.Xpo.Identity
 #endif
     {
 
-        public XPUserStore() :
-			base()
-		{
-
-		}
-
 		public XPUserStore(string connectionName) :
-			base(connectionName)
+			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
+		{
+		}
+		public XPUserStore(string connectionString, string name) :
+			this(new XpoDatabase(connectionString, name))
+		{
+		}
+
+		public XPUserStore(XpoDatabase db) : base(db, new XPUserStoreValidator<TKey, TUser, TXPOUser>())
 		{
 
 		}
 
-		public XPUserStore(string connectionString, string connectionName) :
-			base(connectionString, connectionName)
-		{
-
-		}
-
-		public XPUserStore(XpoDatabase database) :
-			base(database)
+		public XPUserStore(XpoDatabase db, XPDataValidator<TKey, TUser, TXPOUser> validator) : base(db, validator)
 		{
 
 		}
 
 
-    #region Generic Helper methods and members
+
+		protected override TXPOUser Assign(TUser source, TXPOUser destination)
+		{
+			//destination.Id = source.Id;
+			destination.UserName = source.UserName;
+			destination.Email = source.Email;
+			destination.EmailConfirmed = source.EmailConfirmed;
+			destination.PasswordHash = source.PasswordHash;
+			destination.SecurityStamp = source.SecurityStamp;
+			destination.PhoneNumber = source.PhoneNumber;
+			destination.PhoneNumberConfirmed = source.PhoneNumberConfirmed;
+			destination.TwoFactorEnabled = source.TwoFactorEnabled;
+			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
+			destination.LockoutEnabled = source.LockoutEnabled;
+			destination.AccessFailedCount = source.AccessFailedCount;
+#if (NETSTANDARD2_0)
+			                destination.NormalizedName = source.NormalizedName;
+			                destination.NormalizedEmail = source.NormalizedEmail;
+#endif
+			return destination;
+		}
+
+		protected override TUser Assign(TXPOUser source, TUser destination)
+		{
+			destination.Id = source.Id;
+			destination.UserName = source.UserName;
+			destination.Email = source.Email;
+			destination.EmailConfirmed = source.EmailConfirmed;
+			destination.PasswordHash = source.PasswordHash;
+			destination.SecurityStamp = source.SecurityStamp;
+			destination.PhoneNumber = source.PhoneNumber;
+			destination.PhoneNumberConfirmed = source.PhoneNumberConfirmed;
+			destination.TwoFactorEnabled = source.TwoFactorEnabled;
+			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
+			destination.LockoutEnabled = source.LockoutEnabled;
+			destination.AccessFailedCount = source.AccessFailedCount;
+#if (NETSTANDARD2_0)
+			                destination.NormalizedName = source.NormalizedName;
+			                destination.NormalizedEmail = source.NormalizedEmail;
+#endif
+			return destination;
+		}
+		protected override IQueryable<TXPOUser> Query(Session s)
+		{
+			var r = from n in s.Query<TXPOUser>()
+					select n;
+			return r;
+
+		}
+		protected override IEnumerable<TUser> Query()
+		{
+			var results = DB.Execute((db, w) =>
+			{
+				var r = Query(w).Select(CreateModelInstance);
+				return r.ToList();
+			});
+
+			return results;
+			;
+		}
+
+
+		#region Generic Helper methods and members
 		protected static Type XPOUserType { get { return typeof(TXPOUser); } }
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
 		protected static Type XPOLoginType { get { return typeof(TXPOLogin); } }
@@ -159,10 +285,10 @@ namespace DX.Data.Xpo.Identity
         protected static Type XPOTokenType { get { return typeof(TXPOToken); } }
         protected static TXPOToken XPOCreateToken(Session s) { return Activator.CreateInstance(typeof(TXPOToken), s) as TXPOToken; }
 #endif
-#endregion
+		#endregion
 
 
-#region IUserLoginStore<TUser, TKey>
+		#region IUserLoginStore<TUser, TKey>
 #if (NETSTANDARD2_0)
         public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
@@ -192,11 +318,11 @@ namespace DX.Data.Xpo.Identity
             if (String.IsNullOrEmpty(providerKey))
                 throw new ArgumentNullException("providerKey");
 
-            var result = await Task.FromResult(XPOExecute((db, wrk) =>
+            var result = await DB.ExecuteAsync((db, wrk) =>
             {
                 var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", loginProvider, providerKey));
                 return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
-            }));
+            });
             return result;
         }
 
@@ -330,8 +456,9 @@ namespace DX.Data.Xpo.Identity
             return result;
         }
 #endif
-      
-        public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login)
+
+
+		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login)
 		{
 			ThrowIfDisposed();
 			if (user == null)
@@ -343,7 +470,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("login");
 			}
 
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 				TXPOLogin xpoLogin = XPOCreateLogin(wrk);
 				xpoLogin.LoginProvider = login.LoginProvider;
@@ -355,7 +482,7 @@ namespace DX.Data.Xpo.Identity
                 else
                     throw new Exception($"User '{user.UserName}' could not be found in the database");
 				return 0;
-			}));
+			});
 		}
 
 		public async virtual Task<TUser> FindAsync(UserLoginInfo login)
@@ -365,11 +492,11 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException("login");
 			}
-			var result = await Task.FromResult(XPOExecute((db, s) =>
+			var result = await DB.ExecuteAsync((db, s) =>
 			{
 				var userLogin = s.FindObject(XPOLoginType, CriteriaOperator.Parse("(LoginProvider == ?) AND (ProviderKey == ?)", login.LoginProvider, login.ProviderKey)) as XPBaseObject;
 				return (userLogin == null) ? null : Activator.CreateInstance(typeof(TUser), userLogin.GetMemberValue("User"), DxIdentityUserFlags.FLAG_FULL) as TUser;
-			}));
+			});
             return result;
 		}
 
@@ -381,7 +508,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 
-			var result = await Task.FromResult(XPOExecute<IList<UserLoginInfo>>((db, wrk) =>
+			var result = await DB.ExecuteAsync<IList<UserLoginInfo>>((db, wrk) =>
 			{
 				var results = new List<UserLoginInfo>();
 				foreach (var r in new XPCollection(wrk, typeof(TXPOLogin), CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
@@ -394,7 +521,7 @@ namespace DX.Data.Xpo.Identity
 #endif
                 }
 				return results;
-			}, false));
+			}, false);
             return result;
 		}
 
@@ -409,16 +536,26 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException("login");
 			}
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			await DB.ExecuteAsync((db, wrk) =>
 			{
 				wrk.Delete(wrk.FindObject(typeof(TXPOLogin),
 						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND )ProviderKey == ?)",
 														 user.Id, login.LoginProvider, login.ProviderKey)));
-				return 0;
-			}));
+				//return 0;
+			});
 		}
 
-		public async virtual Task CreateAsync(TUser user)
+		//Task IUserStore<TUser, TKey>.CreateAsync(TUser user)
+		//{
+		//	throw new NotImplementedException();
+		//}
+
+		//Task IUserStore<TUser, TKey>.DeleteAsync(TUser user)
+		//{
+		//	throw new NotImplementedException();
+		//}
+
+		public new async virtual Task CreateAsync(TUser user)
 		{
 			ThrowIfDisposed();
 			if (user == null)
@@ -428,66 +565,84 @@ namespace DX.Data.Xpo.Identity
 			if (String.IsNullOrEmpty(user.UserName))
 				user.UserName = user.Email;
 
-            var result = await Task.FromResult(XPOExecute((db, wrk) => 
-            {
-                var xpoUser = XPOCreateUser(wrk);
+			var result = await base.CreateAsync(user);
 
-                xpoUser.Assign(user, DxIdentityUserFlags.FLAG_FULL);
-                wrk.CommitTransaction();
-                user.Assign(xpoUser, DxIdentityUserFlags.FLAG_FULL);
-                return 0;
-            }));
+
+			//await DB.ExecuteAsync((db, wrk) =>
+			//{
+			//	var xpoUser = XPOCreateUser(wrk);
+			//	Assign(user, xpoUser);				
+			//	wrk.CommitTransaction();
+			//	Assign(xpoUser, user);
+			//	return 0;
+			//});
 		}
 
 
-		public async virtual Task DeleteAsync(TUser user)
+		public new async virtual Task DeleteAsync(TUser user)
 		{
 			ThrowIfDisposed();
 			if (user == null)
 			{
 				throw new ArgumentNullException("user");
 			}
-
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
-			{
-				wrk.Delete(wrk.GetObjectByKey(XPOUserType, user.Id));
-				return 0;
-			}));
+			var result = await base.DeleteAsync(user.Id);
+			//await DB.ExecuteAsync((db, wrk) =>
+			//{
+			//	wrk.Delete(wrk.GetObjectByKey(XPOUserType, user.Id));
+	
+			//});
 		}
 
 		public async virtual Task<TUser> FindByIdAsync(object userId)
 		{
 			ThrowIfDisposed();
 
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-				var xpoUser = wrk.GetObjectByKey(XPOUserType, userId);
-				return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
-			}));
+
+				var xpoUser = wrk.GetObjectByKey(XPORoleType, userId);
+				if (xpoUser != null)
+				{
+					TUser r = new TUser();
+					Assign(xpoUser as TXPOUser, r);
+					return r;
+				}
+				return null;
+			});
             return result;
 		}
         public async virtual Task<TUser> FindByIdAsync(TKey userId)
         {
-            return await FindByIdAsync((object)userId);
+			ThrowIfDisposed();
+			var result = await base.GetByKeyAsync(userId);
+
+			return result;
         }
 
         public async virtual Task<TUser> FindByNameAsync(string userName)
 		{
 			ThrowIfDisposed();
 
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 #if (NETSTANDARD2_0)
                 var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("NormalizedName == ?", userName));
 #else
                 var xpoUser = wrk.FindObject(XPOUserType, XpoDxUser.Fields.UserNameUpper == userName.ToUpperInvariant());
 #endif
-                return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
-			}));
+				if (xpoUser != null)
+				{
+					TUser r = new TUser();
+					Assign(xpoUser as TXPOUser, r);
+					return r;
+				}
+				return null;
+			});
             return result;
 		}
 
-		public async virtual Task UpdateAsync(TUser user)
+		public new async virtual Task UpdateAsync(TUser user)
 		{
 			ThrowIfDisposed();
 			if (user == null)
@@ -495,16 +650,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 
-			var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
-			{
-				TXPOUser u = wrk.GetObjectByKey(XPOUserType, user.Id) as TXPOUser;
-				if (u != null)
-				{
-					u.Assign(user, DxIdentityUserFlags.FLAG_FULL);
-				}
-
-				return null;
-			}));
+			var result = await base.UpdateAsync(user);
 		}
 #endregion
 
@@ -533,7 +679,7 @@ namespace DX.Data.Xpo.Identity
                 throw new ArgumentNullException("claims");
             }
 
-            var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            await DB.ExecuteAsync((db, wrk) =>
             {
                 foreach (var claim in claims)
                 {
@@ -542,9 +688,7 @@ namespace DX.Data.Xpo.Identity
                     xpoClaim.ClaimType = claim.Type;
                     xpoClaim.ClaimValue = claim.Value;
                 }
-                return null;
-            }));
-            //return Task.FromResult(false);
+            });
         }
 
         public async virtual Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
@@ -552,7 +696,7 @@ namespace DX.Data.Xpo.Identity
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            await DB.ExecuteAsync((db, wrk) =>
             {
                 XPCollection xpoClaims = new XPCollection(typeof(XpoDxUserClaim),
                     CriteriaOperator.Parse("[User!Id] == ? AND ClaimValue == ? AND ClaimType == ?", 
@@ -566,10 +710,8 @@ namespace DX.Data.Xpo.Identity
                         xpoClaim.ClaimType = newClaim.Type;
                         xpoClaim.ClaimValue = newClaim.Value;
                     }
-                }
-                return null;
-            }));
-
+                }                
+            });
         }
 
         public async virtual Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
@@ -577,7 +719,7 @@ namespace DX.Data.Xpo.Identity
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
+            await DB.ExecuteAsync((db, wrk) =>
             {
                 foreach (var claim in claims)
                 {
@@ -593,9 +735,8 @@ namespace DX.Data.Xpo.Identity
                         }
                     }
                     wrk.Delete(xpoClaims);
-                }
-                return null;
-            }));
+                }                
+            });
         }
 
         public async virtual Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
@@ -607,7 +748,7 @@ namespace DX.Data.Xpo.Identity
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            var result = await Task.FromResult(XPOExecute<IList<TUser>>((db, wrk) =>
+            var result = await DB.ExecuteAsync((db, wrk) =>
             {
                 XPCollection list = new XPCollection(wrk, typeof(XpoDxUser),
                     XpoDxUser.Fields.Claims[
@@ -616,13 +757,12 @@ namespace DX.Data.Xpo.Identity
 
                 List<TUser> users = new List<TUser>();
                 foreach (var item in list)
-                {
-                    TUser usr = new TUser();
-                    usr.Assign(item, 0);
+                {                     
+					TUser usr = Assign(item as TXPOUser, new TUser() as TUser);
                     users.Add(usr);
                 }
                 return users;
-            }));
+            });
 
             return result;
         }
@@ -639,14 +779,13 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException("claim");
 			}
-			var result = await Task.FromResult(XPOExecute<object>((db, wrk) =>
+			await DB.ExecuteAsync((db, wrk) =>
 			{
 				var xpoClaim = XPOCreateClaim(wrk);
 				xpoClaim.SetMemberValue("User", wrk.GetObjectByKey(XPOUserType, user.Id));
 				xpoClaim.ClaimType = claim.Type;
-				xpoClaim.ClaimValue = claim.Value;
-				return null;
-			}));            
+				xpoClaim.ClaimValue = claim.Value;				
+			});            
 		}
 
 		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user)
@@ -656,7 +795,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException("user");
 			}
-			var result = await Task.FromResult(XPOExecute<IList<Claim>>((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 				var results = new List<Claim>();
 				foreach (var c in new XPCollection(wrk, XPOClaimType, CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
@@ -665,7 +804,7 @@ namespace DX.Data.Xpo.Identity
 					results.Add(new Claim(xpoClaim.ClaimType, xpoClaim.ClaimValue));
 				}
 				return results;
-			}, false));
+			}, false);
             return result;
 		}
 
@@ -680,13 +819,12 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException("claim");
 			}
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			await DB.ExecuteAsync((db, wrk) =>
 			{
 				wrk.Delete(new XPCollection(wrk, XPOClaimType,
 						 CriteriaOperator.Parse("([User!Key] == ?) AND (ClaimType == ?) AND (ClaimValue == ?)",
-						                            user.Id, claim.Type, claim.Value), null));
-				return 0;
-			}));
+						                            user.Id, claim.Type, claim.Value), null));				
+			});
 		}
 #endregion
 
@@ -742,20 +880,26 @@ namespace DX.Data.Xpo.Identity
 			}
 
 			string r = roleName.ToUpperInvariant();
-			var result = await Task.FromResult(XPOSelectAndUpdate(user.Id, u =>
+			await DB.ExecuteAsync((db, wrk) => 
 			{
+				var u = wrk.GetObjectByKey<TXPOUser>(user.Id);
+				if (u != null)
+				{
 #if (NETSTANDARD2_0)
-                var role = u.Session.FindObject(typeof(TXPORole),
-						 CriteriaOperator.Parse($"(NormalizedName == ?) AND (NOT Users[{KeyField} == ?])", roleName, u.Id)) as TXPORole;
+					var role = wrk.FindObject(typeof(TXPORole),
+						CriteriaOperator.Parse("(NormalizedName == ?) AND (NOT Users[ID == ?])", roleName, u.Id)) as TXPORole;
 #else
-                var role = u.Session.FindObject(typeof(TXPORole),
-						 CriteriaOperator.Parse($"(NameUpper == ?) AND (NOT Users[{KeyField} == ?])", r, u.Id)) as TXPORole;
+	                var role = u.Session.FindObject(typeof(TXPORole),
+						CriteriaOperator.Parse("(NameUpper == ?) AND (NOT Users[ID == ?])", r, u.Id)) as TXPORole;
 #endif
-                if (role == null)
-					throw new InvalidOperationException(String.Format("Role {0} was not found", roleName));
-				u.RolesList.Add(role);
-				return 0;
-			}, true));
+					if (role == null)
+						throw new InvalidOperationException(String.Format("Role {0} was not found", roleName));					
+					u.RolesList.Add(role);
+
+				}
+
+
+			}, true);
 		}
 
 		public async virtual Task<IList<string>> GetRolesAsync(TUser user)
@@ -766,18 +910,17 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 			var userId = user.Id;
-
-			var result = await Task.FromResult(XPOExecute<IList<string>>((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-				List<string> results = new List<string>();
+				List<string> r = new List<string>();
 				foreach (var role in new XPCollection(wrk, XPORoleType,
-						 CriteriaOperator.Parse($"Users[{KeyField} == ?]", userId),
+						 CriteriaOperator.Parse($"Users[ID == ?]", userId),
 						 new SortProperty("Name", SortingDirection.Ascending)))
 				{
-					results.Add(((TXPORole)role).Name);
+					r.Add(((TXPORole)role).Name);
 				}
-				return results;
-			}, false));
+				return r;
+			}, false);
             return result;
 		}
 
@@ -792,17 +935,17 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentException("roleName cannot be empty");
 			}
-			var result = await Task.FromResult(XPOExecute<bool>((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 #if (NETSTANDARD2_0)
                 var role = wrk.FindObject(typeof(TXPORole),
-						 CriteriaOperator.Parse($"(NormalizedName == ?) AND (Users[{KeyField} == ?])", roleName, user.Id)) as TXPORole;
+						 CriteriaOperator.Parse("(NormalizedName == ?) AND (Users[ID == ?])", roleName, user.Id)) as TXPORole;
 #else
                 var role = wrk.FindObject(typeof(TXPORole),
-						 CriteriaOperator.Parse($"(NameUpper == ?) AND (Users[{KeyField} == ?])", roleName.ToUpperInvariant(), user.Id)) as TXPORole;
+						 CriteriaOperator.Parse("(NameUpper == ?) AND (Users[ID == ?])", roleName.ToUpperInvariant(), user.Id)) as TXPORole;
 #endif
                 return (role != null);
-			}, false));
+			}, false);
             return result;
 		}
 
@@ -818,22 +961,22 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentException("role cannot be empty");
 			}
 
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-				var u = wrk.FindObject(typeof(TXPOUser), CriteriaOperator.Parse($"{KeyField} == ?", user.Id)) as TXPOUser;
+				var u = wrk.FindObject(typeof(TXPOUser), CriteriaOperator.Parse("ID == ?", user.Id)) as TXPOUser;
 				if (u == null)
 					throw new InvalidOperationException(String.Format("User '{0}' was not found", user.UserName));
 #if (NETSTANDARD2_0)
                 var role = wrk.FindObject(typeof(TXPORole),
-                         CriteriaOperator.Parse($"(NormalizedName == ?) AND (Users[{KeyField} == ?])", roleName, user.Id)) as TXPORole;
+                         CriteriaOperator.Parse("(NormalizedName == ?) AND (Users[ID == ?])", roleName, user.Id)) as TXPORole;
 #else
                 var role = wrk.FindObject(typeof(TXPORole),
-						 CriteriaOperator.Parse($"(NameUpper == ?) AND (Users[{KeyField} == ?])", roleName.ToUpperInvariant(), user.Id)) as TXPORole;
+						 CriteriaOperator.Parse("(NameUpper == ?) AND (Users[ID == ?])", roleName.ToUpperInvariant(), user.Id)) as TXPORole;
 #endif
                 if (role != null)
 					u.RolesList.Remove(role);
 				return 0;
-			}));
+			});
 		}
 #endregion
 
@@ -891,7 +1034,16 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 			user.PasswordHash = passwordHash;
-			var result = await Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.PasswordHash = user.PasswordHash, false));
+
+			await DB.ExecuteAsync((db, wrk) => {
+				var u = wrk.GetObjectByKey<TXPOUser>(user.Id) as TXPOUser;
+				if (u != null)
+				{
+					u.PasswordHash = passwordHash;
+				}
+			});
+
+			//var result = await Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.PasswordHash = user.PasswordHash, false));
         }
 #endregion
 
@@ -928,19 +1080,33 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("user");
 			}
 			user.SecurityStamp = stamp;
-			var result = await Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.SecurityStamp = user.SecurityStamp, false));
-		}
-#endregion
+			await DB.ExecuteAsync((db, wrk) => {
+				var u = wrk.GetObjectByKey<TXPOUser>(user.Id) as TXPOUser;
+				if (u != null)
+				{
+					u.SecurityStamp = stamp;
+				}
+			});
 
-#region IQueryableUserStore<TUser, TKey>
+			//var result = await Task.FromResult(XPOSelectAndUpdate(user.Id, u => u.SecurityStamp = user.SecurityStamp, false));
+		}
+		#endregion
+
+		#region IQueryableUserStore<TUser, TKey>
+		//protected virtual Func<TXPOUser, TUser> CreateUserInstance => (x) =>
+		//{
+		//	var result = Activator.CreateInstance(typeof(TUser), x) as TUser;
+		//	//result.Assign(x, 0);
+		//	return result;
+		//};
 		public virtual IQueryable<TUser> Users
 		{
 			get
 			{
-				XPQuery<TXPOUser> q = new XPQuery<TXPOUser>(GetSession());
-				var result = from u in q
-							 select Activator.CreateInstance(typeof(TUser), u as TXPOUser) as TUser;
-				return result;
+				//TODO: Might need to check this for memoryleak
+				var s = DB.GetSession();
+				var r = from n in Query(s) select Assign(n, new TUser());
+				return r;
 			}
 		}
 
@@ -1006,11 +1172,17 @@ namespace DX.Data.Xpo.Identity
 		{
 			ThrowIfDisposed();
 
-			var result = await Task.FromResult(XPOExecute((db, wrk) =>
+			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("EmailUpper == ?", email.ToUpperInvariant()));
-				return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
-			}));
+				if (xpoUser != null)
+				{
+					TUser r = Assign(xpoUser as TXPOUser, new TUser() as TUser);
+					return r;
+				}
+				return null;
+				//return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
+			});
             return result;
 		}
 
@@ -1301,12 +1473,14 @@ namespace DX.Data.Xpo.Identity
             user.LockoutEndDateUtc = lockoutEnd.UtcDateTime;            
             return Task.CompletedTask;
         }
-#endregion
+
+
+		#endregion
 
 #if (NETSTANDARD2_0)
         
 
-#region IUserAuthenticationTokenStore<TUser>
+		#region IUserAuthenticationTokenStore<TUser>
 
         protected virtual TXPOToken FindToken(Session wrk, TUser user, string loginProvider, string name, bool createIfNotFound = false)
         {
@@ -1340,12 +1514,12 @@ namespace DX.Data.Xpo.Identity
                 throw new ArgumentNullException(nameof(user));
             }
 
-            var result = await Task.FromResult(XPOExecute((db, wrk) =>
+            await DB.ExecuteAsync((db, wrk) =>
             {
                 var xpoToken = FindToken(wrk, user, loginProvider, name, true);
                 xpoToken.Value = value;
-                return 0;
-            }));
+            
+            });
         }
 
         public async virtual Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
@@ -1358,13 +1532,12 @@ namespace DX.Data.Xpo.Identity
                 throw new ArgumentNullException(nameof(user));
             }
 
-            var result = await Task.FromResult(XPOExecute((db, wrk) =>
+            await DB.ExecuteAsync((db, wrk) =>
             {
                 var xpoToken = FindToken(wrk, user, loginProvider, name, false);
                 if (xpoToken != null)
-                    wrk.Delete(xpoToken);
-                return 0;
-            }));
+                    wrk.Delete(xpoToken);                
+            });
 
         }
 
@@ -1377,16 +1550,16 @@ namespace DX.Data.Xpo.Identity
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            var result = await Task.FromResult(XPOExecute((db, wrk) =>
+            var result = await DB.ExecuteAsync((db, wrk) =>
             {
                 var xpoToken = FindToken(wrk, user, loginProvider, name, false);
                 return xpoToken?.Value;
-            }));
+            });
             return result;
         }
-#endregion
+		#endregion
 
-#region IUserAuthenticatorKeyStore<TUser>
+		#region IUserAuthenticatorKeyStore<TUser>
         private const string InternalLoginProvider = "[AspNetUserStore]";
         private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
         private const string RecoveryCodeTokenName = "RecoveryCodes";
@@ -1401,9 +1574,9 @@ namespace DX.Data.Xpo.Identity
             var result = await GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
             return result;
         }
-#endregion
+		#endregion
 
-#region IUserTwoFactorRecoveryCodeStore<TUser>
+		#region IUserTwoFactorRecoveryCodeStore<TUser>
         public virtual Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
         {
             var mergedCodes = string.Join(";", recoveryCodes);
@@ -1451,9 +1624,9 @@ namespace DX.Data.Xpo.Identity
             }
             return 0;
         }
-#endregion
+		#endregion
 
 #endif
-        //public void Crap() { }
-    }
+		//public void Crap() { }
+	}
 }

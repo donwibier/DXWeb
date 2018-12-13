@@ -3,15 +3,17 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+using DX.Utils.Data;
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxBase : IXPOKey<string>, IXPSimpleObject, IAssignable
+    public partial class XpoDxBase : IDataStoreModel<string>, IXPSimpleObject
     {
         public XpoDxBase(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
 
-        public string Key { get { return Id; } }
+        public virtual string ID { get => _Id; set => _Id = value; }
 
         protected override void OnSaving()
         {
@@ -23,16 +25,6 @@ namespace DX.Data.Xpo.Identity.Persistent
             _ModStampUTC = DateTime.UtcNow;
 
             base.OnSaving();
-        }
-
-        public virtual void Assign(object source, int loadingFlags)
-        {
-            IXPOKey<string> src = source as IXPOKey<string>;
-            if (src != null)
-            {
-                this._Id = src.Key;
-            }
-
         }
 
         #region Embedded Fields class

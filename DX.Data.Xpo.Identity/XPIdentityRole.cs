@@ -3,7 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-#if(NETSTANDARD2_0)
+using DX.Utils.Data;
+#if (NETSTANDARD2_0)
 
 #else
 using Microsoft.AspNet.Identity;
@@ -18,17 +19,18 @@ namespace DX.Data.Xpo.Identity
     public class XPIdentityRole : XPIdentityRole<string, XpoDxRole>
 #endif
     {
-        public XPIdentityRole(XpoDxRole source)
-			  : base(source)
-		{
+		//      public XPIdentityRole(XpoDxRole source)
+		//	  : base(source)
+		//{
 
-		}
-		public XPIdentityRole(XpoDxRole source, int loadingFlags)
-			  : base(source, loadingFlags)
-		{
+		//}
+		//public XPIdentityRole(XpoDxRole source, int loadingFlags)
+		//	  : base(source, loadingFlags)
+		//{
 
-		}
+		//}
 		public XPIdentityRole()
+			: base()
 		{
 
 		}
@@ -41,21 +43,26 @@ namespace DX.Data.Xpo.Identity
          where TXPORole : XPBaseObject, IDxRole<string>
 #endif
     {
-        public XPIdentityRole(TXPORole source, int loadingFlags) : base(source, loadingFlags)
-        {
+		public XPIdentityRole()
+			:base()
+		{
 
-        }
+		}
+		//public XPIdentityRole(TXPORole source, int loadingFlags) : base(source, loadingFlags)
+		//{
 
-        public XPIdentityRole(TXPORole source) : base(source)
-        {
+		//}
 
-        }
+		//public XPIdentityRole(TXPORole source) : base(source)
+		//{
 
-        public XPIdentityRole()
-        {
+		//}
 
-        }
-    }
+		//public XPIdentityRole()
+		//{
+
+		//}
+	}
         /// <summary>
         ///     Represents a Role entity
         /// </summary>
@@ -63,40 +70,47 @@ namespace DX.Data.Xpo.Identity
         /// <typeparam name="TUserRole"></typeparam>
 #if (NETSTANDARD2_0)
     public abstract class XPIdentityRole<TKey, TXPORole, TXPORoleClaim> 
-        : XpoDtoBaseEntity<TKey, TXPORole>, IRole<TKey>, IDxRole<TKey>
+        : IDataStoreModel<TKey>, IDxRole<TKey>
 		 where TKey : IEquatable<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>
          where TXPORoleClaim : XPBaseObject, IDxRoleClaim<TKey>
 #else
     public abstract class XPIdentityRole<TKey, TXPORole> 
-        : XpoDtoBaseEntity<TKey, TXPORole>, IRole<TKey>, IDxRole<TKey>
+        : IDataStoreModel<TKey>, IDxRole<TKey>
 		 where TKey : IEquatable<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>        
 #endif
     {
-        public XPIdentityRole(TXPORole source, int loadingFlags)
-			  : base(source, loadingFlags)
-		{
-			Users = new List<IDxUser<TKey>>();
-		}
+        //public XPIdentityRole(TXPORole source, int loadingFlags)
+		//	  : base(source, loadingFlags)
+		//{
+		//	Users = new List<IDxUser<TKey>>();
+		//}
 
-		public XPIdentityRole(TXPORole source)
-			  : this(source, 0)
-		{
+		//public XPIdentityRole(TXPORole source)
+		//	  : this(source, 0)
+		//{
 
-		}
-		public XPIdentityRole() :
-			  this(null, 0)
+		//}
+		//public XPIdentityRole() :
+		//	  this(null, 0)
+		//{
+
+		//}
+		public XPIdentityRole()
 		{
 
 		}
         /// <summary>
         ///     Navigation property for users in the role
         /// </summary>
-        public virtual ICollection<IDxUser<TKey>> Users { get; protected set; }
-		public virtual IList UsersList { get { return Users.ToList(); } }
+        //public virtual ICollection<IDxUser<TKey>> Users { get; protected set; }
 
-		public override TKey Key { get { return Id; } }
+		private List<IDxUser<TKey>> _UserList = new List<IDxUser<TKey>>();
+		public virtual IList UsersList { get => _UserList; }
+
+		//public TKey ID { get; set; }
+		public TKey ID { get => Id; set => Id = value; }
 
 		/// <summary>
 		///     Role id
@@ -116,17 +130,17 @@ namespace DX.Data.Xpo.Identity
             get { return typeof(TXPORoleClaim); }
         }
 #endif
-        public override void Assign(object source, int loadingFlags)
-		{
-			var src = CastSource(source);
-			if (src != null)
-			{
-				this.Id = src.Key;
-				this.Name = src.Name;
-#if (NETSTANDARD2_0)
-                this.NormalizedName = src.NormalizedName;
-#endif
-			}
-		}
+//        public override void Assign(object source, int loadingFlags)
+//		{
+//			var src = CastSource(source);
+//			if (src != null)
+//			{
+//				this.Id = src.Key;
+//				this.Name = src.Name;
+//#if (NETSTANDARD2_0)
+//                this.NormalizedName = src.NormalizedName;
+//#endif
+//			}
+//		}
 	}
 }
