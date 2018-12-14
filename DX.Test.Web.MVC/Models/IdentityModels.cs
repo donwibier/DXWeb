@@ -15,24 +15,24 @@ namespace DX.Test.Web.MVC.Models
 		{
 		}
 
-		public ApplicationUser(XpoApplicationUser source) : base(source)
-		{
-		}
+		//public ApplicationUser(XpoApplicationUser source) : base(source)
+		//{
+		//}
 
-		public ApplicationUser(XpoApplicationUser source, int loadingFlags) : base(source, loadingFlags)
-		{
-		}
-		public override void Assign(object source, int loadingFlags)
-		{
-			base.Assign(source, loadingFlags);
-			//XpoApplicationUser src = source as XpoApplicationUser;
-			//if (src != null)
-			//{
-			//	// additional properties here
-			//	this.PropertyA = src.PropertyA;
-			//	// etc.				
-			//}
-		}
+		//public ApplicationUser(XpoApplicationUser source, int loadingFlags) : base(source, loadingFlags)
+		//{
+		//}
+		//public override void Assign(object source, int loadingFlags)
+		//{
+		//	base.Assign(source, loadingFlags);
+		//	//XpoApplicationUser src = source as XpoApplicationUser;
+		//	//if (src != null)
+		//	//{
+		//	//	// additional properties here
+		//	//	this.PropertyA = src.PropertyA;
+		//	//	// etc.				
+		//	//}
+		//}
 
 		public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
@@ -51,17 +51,17 @@ namespace DX.Test.Web.MVC.Models
 		public XpoApplicationUser(Session session) : base(session)
 		{
 		}
-		public override void Assign(object source, int loadingFlags)
-		{
-			base.Assign(source, loadingFlags);
-			//ApplicationUser src = source as ApplicationUser;
-			//if (src != null)
-			//{
-			//	// additional properties here
-			//	this.PropertyA = src.PropertyA;
-			//	// etc.				
-			//}
-		}
+		//public override void Assign(object source, int loadingFlags)
+		//{
+		//	base.Assign(source, loadingFlags);
+		//	//ApplicationUser src = source as ApplicationUser;
+		//	//if (src != null)
+		//	//{
+		//	//	// additional properties here
+		//	//	this.PropertyA = src.PropertyA;
+		//	//	// etc.				
+		//	//}
+		//}
 	}
 
 	public class ApplicationDbContext
