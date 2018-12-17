@@ -4,6 +4,14 @@ using System.Threading.Tasks;
 
 namespace DX.Utils.Data
 {
+	public interface IAssignable
+	{
+		void Assign(object source);
+	}
+	//public interface IAssignable<TFrom>
+	//{
+	//	void Assign(TFrom source);
+	//}
 	public interface IDataStoreModel<TKey>
 		where TKey : IEquatable<TKey>
 	{
@@ -79,8 +87,8 @@ namespace DX.Utils.Data
 	public interface IDataValidationResults<TKey> 
 	where TKey : IEquatable<TKey>
 	{
-		IEnumerable<DataValidationResult<TKey>> Errors { get ; }
-		void Add(DataValidationResult<TKey> error);
+		IEnumerable<IDataValidationResult<TKey>> Errors { get ; }
+		void Add(IDataValidationResult<TKey> error);
 		void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code);
 
 		bool Success { get;}

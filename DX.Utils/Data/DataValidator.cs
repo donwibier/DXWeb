@@ -36,10 +36,10 @@ namespace DX.Utils.Data
 	public class DataValidationResults<TKey> :IDataValidationResults<TKey>
 		where TKey: IEquatable<TKey>
 	{		
-		private readonly List<DataValidationResult<TKey>> errors = new List<DataValidationResult<TKey>>();
+		private readonly List<IDataValidationResult<TKey>> errors = new List<IDataValidationResult<TKey>>();
 
-		public IEnumerable<DataValidationResult<TKey>> Errors { get => errors; }
-		public void Add(DataValidationResult<TKey> error)
+		public IEnumerable<IDataValidationResult<TKey>> Errors { get => errors; }
+		public void Add(IDataValidationResult<TKey> error)
 		{
 			errors.Add(error);
 

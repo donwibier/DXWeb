@@ -6,11 +6,76 @@ using System.Linq;
 
 namespace DX.Data.Xpo
 {
-	public abstract class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>
+	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
+		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = id
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = id
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Inserted(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Updated(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
+
+		public override IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults)
+		{
+			var result = new DataValidationResult<TKey>
+			{
+				ResultType = DataValidationResultType.Success,
+				ID = model.ID
+			};
+			validationResults.Add(result);
+			return result;
+		}
 	}
 
 	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>

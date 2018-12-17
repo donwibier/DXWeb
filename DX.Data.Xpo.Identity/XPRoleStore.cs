@@ -69,106 +69,36 @@ namespace DX.Data.Xpo.Identity
 	public class XPRoleStoreValidator<TKey, TRole, TXPORole> : XPDataValidator<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : IDataStoreModel<TKey>
-		where TXPORole : XPBaseObject, IDataStoreModel<TKey>
+		where TXPORole : XPBaseObject, IDataStoreModel<TKey>, IDxRole<TKey>
 	{
-		//public override bool Deleted(TXPORole model)
-		//{
-		//	return true;
-		//}
-
-		//public override bool Deleting(TXPORole model)
-		//{
-		//	int userCount = (int)Session.Evaluate(typeof(XpoDxUser),
-		//		CriteriaOperator.Parse("Count"),
-		//		CriteriaOperator.Parse("Roles[Id == ?]", this.Id));
-		//	if (userCount > 0)
-		//		throw new Exception(String.Format("Role '{0}' cannot be deleted because there are users in this Role", this.Name));
-		//	return true;
-		//}
-
-		//public override bool Inserted(TRole model, TXPORole dbModel)
-		//{
-		//	return true;
-		//}
-
-		//public override bool Inserting(TRole model)
-		//{
-		//	return true;
-		//}
-
-		//public override bool Updated(TRole model, TXPORole dbModel)
-		//{
-		//	return true;
-		//}
-
-		//public override bool Updating(TRole model)
-		//{
-		//	return true;
-		//}
-		public override IDataValidationResult<TKey> Deleted(TKey id, TXPORole dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey> {
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
+		
 		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
+			IDataValidationResult<TKey> result = null;
+			TXPORole role = arg as TXPORole;
+			if (role != null)
 			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
+				int userCount = (int)role.Session.Evaluate(typeof(XpoDxUser),
+					CriteriaOperator.Parse("Count"),
+					CriteriaOperator.Parse("Roles[Id == ?]", role.ID));
+				if (userCount > 0)
+					result = new DataValidationResult<TKey>
+					{
+						ResultType = DataValidationResultType.Error,
+						ID = role.ID,
+						Message = String.Format("Role '{0}' cannot be deleted because there are users in this Role", role.Name)
+					};
+			}
+
+			if (result == null)
+			{
+				result = base.Deleting(id, arg, validationResults);
+			}
 			validationResults.Add(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserted(TRole model, TXPORole dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Inserting(TRole model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Updated(TRole model, TXPORole dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Updating(TRole model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
+		
 	}
 
 

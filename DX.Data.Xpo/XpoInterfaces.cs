@@ -9,8 +9,5 @@ namespace DX.Data.Xpo
 	//	TKey Key { get; }
 	//}
 
-	//public interface IAssignable
-	//{
-	//	void Assign(object source, int loadingFlags);
-	//}
+	
 }
