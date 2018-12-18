@@ -8,30 +8,32 @@
 //------------------------------------------------------------------------------
 using System;
 using DevExpress.Xpo;
+using DevExpress.Xpo.Metadata;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    [Persistent(@"DXClaims")]
-    [MapInheritance(MapInheritanceType.OwnTable)]
-    public partial class XpoDxBaseClaim : XpoDxBase
-    {
-        string _ClaimType;
-        [Size(150)]
-        public string ClaimType
-        {
-            get { return _ClaimType; }
-            set { SetPropertyValue<string>("ClaimType", ref _ClaimType, value); }
-        }
-        string _ClaimValue;
-        [Size(150)]
-        public string ClaimValue
-        {
-            get { return _ClaimValue; }
-            set { SetPropertyValue<string>("ClaimValue", ref _ClaimValue, value); }
-        }
-    }
+	[Persistent(@"DXClaims")]
+	[MapInheritance(MapInheritanceType.OwnTable)]
+	public partial class XpoDxBaseClaim : XpoDxBase
+	{
+		string _ClaimType;
+		[Size(150)]
+		public string ClaimType
+		{
+			get { return _ClaimType; }
+			set { SetPropertyValue<string>("ClaimType", ref _ClaimType, value); }
+		}
+		string _ClaimValue;
+		[Size(150)]
+		public string ClaimValue
+		{
+			get { return _ClaimValue; }
+			set { SetPropertyValue<string>("ClaimValue", ref _ClaimValue, value); }
+		}
+	}
 
 }

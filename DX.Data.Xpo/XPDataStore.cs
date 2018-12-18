@@ -158,6 +158,7 @@ namespace DX.Data.Xpo
 						//ok = val.Inserted(item, newItem);
 						//if (!ok)
 						//	throw new Exception(String.Format("Validator failed on Inserted on '{0}'", XpoType.Name));
+						
 						w.FailedCommitTransaction += (s, e) =>
 						{
 							r.Add(new DataValidationResult<TKey>

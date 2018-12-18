@@ -8,28 +8,30 @@
 //------------------------------------------------------------------------------
 using System;
 using DevExpress.Xpo;
+using DevExpress.Xpo.Metadata;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    [Persistent(@"DXRoleClaims")]
-    [MapInheritance(MapInheritanceType.ParentTable)]
-    public partial class XpoDxRoleClaim : XpoDxBaseClaim
-    {
-        XpoDxRole _Role;
-        [Association(@"XpoDxRoleClaimReferencesXpoDxRole")]
-        public XpoDxRole Role
-        {
-            get { return _Role; }
-            set { SetPropertyValue<XpoDxRole>("Role", ref _Role, value); }
-        }
-        [PersistentAlias("[Role!Key]")]
-        public string RoleId
-        {
-            get { return (string)(EvaluateAlias("RoleId")); }
-        }
-    }
+	[Persistent(@"DXRoleClaims")]
+	[MapInheritance(MapInheritanceType.ParentTable)]
+	public partial class XpoDxRoleClaim : XpoDxBaseClaim
+	{
+		XpoDxRole _Role;
+		[Association(@"XpoDxRoleClaimReferencesXpoDxRole")]
+		public XpoDxRole Role
+		{
+			get { return _Role; }
+			set { SetPropertyValue<XpoDxRole>("Role", ref _Role, value); }
+		}
+		[PersistentAlias("[Role!Key]")]
+		public string RoleId
+		{
+			get { return (string)(EvaluateAlias("RoleId")); }
+		}
+	}
 
 }

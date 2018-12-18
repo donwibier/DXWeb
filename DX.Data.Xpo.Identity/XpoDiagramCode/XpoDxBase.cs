@@ -12,7 +12,7 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxBase(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-
+		[NonPersistent]
         public virtual string ID { get => _Id; set => _Id = value; }
 
         protected override void OnSaving()
