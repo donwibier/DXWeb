@@ -8,38 +8,40 @@
 //------------------------------------------------------------------------------
 using System;
 using DevExpress.Xpo;
+using DevExpress.Xpo.Metadata;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    [NonPersistent]
-    public partial class XpoDxBase : XPBaseObject
-    {
-        [Key]
-        [Size(50)]
-        [Persistent(@"Id")]
-        string _Id;
-        [PersistentAlias("_Id")]
-        public string Id
-        {
-            get { return _Id; }
-        }
-        [Persistent(@"AddStampUTC")]
-        DateTime _AddStampUTC;
-        [PersistentAlias("_AddStampUTC")]
-        public DateTime AddStampUTC
-        {
-            get { return _AddStampUTC; }
-        }
-        [Persistent(@"ModStampUTC")]
-        DateTime _ModStampUTC;
-        [PersistentAlias("_ModStampUTC")]
-        public DateTime ModStampUTC
-        {
-            get { return _ModStampUTC; }
-        }
-    }
+	[NonPersistent]
+	public partial class XpoDxBase : XPBaseObject
+	{
+		[Key]
+		[Size(50)]
+		[Persistent(@"Id")]
+		string _Id;
+		[PersistentAlias("_Id")]
+		public string Id
+		{
+			get { return _Id; }
+		}
+		[Persistent(@"AddStampUTC")]
+		DateTime _AddStampUTC;
+		[PersistentAlias("_AddStampUTC")]
+		public DateTime AddStampUTC
+		{
+			get { return _AddStampUTC; }
+		}
+		[Persistent(@"ModStampUTC")]
+		DateTime _ModStampUTC;
+		[PersistentAlias("_ModStampUTC")]
+		public DateTime ModStampUTC
+		{
+			get { return _ModStampUTC; }
+		}
+	}
 
 }

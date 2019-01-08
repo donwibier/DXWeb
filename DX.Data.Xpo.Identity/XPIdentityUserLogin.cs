@@ -56,7 +56,7 @@ namespace DX.Data.Xpo.Identity
 				
 		  }
 
-		  public virtual TKey ID { get => Id; set => Id = value; }
+		public virtual TKey ID { get => Id; set => Id = value; }
 		
 		  public virtual TKey Id { get; set; }
 

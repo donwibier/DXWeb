@@ -154,19 +154,29 @@ namespace DX.Data.Xpo
 						//TODO: Move to Validator Inserted
 						//newItem.AddStampUTC = DateTime.UtcNow;
 						//newItem.ModStampUTC = DateTime.UtcNow;
-						val?.Inserted(item, newItem, r);
+						
 						//ok = val.Inserted(item, newItem);
 						//if (!ok)
 						//	throw new Exception(String.Format("Validator failed on Inserted on '{0}'", XpoType.Name));
-						w.FailedCommitTransaction += (s, e) =>
+						//w.FailedCommitTransaction += (s, e) =>
+						//{
+							
+						//	e.Handled = true;
+						//};
+						try
+						{
+							w.CommitTransaction();
+							item.ID = newItem.ID;
+							val?.Inserted(item, newItem, r);
+						}
+						catch(Exception e)
 						{
 							r.Add(new DataValidationResult<TKey>
 							{
 								ResultType = DataValidationResultType.Error,
-								Message = e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message
+								Message = e.InnerException != null ? e.InnerException.Message : e.Message
 							});
-							e.Handled = true;
-						};
+						}
 					}
 					return r;
 				});
@@ -204,7 +214,21 @@ namespace DX.Data.Xpo
 						Assign(item, updatedItem);
 						// Move to Validator Updated
 						//updatedItem.ModStampUTC = DateTime.UtcNow;
-						val?.Updated(item, updatedItem, r);
+						
+						try
+						{
+							w.CommitTransaction();
+							//item.ID = updatedItem.ID;
+							val?.Updated(item, updatedItem, r);
+						}
+						catch (Exception e)
+						{
+							r.Add(new DataValidationResult<TKey>
+							{
+								ResultType = DataValidationResultType.Error,
+								Message = e.InnerException != null ? e.InnerException.Message : e.Message
+							});
+						}
 					}
 					return r;
 				});
