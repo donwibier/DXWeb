@@ -38,7 +38,7 @@ namespace DX.Utils.Data
 	{		
 		private readonly List<IDataValidationResult<TKey>> errors = new List<IDataValidationResult<TKey>>();
 
-		public IEnumerable<IDataValidationResult<TKey>> Errors { get => errors; }
+		public IEnumerable<IDataValidationResult<TKey>> Results { get => errors; }
 		public void Add(IDataValidationResult<TKey> error)
 		{
 			errors.Add(error);

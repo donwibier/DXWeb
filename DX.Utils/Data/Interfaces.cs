@@ -87,7 +87,7 @@ namespace DX.Utils.Data
 	public interface IDataValidationResults<TKey> 
 	where TKey : IEquatable<TKey>
 	{
-		IEnumerable<IDataValidationResult<TKey>> Errors { get ; }
+		IEnumerable<IDataValidationResult<TKey>> Results { get ; }
 		void Add(IDataValidationResult<TKey> error);
 		void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code);
 
