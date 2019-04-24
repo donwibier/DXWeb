@@ -38,7 +38,7 @@ namespace DX.Data.Xpo
 			var result = new DataValidationResult<TKey>
 			{
 				ResultType = DataValidationResultType.Success,
-				ID = model.ID
+				ID = dbModel.ID
 			};
 			validationResults.Add(result);
 			return result;
@@ -60,7 +60,7 @@ namespace DX.Data.Xpo
 			var result = new DataValidationResult<TKey>
 			{
 				ResultType = DataValidationResultType.Success,
-				ID = model.ID
+				ID = dbModel.ID
 			};
 			validationResults.Add(result);
 			return result;
@@ -135,60 +135,65 @@ namespace DX.Data.Xpo
 		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
 		{
 			if (items == null)
-				throw new ArgumentNullException("items");			
+				throw new ArgumentNullException("items");
+
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
-			try
+
+			result = xpo.Execute((db, w) =>
 			{
-				result = xpo.Execute((db, w) =>
+				// need to keep the xpo entities together with the model items so we can update 
+				// the id's of the models afterwards.
+				Dictionary<TXPOClass, TModel> batchPairs = new Dictionary<TXPOClass, TModel>();
+
+				var r = new DataValidationResults<TKey>();
+				foreach (var item in items)
 				{
-					var r = new DataValidationResults<TKey>();
-					foreach (var item in items)
-					{						
-						val?.Inserting(item, r);
-
-						//bool ok = val.Inserting(item);
-						//if (!ok)
-						//	throw new Exception(String.Format("Validator failed on Inserting on '{0}'", XpoType.Name));
-
-						var newItem = Assign(item, Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
-						//TODO: Move to Validator Inserted
-						//newItem.AddStampUTC = DateTime.UtcNow;
-						//newItem.ModStampUTC = DateTime.UtcNow;
-						
-						//ok = val.Inserted(item, newItem);
-						//if (!ok)
-						//	throw new Exception(String.Format("Validator failed on Inserted on '{0}'", XpoType.Name));
-						//w.FailedCommitTransaction += (s, e) =>
-						//{
-							
-						//	e.Handled = true;
-						//};
-						try
-						{
-							w.CommitTransaction();
-							item.ID = newItem.ID;
-							val?.Inserted(item, newItem, r);
-						}
-						catch(Exception e)
-						{
-							r.Add(new DataValidationResult<TKey>
-							{
-								ResultType = DataValidationResultType.Error,
-								Message = e.InnerException != null ? e.InnerException.Message : e.Message
-							});
-						}
+					var canInsert = val?.Inserting(item, r);
+					if (canInsert.ResultType == DataValidationResultType.Error)
+					{
+						w.RollbackTransaction();
+						r.Add(canInsert);
+						break;
 					}
-					return r;
-				});
-			}
-			catch (Exception ex)
-			{
-				result.Add(new DataValidationResult<TKey>
+
+					TXPOClass newItem = Assign(item, Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
+					batchPairs.Add(newItem, item);
+
+					var hasInserted = val?.Inserted(item, newItem, r);
+					if (hasInserted.ResultType == DataValidationResultType.Error)
+					{
+						w.RollbackTransaction();
+						r.Add(hasInserted);
+						break; 
+					}
+				}
+
+				try
 				{
-					ResultType = DataValidationResultType.Error,
-					Message = ex.InnerException != null ? ex.InnerException.Message : ex.Message
-				});
-			}
+					w.ObjectSaved += (s, e) => {
+						// sync the model ids with the newly generated xpo id's
+						var xpoItem = e.Object as TXPOClass;
+						if (xpoItem != null && batchPairs.ContainsKey(xpoItem))
+						{
+							//var model = batchPairs[xpoItem];
+							batchPairs[xpoItem].ID = xpoItem.ID;
+						}
+					};
+					w.CommitTransaction();
+					
+				}
+				catch (Exception e)
+				{
+					w.RollbackTransaction();
+					r.Add(new DataValidationResult<TKey>
+					{
+						ResultType = DataValidationResultType.Error,
+						Message = e.InnerException != null ? e.InnerException.Message : e.Message
+					});
+				}
+				return r;
+			});
+
 			return result;
 		}
 
@@ -198,49 +203,52 @@ namespace DX.Data.Xpo
 				throw new ArgumentNullException("items");
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
-			try
+			result = xpo.Execute((db, w) =>
 			{
-				result = xpo.Execute((db, w) =>
+				var r = new DataValidationResults<TKey>();
+				foreach (var item in items)
 				{
-					var r = new DataValidationResults<TKey>();
-					foreach (var item in items)
+					var canUpdate = val?.Updating(item, r);
+					if (canUpdate.ResultType == DataValidationResultType.Error)
 					{
-						val?.Updating(item, r);
-
-						var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
-						if (updatedItem == null)
-							r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
-
-						Assign(item, updatedItem);
-						// Move to Validator Updated
-						//updatedItem.ModStampUTC = DateTime.UtcNow;
-						
-						try
-						{
-							w.CommitTransaction();
-							//item.ID = updatedItem.ID;
-							val?.Updated(item, updatedItem, r);
-						}
-						catch (Exception e)
-						{
-							r.Add(new DataValidationResult<TKey>
-							{
-								ResultType = DataValidationResultType.Error,
-								Message = e.InnerException != null ? e.InnerException.Message : e.Message
-							});
-						}
+						w.RollbackTransaction();
+						r.Add(canUpdate);
+						break;
 					}
-					return r;
-				});
-			}
-			catch (Exception ex)
-			{
-				result.Add(new DataValidationResult<TKey>
+
+					var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
+					if (updatedItem == null)
+					{
+						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
+						break;
+					}
+
+					Assign(item, updatedItem);
+
+					var hasUpdated = val?.Updated(item, updatedItem, r);
+					if (hasUpdated.ResultType == DataValidationResultType.Error)
+					{
+						w.RollbackTransaction();
+						r.Add(hasUpdated);
+						break;
+					}
+				}
+				try
 				{
-					ResultType = DataValidationResultType.Error,
-					Message = ex.InnerException != null ? ex.InnerException.Message : ex.Message
-				});
-			}
+					w.CommitTransaction();
+				}
+				catch (Exception e)
+				{
+					w.RollbackTransaction();
+					r.Add(new DataValidationResult<TKey>
+					{
+						ResultType = DataValidationResultType.Error,
+						Message = e.InnerException != null ? e.InnerException.Message : e.Message
+					});
+				}
+				return r;
+			});
+
 			return result;
 		}
 
@@ -254,11 +262,39 @@ namespace DX.Data.Xpo
 
 					var item = w.GetObjectByKey<TXPOClass>(id);
 					if (item == null)
+					{
 						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
-
-					val.Deleting(id, item, r);
+						break;
+					}
+					var canDelete = val?.Deleting(id, item, r);
+					if (canDelete.ResultType == DataValidationResultType.Error)
+					{
+						w.RollbackTransaction();
+						r.Add(canDelete);
+						break;
+					}
+					
 					item.Delete();
-					val.Deleted(id, item, r);
+					//val.Deleted(id, item, r);
+					var hasDeleted = val?.Deleted(id, item, r);
+					if (hasDeleted.ResultType == DataValidationResultType.Error)
+					{
+						w.RollbackTransaction();
+						r.Add(hasDeleted);
+						break; // throw new Exception(hasInserted.Message);
+					}
+				}
+				try
+				{
+					w.CommitTransaction();
+				}
+				catch (Exception e)
+				{
+					r.Add(new DataValidationResult<TKey>
+					{
+						ResultType = DataValidationResultType.Error,
+						Message = e.InnerException != null ? e.InnerException.Message : e.Message
+					});
 				}
 				return r;
 			});

@@ -118,9 +118,13 @@ namespace DX.Data.Xpo.Mvc
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				return Query(w)
+				var r = Query(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
-					.UniqueValuesForField(PrepareProperty(e.FieldName));
+					/*.UniqueValuesForField(PrepareProperty(e.FieldName)) */
+					.UniqueValuesForField(PrepareProperty(e.FieldName)) as IQueryable<TXPOClass>;
+
+				return (from n in r select n).ToList();
+				//return r;
 			});
 			e.Data = result;
 		}
@@ -128,10 +132,11 @@ namespace DX.Data.Xpo.Mvc
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				return Query(w)
+				var r =  Query(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.GetGroupInfo(PrepareProperty(e.FieldName), e.SortOrder);
+				return r.ToList();
 			});
 			e.Data = result;
 		}
@@ -193,7 +198,7 @@ namespace DX.Data.Xpo.Mvc
 			{
 				e.RowValues = DB.Execute((db, w) => {
 					var r = Query(w).Where(c => e.KeyValues.Contains(c.ID)).Select(CreateModelInstance);
-					return r;
+					return r.ToList();
 				});
 			}
 		}
