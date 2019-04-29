@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		18.1.4.5: Smaller changes and fixes on Validation results and handling
 		18.1.4.4: Refactorings to improve speed and support for Pageable (XP)DataStore
 		18.1.4.3: Abstract Generic DTO XPDataStore and XPValidator classes added
 		18.1.4.2: Better exception message on invalid connection string
