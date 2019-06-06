@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>18.1.4.5</Version>
-    <FileVersion>18.1.4.5</FileVersion>
+    <Version>18.2.3.6</Version>
+    <FileVersion>18.2.3.6</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		18.2.3.6: Small optimisations and upgrade to DevExpress v18.2.3
 		18.1.4.4: Refactorings to improve speed and support for Pageable (XP)DataStore
 		18.1.4.3: Abstract Generic DTO XPDataStore and XPValidator classes added
 		18.1.4.2: Better exception message on invalid connection string

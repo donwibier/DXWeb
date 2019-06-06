@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>18.1.4.3</Version>
-    <FileVersion>18.1.4.3</FileVersion>
+    <Version>18.2.3.4</Version>
+    <FileVersion>18.2.3.4</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		18.2.3.4: Upgrade to DevExpress v18.2.3 
 		18.1.4.3: BREAKING CHANGE ON EXISTING DATA: Rename table XpoDxUserToken in your db to DXUserTokens !!
 		18.1.4.2: XPUserStore FindByIdAsync(TKey userId) didn't call FindByIdAsync(object userId) because of invalid cast for .NET Framework
 		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.

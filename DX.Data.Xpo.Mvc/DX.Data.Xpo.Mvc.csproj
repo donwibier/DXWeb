@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>18.1.4.4</Version>
-		<FileVersion>18.1.4.4</FileVersion>
+		<Version>18.2.3.5</Version>
+		<FileVersion>18.1.4.5</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -17,6 +17,7 @@
 	  <PackageReleaseNotes>18.1.4.3: XPPagedDatastore implementation for advanced databinding on the DevExpress GridView</PackageReleaseNotes>
 	  <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	  <PackageReleaseNotes>
+		  18.2.3.5: Upgrade do DevExpress v18.2.3
 		  18.1.4.1: XPPagedDataStore class implemented
 	  </PackageReleaseNotes>
 	  <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>

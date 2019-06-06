@@ -193,7 +193,7 @@ namespace DX.Data.Xpo.Mvc
 			{
 				e.RowValues = DB.Execute((db, w) => {
 					var r = Query(w).Where(c => e.KeyValues.Contains(c.ID)).Select(CreateModelInstance);
-					return r;
+					return r.ToList();
 				});
 			}
 		}
