@@ -114,4 +114,13 @@ namespace DX.Utils.Data
 		IDataValidationResult<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 	}
 
+	public interface IDataMapper<TKey, TModel, TDBModel>
+		where TKey : IEquatable<TKey>
+		where TModel : IDataStoreModel<TKey>
+		where TDBModel : class, IDataStoreModel<TKey>
+	{
+		Func<TDBModel, TModel> CreateModel { get; }
+		TDBModel Assign(TModel source, TDBModel destination);
+		string Map(string sourceField);
+	}
 }

@@ -64,9 +64,13 @@ namespace DX.Data.Xpo.Identity
     public interface IDxRole<TKey> : IDataStoreModel<TKey>, IRole<TKey>
         where TKey : IEquatable<TKey>
     {
-        //Id
-        //Name
-        IList UsersList { get; }
+//        TKey Id { get; set; }
+//        string Name { get; set; }
+
+//#if (NETSTANDARD2_0)
+//		string NormalizedName { get; set; }
+//#endif
+//		IList UsersList { get; }
     }
 
     public interface IDxUserLogin<TKey> : IDataStoreModel<TKey>

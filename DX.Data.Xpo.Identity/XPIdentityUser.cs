@@ -19,20 +19,8 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPIdentityUser : XPIdentityUser<string, XpoDxUser>
+	public class XPIdentityUser : XPIdentityUser<string>
 	{
-		//public XPIdentityUser(XpoDxUser source) :
-		//    base(source)
-		//{
-
-		//}
-
-		//public XPIdentityUser(XpoDxUser source, int loadingFlags) :
-		//    base(source, loadingFlags)
-		//{
-
-		//}
-
 		public XPIdentityUser()
 			: base()
 		{
@@ -40,39 +28,11 @@ namespace DX.Data.Xpo.Identity
 		}
 	}
 
-	public class XPIdentityUser<TXPOUser>:XPIdentityUser<string, TXPOUser>
-		where TXPOUser : XPBaseObject, IDxUser<string>
-	{
-		//public XPIdentityUser(TXPOUser source) : base(source)
-		//{
-
-		//}
-
-		//public XPIdentityUser(TXPOUser source, int loadingFlags) : base(source, loadingFlags)
-		//{
-
-		//}
-
-		public XPIdentityUser()
-			:base()
-		{
-
-		}
-	}
-	public class XPIdentityUser<TKey, TXPOUser> : XPIdentityUser<TKey, TXPOUser, XPIdentityUserLogin, XPIdentityRole, XPIdentityUserClaim>
+	public class XPIdentityUser<TKey> : XPIdentityUser<TKey, XPIdentityUserLogin, XPIdentityRole, XPIdentityUserClaim>
 		 where TKey : IEquatable<TKey>
-		 where TXPOUser : XPBaseObject, IDxUser<TKey>
+		 
 	{
-		//public XPIdentityUser(TXPOUser source)
-		//	  : base(source)
-		//{
 
-		//}
-		//public XPIdentityUser(TXPOUser source, int loadingFlags)
-		//	  : base(source, loadingFlags)
-		//{
-
-		//}
 		public XPIdentityUser()
 			  : base()
 		{
@@ -88,30 +48,12 @@ namespace DX.Data.Xpo.Identity
 	/// <typeparam name="TLogin"></typeparam>
 	/// <typeparam name="TRole"></typeparam>
 	/// <typeparam name="TClaim"></typeparam>
-	//public abstract class XPIdentityUser<TKey, TXPOUser, TLogin, TRole, TClaim> : XpoDtoBaseEntity<TKey, TXPOUser>, IUser<TKey>, IDxUser<TKey>
-	public abstract class XPIdentityUser<TKey, TXPOUser, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IDxUser<TKey> //, TXPOUser>, IUser<TKey>, IDxUser<TKey>
-		 where TKey : IEquatable<TKey>
-		 where TXPOUser : XPBaseObject, IDxUser<TKey>
+	public class XPIdentityUser<TKey, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IDxUser<TKey> 
+		 where TKey : IEquatable<TKey>		 
 		 where TRole : class
 		 where TLogin : class
 		 where TClaim : class		
 	{
-		//public XPIdentityUser(TXPOUser source, int loadingFlags)
-		//	  : base(source, loadingFlags)
-		//{
-		//	Claims = new List<TClaim>();
-		//	Roles = new List<TRole>();
-		//	Logins = new List<TLogin>();
-		//}
-		//public XPIdentityUser(TXPOUser source)
-		//	  : this(source, 0)
-		//{
-
-		//}
-		//public XPIdentityUser()
-		//	  : this(null, 0)
-		//{
-		//}
 		public XPIdentityUser()
 		{
 			Claims = new List<TClaim>();

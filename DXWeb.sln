@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29001.49
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Utils", "DX.Utils\DX.Utils.csproj", "{B1B46D04-F431-43E6-B06C-D78F70D73DC3}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Test.Web.MVC", "DX.Test.Web.MVC\DX.Test.Web.MVC.csproj", "{54DA526C-F036-4892-8209-E6AF7EB00AF0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Mvc", "DX.Data.Xpo.Mvc\DX.Data.Xpo.Mvc.csproj", "{7FB29A1D-64E9-4B58-A40D-F455097500DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Projects", "Test Projects", "{C779871D-BAC2-4997-A06F-8B8EC5265091}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3CE1EC26-90CE-4A43-A835-759BD60937E4} = {C779871D-BAC2-4997-A06F-8B8EC5265091}
+		{54DA526C-F036-4892-8209-E6AF7EB00AF0} = {C779871D-BAC2-4997-A06F-8B8EC5265091}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {30AFBBD3-FE5B-48CA-BAB2-94646300AE21}

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity;
@@ -62,6 +63,22 @@ namespace DX.Test.Web.MVC.Models
 		//	//	// etc.				
 		//	//}
 		//}
+	}
+
+	public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	{
+		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+		{
+			var result = base.Assign(source, destination);
+			return result;
+		}
+
+		public override string Map(string sourceField)
+		{
+			return base.Map(sourceField);
+		}
+
+		public override Func<XpoApplicationUser, ApplicationUser> CreateModel => base.CreateModel;
 	}
 
 	public class ApplicationDbContext

@@ -18,82 +18,9 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPUserStoreValidator<TKey, TUser, TXPOUser> : XPDataValidator<TKey, TUser, TXPOUser>
-		where TKey : IEquatable<TKey>
-		where TUser : IDataStoreModel<TKey>
-		where TXPOUser : XPBaseObject, IDataStoreModel<TKey>
-	{
-		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
-			return result;
-		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Inserted(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Inserting(TUser model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Updated(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-
-		public override IDataValidationResult<TKey> Updating(TUser model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
-			return result;
-		}
-	}
-
-
-	public class XPUserStore<TUser> :
-		XPUserStore<TUser, XpoDxUser>
-		 where TUser : XPIdentityUser<string, XpoDxUser>, IUser<string>, new()
+	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
+		 where TUser : class, IDxUser<string>, new()
 	{
 
 		public XPUserStore(string connectionName) :
@@ -114,17 +41,13 @@ namespace DX.Data.Xpo.Identity
 		}
 	}
 #if (NETSTANDARD2_0)
-	public class XPUserStore<TUser, TXPOUser> :
-	 XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken>,
-	 IUserStore<TUser>
-	 where TUser : XPIdentityUser<string, TXPOUser>, IUser<string>, new()
-	 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken>
+		 where TUser : IDxUser<string>, new()
+		 where TXPOUser : XpoDxUser, IDxUser<string>
 #else
-	public class XPUserStore<TUser, TXPOUser> :
-	 XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
-	 IUserStore<TUser>
-	 where TUser : XPIdentityUser<string, TXPOUser>, IUser<string>, new()
-	 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>		 
+		 where TUser :  class, IDxUser<string>, new()
+		 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
 #endif
 	{
 
@@ -135,16 +58,34 @@ namespace DX.Data.Xpo.Identity
 		}
 
 		public XPUserStore(string connectionString, string connectionName) :
-			base(connectionString, connectionName)
+			base(connectionString, connectionName )
+		{
+
+		}
+
+		public XPUserStore(string connectionString, string connectionName, XPUserMapper<TUser, TXPOUser> mapper, XPUserStoreValidator<string, TUser, TXPOUser> validator) :
+			base(connectionString, connectionName, mapper, validator)
 		{
 
 		}
 
 		public XPUserStore(XpoDatabase database) :
-			base(database)
+			base(database, new XPUserMapper<TUser, TXPOUser>(), new XPUserStoreValidator<string, TUser, TXPOUser>())
 		{
 
 		}
+		public XPUserStore(XpoDatabase database, XPUserMapper<TUser, TXPOUser> mapper, XPUserStoreValidator<string, TUser, TXPOUser> validator) :
+			base(database, mapper, validator)
+		{
+
+		}
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper)
+			: base(db, mapper, new XPUserStoreValidator<string, TUser, TXPOUser>())
+		{
+
+		}
+
+
 	}
 #if (NETSTANDARD2_0)
 	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,
@@ -162,7 +103,7 @@ namespace DX.Data.Xpo.Identity
 		 IUserAuthenticatorKeyStore<TUser>,
 		 IUserTwoFactorRecoveryCodeStore<TUser>
 		 where TKey : IEquatable<TKey>
-		 where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>, new()
+		 where TUser : class, IDxUser<TKey>, new()
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
 		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
@@ -181,7 +122,7 @@ namespace DX.Data.Xpo.Identity
 		 IUserTwoFactorStore<TUser, TKey>,
 		 IUserLockoutStore<TUser, TKey>
 		 where TKey : IEquatable<TKey>
-		 where TUser : XPIdentityUser<TKey, TXPOUser>, IUser<TKey>, new()
+		 where TUser : class, IDxUser<TKey>, new()
 		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
 		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
 		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
@@ -189,72 +130,28 @@ namespace DX.Data.Xpo.Identity
 #endif
 	{
 
-		public XPUserStore(string connectionName) :
-			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
+		public XPUserStore(string connectionName) 
+			: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
-		public XPUserStore(string connectionString, string name) :
-			this(new XpoDatabase(connectionString, name))
+		public XPUserStore(string connectionString, string name) 
+			: this(new XpoDatabase(connectionString, name), new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
 		{
 		}
 
-		public XPUserStore(XpoDatabase db) : base(db, new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		{
-
-		}
-
-		public XPUserStore(XpoDatabase db, XPDataValidator<TKey, TUser, TXPOUser> validator) : base(db, validator)
+		public XPUserStore(XpoDatabase db) 
+			: base(db, new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
 		{
 
 		}
 
-
-
-		protected override TXPOUser Assign(TUser source, TXPOUser destination)
+		public XPUserStore(XpoDatabase db, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator) 
+			: base(db, mapper, validator)
 		{
-			//destination.Id = source.Id;
-			destination.UserName = source.UserName;
-			destination.Email = source.Email;
-			destination.EmailConfirmed = source.EmailConfirmed;
-			destination.PasswordHash = source.PasswordHash;
-			destination.SecurityStamp = source.SecurityStamp;
-			destination.PhoneNumber = source.PhoneNumber;
-			destination.PhoneNumberConfirmed = source.PhoneNumberConfirmed;
-			destination.TwoFactorEnabled = source.TwoFactorEnabled;
-			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
-			destination.LockoutEnabled = source.LockoutEnabled;
-			destination.AccessFailedCount = source.AccessFailedCount;
-#if (NETSTANDARD2_0)
-							destination.NormalizedName = source.NormalizedName;
-							destination.NormalizedEmail = source.NormalizedEmail;
-#endif
-			if (destination is IAssignable)
-				(destination as IAssignable).Assign(source);
-			return destination;
+
 		}
 
-		protected override TUser Assign(TXPOUser source, TUser destination)
-		{
-			destination.Id = source.Id;
-			destination.UserName = source.UserName;
-			destination.Email = source.Email;
-			destination.EmailConfirmed = source.EmailConfirmed;
-			destination.PasswordHash = source.PasswordHash;
-			destination.SecurityStamp = source.SecurityStamp;
-			destination.PhoneNumber = source.PhoneNumber;
-			destination.PhoneNumberConfirmed = source.PhoneNumberConfirmed;
-			destination.TwoFactorEnabled = source.TwoFactorEnabled;
-			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
-			destination.LockoutEnabled = source.LockoutEnabled;
-			destination.AccessFailedCount = source.AccessFailedCount;
-#if (NETSTANDARD2_0)
-							destination.NormalizedName = source.NormalizedName;
-							destination.NormalizedEmail = source.NormalizedEmail;
-#endif
-			if (destination is IAssignable)
-				(destination as IAssignable).Assign(source);
-			return destination;
-		}
+
 		protected override IQueryable<TXPOUser> Query(Session s)
 		{
 			var r = from n in s.Query<TXPOUser>()
@@ -608,8 +505,7 @@ namespace DX.Data.Xpo.Identity
 				var xpoUser = wrk.GetObjectByKey(XPORoleType, userId);
 				if (xpoUser != null)
 				{
-					TUser r = new TUser();
-					Assign(xpoUser as TXPOUser, r);
+					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);					
 					return r;
 				}
 				return null;
@@ -637,8 +533,7 @@ namespace DX.Data.Xpo.Identity
 #endif
 				if (xpoUser != null)
 				{
-					TUser r = new TUser();
-					Assign(xpoUser as TXPOUser, r);
+					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);					
 					return r;
 				}
 				return null;
@@ -761,8 +656,8 @@ namespace DX.Data.Xpo.Identity
 
 				List<TUser> users = new List<TUser>();
 				foreach (var item in list)
-				{                     
-					TUser usr = Assign(item as TXPOUser, new TUser() as TUser);
+				{
+					TUser usr = Mapper.CreateModel(item as TXPOUser);
 					users.Add(usr);
 				}
 				return users;
@@ -1109,7 +1004,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				//TODO: Might need to check this for memoryleak
 				var s = DB.GetSession();
-				var r = from n in Query(s) select Assign(n, new TUser());
+				var r = from n in Query(s) select CreateModelInstance(n);
 				return r;
 			}
 		}
@@ -1181,7 +1076,7 @@ namespace DX.Data.Xpo.Identity
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("EmailUpper == ?", email.ToUpperInvariant()));
 				if (xpoUser != null)
 				{
-					TUser r = Assign(xpoUser as TXPOUser, new TUser() as TUser);
+					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);// Assign(xpoUser as TXPOUser, new TUser() as TUser);
 					return r;
 				}
 				return null;
@@ -1631,6 +1526,6 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 #endif
-		//public void Crap() { }
+		
 	}
 }

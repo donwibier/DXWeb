@@ -6,6 +6,15 @@ using System.Linq;
 
 namespace DX.Data.Xpo
 {
+	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>
+		where TKey : IEquatable<TKey>
+		where TModel : IDataStoreModel<TKey>
+		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+	{
+
+	}
+
+
 	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
@@ -85,16 +94,24 @@ namespace DX.Data.Xpo
 	{
 		private readonly XpoDatabase xpo;
 		private readonly XPDataValidator<TKey, TModel, TXPOClass> val;
-		public XPDataStore(XpoDatabase db, XPDataValidator<TKey, TModel, TXPOClass> validator = null)
+		private readonly XPDataMapper<TKey, TModel, TXPOClass> map;
+		public XPDataStore(XpoDatabase db, XPDataMapper<TKey, TModel, TXPOClass> mapper, XPDataValidator<TKey, TModel, TXPOClass> validator = null)
 		{
+			if (db == null)
+				throw new ArgumentNullException("db");
+			if (mapper == null)
+				throw new ArgumentNullException("mapper");
 			xpo = db;
+			map = mapper;
 			val = validator;
 		}
 		public XpoDatabase DB => xpo;
 
+		public XPDataMapper<TKey, TModel, TXPOClass> Mapper => map;
+		public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
+
 		public Type XpoType => typeof(TXPOClass);
 
-		//public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
 
 		protected virtual IQueryable<TXPOClass> Query(Session s)
 		{
@@ -103,23 +120,13 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
+		protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
 
-		//protected virtual TModel CreateModel(TXPOClass item)
-		//{
-		//	return CreateInstance(item);
-		//	//TModel result = Activator.CreateInstance(typeof(TModel)) as TModel;
-		//	//return Assign(item, result);
-		//}
-		protected virtual Func<TXPOClass, TModel> CreateModelInstance
+		protected TXPOClass Assign(TModel source, TXPOClass destination)
 		{
-			get
-			{
-				return (x) => { return Assign(x, new TModel()); };
-			}
+			return map.Assign(source, destination);
 		}
 
-		protected abstract TXPOClass Assign(TModel source, TXPOClass destination);
-		protected abstract TModel Assign(TXPOClass source, TModel destination);
 		public override TModel GetByKey(TKey key)
 		{
 			var result = DB.Execute((db, w) =>
@@ -300,9 +307,5 @@ namespace DX.Data.Xpo
 			});
 			return result;
 		}
-
-		
-
-
 	}
 }

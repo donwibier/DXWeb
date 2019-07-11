@@ -20,102 +20,70 @@ namespace DX.Data.Xpo.Identity
 {
 #if (NETSTANDARD2_0)
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
-        where TRole : XPIdentityRole<string, TXPORole, XpoDxRoleClaim>, IRole<string>, new()
+        where TRole : class, IDxRole<string>, new()
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
 #else
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
-        where TRole : XPIdentityRole<string, TXPORole>, IRole<string>, new()
+        where TRole : class, IDxRole<string>, IRole<string>, new()
 		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
 #endif
     {
-		public XPRoleStore(string connectionName) : base(connectionName)
+		public XPRoleStore(string connectionName)
+			: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
+
+		{
+
+		}
+//#if (NETSTANDARD2_0)
+//#else
+//#endif
+
+
+		public XPRoleStore(string connectionString, string name)
+#if (NETSTANDARD2_0)
+			: this(new XpoDatabase(connectionString, name), new XPRoleMapper<string, TRole, TXPORole, XpoDxRoleClaim>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
+#else
+			: this(new XpoDatabase(connectionString, name), new XPRoleMapper<string, TRole, TXPORole>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
+#endif
 		{
 
 		}
 
-		public XPRoleStore(string connectionString, string name) : base(connectionString, name)
+		public XPRoleStore(XpoDatabase db)
+#if (NETSTANDARD2_0)
+			: base(db, new XPRoleMapper<string, TRole, TXPORole, XpoDxRoleClaim>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
+#else
+			: base(db, new XPRoleMapper<string, TRole, TXPORole>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
+#endif
 		{
 
 		}
 
-		public XPRoleStore(XpoDatabase db) : base(db)
+		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) 
+			: base(db, mapper, validator)
 		{
 
 		}
-
-		public XPRoleStore(XpoDatabase db, XPDataValidator<string, TRole, TXPORole> validator) : base(db, validator)
+		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper)
+			: base(db, mapper, new XPRoleStoreValidator<string, TRole, TXPORole>())
 		{
 
 		}
-		//public XPRoleStore(XpoDatabase db) : base(db)
-		//{
-
-		//}
-
-		//public XPRoleStore(XpoDatabase db, XPDataValidator<string, TRole, TXPORole> validator) : base(db, validator)
-		//{
-
-		//}
-		//      public XPRoleStore() : 
-		//	base() { }
-		//public XPRoleStore(string connectionName) : 
-		//	base(connectionName) { }
-		//public XPRoleStore(string connectionString, string connectionName) : 
-		//	base(connectionString, connectionName) { }
-		//public XPRoleStore(XpoDatabase database) : 
-		//	base(database) { }
 	}
-
-	public class XPRoleStoreValidator<TKey, TRole, TXPORole> : XPDataValidator<TKey, TRole, TXPORole>
-		where TKey : IEquatable<TKey>
-		where TRole : IDataStoreModel<TKey>
-		where TXPORole : XPBaseObject, IDataStoreModel<TKey>, IDxRole<TKey>
-	{
-		
-		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
-		{
-			IDataValidationResult<TKey> result = null;
-			TXPORole role = arg as TXPORole;
-			if (role != null)
-			{
-				int userCount = (int)role.Session.Evaluate(typeof(XpoDxUser),
-					CriteriaOperator.Parse("Count"),
-					CriteriaOperator.Parse("Roles[Id == ?]", role.ID));
-				if (userCount > 0)
-					result = new DataValidationResult<TKey>
-					{
-						ResultType = DataValidationResultType.Error,
-						ID = role.ID,
-						Message = String.Format("Role '{0}' cannot be deleted because there are users in this Role", role.Name)
-					};
-			}
-
-			if (result == null)
-			{
-				result = base.Deleting(id, arg, validationResults);
-			}
-			validationResults.Add(result);
-			return result;
-		}
-
-		
-	}
-
 
 #if (NETSTANDARD2_0)
-	public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim/*, TXPOUser*/> : XPDataStore<TKey, TRole, TXPORole>, //  XpoStore<TXPORole, TKey>,
-        IQueryableRoleStore<TRole>,
-        IRoleClaimStore<TRole>
+	public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim> : XPDataStore<TKey, TRole, TXPORole>, 
+				IQueryableRoleStore<TRole>, IRoleClaimStore<TRole>
         where TKey : IEquatable<TKey>
-        where TRole : XPIdentityRole<TKey, TXPORole, TXPORoleClaim>, IRole<TKey>, new()
-        where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
+        where TRole : class, IDxRole<TKey>, new()
+        where TXPORole : XPBaseObject, IDxRole<TKey>
         where TXPORoleClaim: XPBaseObject, IDxRoleClaim<TKey>
 #else
 	public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XPDataStore<TKey, TRole, TXPORole>, //XpoStore<TXPORole, TKey>,
-    	IQueryableRoleStore<TRole, TKey>
+    			IQueryableRoleStore<TRole, TKey>
     	where TKey : IEquatable<TKey>
-    	where TRole : XPIdentityRole<TKey, TXPORole>, IRole<TKey>, new()
-    	where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
+    	where TRole : class, IDxRole<TKey>, new()
+    	where TXPORole : XPBaseObject, IDxRole<TKey>
 #endif
 	{
 		public XPRoleStore(string connectionName) :
@@ -127,56 +95,21 @@ namespace DX.Data.Xpo.Identity
 		{
 		}
 
-		public XPRoleStore(XpoDatabase db) : base(db, new XPRoleStoreValidator<TKey, TRole, TXPORole>())
-		{
-
-		}
-		public XPRoleStore(XpoDatabase db, XPDataValidator<TKey, TRole, TXPORole> validator) : base(db, validator)
-		{
-
-		}
-
-		#region abstract implementation
-
-		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>()
-		{
-			{"Id", "Id"},			
 #if (NETSTANDARD2_0)
-			{"NormalizedName", "NormalizedName"},
+		public XPRoleStore(XpoDatabase db) : base(db, new XPRoleMapper<TKey, TRole, TXPORole, TXPORoleClaim>(), new XPRoleStoreValidator<TKey, TRole, TXPORole>())
+#else
+		public XPRoleStore(XpoDatabase db) : base(db, new XPRoleMapper<TKey, TRole, TXPORole>(), new XPRoleStoreValidator<TKey, TRole, TXPORole>())
 #endif
-			{"Name", "Name"}
-		};
-		protected virtual Dictionary<string, string> PropertyMap => _propertyMap;
-
-		protected override TXPORole Assign(TRole source, TXPORole destination)
 		{
-			if (source == null)
-				throw new ArgumentNullException("source");
-			if (destination == null)
-				throw new ArgumentNullException("destination");
 
-			destination.ID = source.ID;
-			destination.Name = source.Name;
-#if (NETSTANDARD2_0)
-			destination.NormalizedName = source.NormalizedName;
-#endif
-			return destination;
+		}
+		public XPRoleStore(XpoDatabase db, XPDataMapper<TKey, TRole, TXPORole> mapper, XPDataValidator<TKey, TRole, TXPORole> validator) : base(db, mapper, validator)
+		{
+
 		}
 
-		protected override TRole Assign(TXPORole source, TRole destination)
-		{
-			if (source == null)
-				throw new ArgumentNullException("source");
-			if (destination == null)
-				throw new ArgumentNullException("destination");
+#region abstract implementation
 
-			destination.ID = source.ID;
-			destination.Name = source.Name;
-#if (NETSTANDARD2_0)
-			destination.NormalizedName = source.NormalizedName;
-#endif
-			return destination;
-		}
 
 		protected override IQueryable<TXPORole> Query(Session s)
 		{
@@ -196,37 +129,14 @@ namespace DX.Data.Xpo.Identity
 			return results;
 		}
 
-		#endregion
+#endregion
 
-		#region Overrides
+#region Overrides
 
-		#endregion
+#endregion
 
-		//===========================
-		//public XPRoleStore() :
-		//	base()
-		//{
 
-		//}
-
-		//public XPRoleStore(string connectionName) :
-		//	base(connectionName)
-		//{
-
-		//}
-		//public XPRoleStore(string connectionString, string connectionName) :
-		//	base(connectionString, connectionName)
-		//{
-
-		//}
-
-		//public XPRoleStore(XpoDatabase database) :
-		//	base(database)
-		//{
-
-		//}
-
-		#region Generic Helper methods and members
+#region Generic Helper methods and members
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
 
@@ -234,7 +144,7 @@ namespace DX.Data.Xpo.Identity
         protected static Type XPORoleClaimType { get { return typeof(TXPORoleClaim); } }
         protected static TXPORoleClaim XPOCreateRoleClaim(Session s) { return Activator.CreateInstance(typeof(TXPORoleClaim), s) as TXPORoleClaim; }
 #endif
-		#endregion
+#endregion
 
 
 		
@@ -248,7 +158,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				//TODO: Might need to check this for memoryleak
 				var s = DB.GetSession();
-				var r = from n in Query(s) select Assign(n, new TRole());
+				var r = from n in Query(s) select Mapper.CreateModel(n);
 				return r;
 				//return Query(s).Select(CreateModelInstance);
 			}
@@ -322,11 +232,10 @@ namespace DX.Data.Xpo.Identity
 
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			 {
-				 var xpoRole = wrk.GetObjectByKey(XPORoleType, roleId);
+				 var xpoRole = wrk.GetObjectByKey(XPORoleType, roleId) as TXPORole;
 				 if (xpoRole != null)
 				 {
-					 TRole r = new TRole();
-					 Assign(xpoRole as TXPORole, r);
+					 TRole r = Mapper.CreateModel(xpoRole);					 
 					 return r;
 				 }
 				 return null;
@@ -348,8 +257,7 @@ namespace DX.Data.Xpo.Identity
 #endif
 				if (xpoRole != null)
 				{
-					TRole r = new TRole();
-					Assign(xpoRole as TXPORole, r);
+					TRole r = Mapper.CreateModel(xpoRole as TXPORole);
 					return r;
 				}
 				return null;
@@ -545,7 +453,7 @@ namespace DX.Data.Xpo.Identity
 
 			});
         }
-#endif		
+#endif
 	}
 
 }

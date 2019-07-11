@@ -5,57 +5,71 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using DX.Data.Xpo.Identity;
 using DevExpress.Xpo;
+using DX.Data.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Test.Web.Core.Models
 {
-    // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : XPIdentityUser<XpoApplicationUser>
-    {
-        public ApplicationUser(XpoApplicationUser source) : base(source)
-        {}
+	public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	{
+		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+		{
+			var result = base.Assign(source, destination);
+			return result;
+		}
 
-        public ApplicationUser(XpoApplicationUser source, int loadingFlags) : base(source, loadingFlags)
-        {}
+		public override string Map(string sourceField)
+		{
+			return base.Map(sourceField);
+		}
 
-        public ApplicationUser()
-        {}
+		public override Func<XpoApplicationUser, ApplicationUser> CreateModel => base.CreateModel;
+	}
 
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            //XpoApplicationUser src = source as XpoApplicationUser;
-            //if (src != null)
-            //{
-            //	// additional properties here
-            //	this.PropertyA = src.PropertyA;
-            //	// etc.				
-            //}
-        }
-    }
+	// Add profile data for application users by adding properties to the ApplicationUser class
+	public class ApplicationUser : XPIdentityUser<XpoApplicationUser>
+	{
+		public ApplicationUser()
+		{
 
-    public class ApplicationRole : XPIdentityRole<XpoApplicationRole>
-    {
-        public ApplicationRole(XpoApplicationRole source, int loadingFlags) : base(source, loadingFlags)
-        {}
+		}
+	}
 
-        public ApplicationRole(XpoApplicationRole source) : base(source)
-        {}
+	public class ApplicationRole : XPIdentityRole<XpoApplicationRole>
+	{
+		public ApplicationRole()
+		{ }
+	}
+	public class ApplicationRoleMapper : XPRoleMapper<string, ApplicationRole, XpoApplicationRole, XpoDxRoleClaim>
+	{
+		public override Func<XpoApplicationRole, ApplicationRole> CreateModel => base.CreateModel;
 
-        public ApplicationRole()
-        {}
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            //XpoApplicationRole src = source as XpoApplicationRole;
-            //if (src != null)
-            //{
-            //	// additional properties here
-            //	this.PropertyA = src.PropertyA;
-            //	// etc.				
-            //}
-        }
-    }
+		public override XpoApplicationRole Assign(ApplicationRole source, XpoApplicationRole destination)
+		{
+			XpoApplicationRole result = base.Assign(source, destination);
+			return result;
+		}
+
+		public override string Map(string sourceField)
+		{
+			return base.Map(sourceField);
+		}
+	}
+	public class XpoApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	{
+		public override Func<XpoApplicationUser, ApplicationUser> CreateModel => base.CreateModel;
+		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+		{
+			XpoApplicationUser result = base.Assign(source, destination);
+
+			return result;
+		}
+
+		public override string Map(string sourceField)
+		{
+			return base.Map(sourceField);
+		}
+	}
 
     // This class will be persisted in the database by XPO
     // It should have the same properties as the ApplicationUser
@@ -65,17 +79,6 @@ namespace DX.Test.Web.Core.Models
         public XpoApplicationUser(Session session) : base(session)
         {
         }
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            //ApplicationUser src = source as ApplicationUser;
-            //if (src != null)
-            //{
-            //	// additional properties here
-            //	this.PropertyA = src.PropertyA;
-            //	// etc.				
-            //}
-        }
     }
 
     [MapInheritance(MapInheritanceType.ParentTable)]
@@ -84,18 +87,6 @@ namespace DX.Test.Web.Core.Models
         public XpoApplicationRole(Session session) : base(session)
         {
         }
-        public override void Assign(object source, int loadingFlags)
-        {
-            base.Assign(source, loadingFlags);
-            //ApplicationUser src = source as ApplicationUser;
-            //if (src != null)
-            //{
-            //	// additional properties here
-            //	this.PropertyA = src.PropertyA;
-            //	// etc.				
-            //}
-        }
     }
-
 
 }
