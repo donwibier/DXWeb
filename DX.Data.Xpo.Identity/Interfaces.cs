@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using DevExpress.Xpo;
 using DX.Utils.Data;
 #if (NETSTANDARD2_0)
 using Microsoft.AspNetCore.Identity;
@@ -32,12 +33,15 @@ namespace DX.Data.Xpo.Identity
     }
 
 #endif
-    public interface IDxUser<TKey> : IDataStoreModel<TKey>, IUser<TKey>
+	//public interface IXPUser<TKey, TXPOUser, TXPORole>: IXPUser<TKey, TXPOUser >
+
+
+    public interface IXPUser<TKey> : IDataStoreModel<TKey>, IUser<TKey>
          where TKey : IEquatable<TKey>
     {
-        //Id
-        //UserName
-        string Email { get; set; }
+		//Id
+		//UserName
+		string Email { get; set; }
         bool EmailConfirmed { get; set; }
 
         string PhoneNumber { get; set; }
@@ -59,30 +63,28 @@ namespace DX.Data.Xpo.Identity
 		void AssignRoles(IList roles);
 		void AssignClaims(IList claims);
 		void AssignLogins(IList logins);
+		/*
+		XPCollection<TXPORole> Roles { get; }
+		XPCollection<TXPOUserLogin> Logins { get; }
+		XPCollection<TXPOUserToken> Tokens { get; }
+		XPCollection<TXPOUserClaim> Claims { get; }
+		*/
 	}
 
-    public interface IDxRole<TKey> : IDataStoreModel<TKey>, IRole<TKey>
-        where TKey : IEquatable<TKey>
-    {
-//        TKey Id { get; set; }
-//        string Name { get; set; }
+    
 
-//#if (NETSTANDARD2_0)
-//		string NormalizedName { get; set; }
-//#endif
-//		IList UsersList { get; }
-    }
-
-    public interface IDxUserLogin<TKey> : IDataStoreModel<TKey>
-        where TKey : IEquatable<TKey>
-    {
-        //Id
-        TKey UserId { get; }
+    public interface IXPUserLogin<TKey> : IDataStoreModel<TKey>
+		where TKey : IEquatable<TKey>
+	{
+		//Id
+		TKey UserId { get; }
         string LoginProvider { get; set; }
         string ProviderKey { get; set; }
+
+		//TXPOUser User { get; set; }
     }
 
-    public interface IDxBaseClaim<TKey> : IDataStoreModel<TKey>
+    public interface IXPBaseClaim<TKey> : IDataStoreModel<TKey>
         where TKey : IEquatable<TKey>
     {
         string ClaimType { get; set; }
@@ -92,25 +94,42 @@ namespace DX.Data.Xpo.Identity
 
         void InitializeFromClaim(Claim other);
     }
-    public interface IDxUserClaim<TKey> : IDxBaseClaim<TKey>
-        where TKey : IEquatable<TKey>
-    {
-        //Id
-        TKey UserId { get; }
+    public interface IXPUserClaim<TKey> : IXPBaseClaim<TKey>
+        where TKey : IEquatable<TKey>		
+	{
+		//Id
+		TKey UserId { get; }
     }
 
-    public interface IDxUserToken<TKey> : IDataStoreModel<TKey>
+    public interface IXPUserToken<TKey> : IDataStoreModel<TKey>
         where TKey : IEquatable<TKey>
-    {
+	{
         TKey UserId { get; }
         string LoginProvider { get; set; }
         string Name { get; set; }
         string Value { get; set; }
-    }
 
-    public interface IDxRoleClaim<TKey> : IDxBaseClaim<TKey>
-        where TKey:IEquatable<TKey>
-    {        
-        TKey RoleId { get;  }
+		//TXPOUser User { get; set; }
+	}
+	public interface IXPRole<TKey> : IDataStoreModel<TKey>, IRole<TKey>
+		where TKey : IEquatable<TKey>
+	{
+		//        TKey Id { get; set; }
+		//        string Name { get; set; }
+
+		//#if (NETSTANDARD2_0)
+		//		string NormalizedName { get; set; }
+		//#endif
+		//		IList UsersList { get; }
+//		XPCollection<TXPOUser> Users { get; }
+//#if (NETSTANDARD2_0)
+//		XPCollection<TXPORoleClaim> Claims { get; }
+//#endif
+	}
+
+	public interface IXPRoleClaim<TKey> : IXPBaseClaim<TKey>
+        where TKey:IEquatable<TKey>		
+	{
+		TKey RoleId { get;  }
     }
 }

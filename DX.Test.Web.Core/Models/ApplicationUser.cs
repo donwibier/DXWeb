@@ -27,7 +27,7 @@ namespace DX.Test.Web.Core.Models
 	}
 
 	// Add profile data for application users by adding properties to the ApplicationUser class
-	public class ApplicationUser : XPIdentityUser<XpoApplicationUser>
+	public class ApplicationUser : XPIdentityUser
 	{
 		public ApplicationUser()
 		{
@@ -35,12 +35,12 @@ namespace DX.Test.Web.Core.Models
 		}
 	}
 
-	public class ApplicationRole : XPIdentityRole<XpoApplicationRole>
+	public class ApplicationRole : XPIdentityRole
 	{
 		public ApplicationRole()
 		{ }
 	}
-	public class ApplicationRoleMapper : XPRoleMapper<string, ApplicationRole, XpoApplicationRole, XpoDxRoleClaim>
+	public class ApplicationRoleMapper : XPRoleMapper<string, ApplicationRole, XpoApplicationRole>
 	{
 		public override Func<XpoApplicationRole, ApplicationRole> CreateModel => base.CreateModel;
 

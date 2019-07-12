@@ -12,7 +12,7 @@ namespace DX.Data.Xpo.Identity
 	 /// <summary>
 	 ///     Entity type for a user's login (i.e. facebook, google)
 	 /// </summary>
-	 public class XPIdentityUserLogin : XPIdentityUserLogin<string, XpoDxUserLogin>, IDxUserLogin<string>
+	 public class XPIdentityUserLogin : XPIdentityUserLogin<string>
 	 {
 		  //public XPIdentityUserLogin(XpoDxUserLogin source)
 				//: base(source)
@@ -29,16 +29,15 @@ namespace DX.Data.Xpo.Identity
 		  {
 				
 		  }
-
 	 }
 
 	 /// <summary>
 	 ///     Entity type for a user's login (i.e. facebook, google)
 	 /// </summary>
 	 /// <typeparam name="TKey"></typeparam>
-	 public abstract class XPIdentityUserLogin<TKey, TXPOLogin> : IDataStoreModel<TKey>, IDxUserLogin<TKey>
+	 public abstract class XPIdentityUserLogin<TKey> : IDataStoreModel<TKey>//, IUserLogin<TKey>
 		  where TKey : IEquatable<TKey>
-		  where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
+		  //where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
 	 {
 		  //public XPIdentityUserLogin(TXPOLogin source)
 				//: base(source)

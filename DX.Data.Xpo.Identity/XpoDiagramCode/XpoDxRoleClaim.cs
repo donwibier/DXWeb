@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxRoleClaim : IDxRoleClaim<string>
+    public partial class XpoDxRoleClaim : IXPRoleClaim<string>
     {
         public XpoDxRoleClaim(Session session) : base(session) { }
 

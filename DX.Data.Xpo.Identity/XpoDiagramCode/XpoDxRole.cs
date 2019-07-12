@@ -8,7 +8,7 @@ using System.Collections;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxRole: IDxRole<string>
+    public partial class XpoDxRole: IXPRole<string>
     {
         public XpoDxRole(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }

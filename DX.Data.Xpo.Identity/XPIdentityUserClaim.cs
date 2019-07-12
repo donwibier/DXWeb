@@ -14,32 +14,32 @@ namespace DX.Data.Xpo.Identity
 	 /// <summary>
 	 ///     EntityType that represents one specific user claim
 	 /// </summary>
-	 public class XPIdentityUserClaim : XPIdentityUserClaim<string, XpoDxUserClaim>
-	 {
-		  //public XPIdentityUserClaim(XpoDxUserClaim source)
-				//: base(source)
-		  //{
+	 //public class XPIdentityUserClaim : XPIdentityUserClaim<string, XpoDxUserClaim>
+	 //{
+		//  //public XPIdentityUserClaim(XpoDxUserClaim source)
+		//		//: base(source)
+		//  //{
 				
-		  //}
-		  //public XPIdentityUserClaim(XpoDxUserClaim source, int loadingFlags)
-				//: base(source, loadingFlags)
-		  //{
+		//  //}
+		//  //public XPIdentityUserClaim(XpoDxUserClaim source, int loadingFlags)
+		//		//: base(source, loadingFlags)
+		//  //{
 				
-		  //}
-		  public XPIdentityUserClaim()
-			:base()
-		  {
+		//  //}
+		//  public XPIdentityUserClaim()
+		//	:base()
+		//  {
 				
-		  }
-	 }
+		//  }
+	 //}
 
 	/// <summary>
 	///     EntityType that represents one specific user claim
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
-	public abstract class XPIdentityUserClaim<TKey, TXPOClaim> : IDataStoreModel<TKey>, IDxUserClaim<TKey>
+	public abstract class XPIdentityUserClaim<TKey> : IDataStoreModel<TKey>//, IUserClaim<TKey>
 		 where TKey : IEquatable<TKey>
-		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
+		 //where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 	{
 		//public XPIdentityUserClaim(TXPOClaim source)
 		//	  : base(source)

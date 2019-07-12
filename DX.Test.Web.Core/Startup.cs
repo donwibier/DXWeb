@@ -41,9 +41,13 @@ namespace DX.Test.Web.Core
                     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                     options.Lockout.MaxFailedAccessAttempts = 3;					
                 })	
-				.AddXpoIdentityUserMapper<ApplicationUser, XpoApplicationUser>(new ApplicationUserMapper())
-				.AddXpoIdentityRoleMapper<ApplicationRole, XpoApplicationRole>(new ApplicationRoleMapper())
-                .AddXpoIdentityStores<XpoApplicationUser, XpoApplicationRole>()				
+				//.AddXpoIdentityUserMapper<ApplicationUser, XpoApplicationUser>(new ApplicationUserMapper())
+				//.AddXpoIdentityRoleMapper<ApplicationRole, XpoApplicationRole>(new ApplicationRoleMapper())
+                .AddXpoIdentityStores<ApplicationUser, XpoApplicationUser, ApplicationRole, XpoApplicationRole>(connStrName,
+					new ApplicationUserMapper(), 
+					new ApplicationRoleMapper(),
+					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
+					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())				
                 .AddDefaultTokenProviders();
 
             // Add application services.

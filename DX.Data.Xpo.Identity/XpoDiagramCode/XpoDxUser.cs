@@ -9,7 +9,7 @@ using DX.Utils;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxUser : IDxUser<string>
+    public partial class XpoDxUser : IXPUser<string>
     {
         public XpoDxUser(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
@@ -85,7 +85,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
             foreach (var r in roles)
             {
-                IDxRole<string> role = r as IDxRole<string>;
+                IXPRole<string> role = r as IXPRole<string>;
                 if (role != null)
                     Roles.Add(Session.FindObject(typeof(XpoDxRole), XpoDxRole.Fields.NameUpper == role.Name.ToUpperInvariant()) as XpoDxRole);
             }
@@ -101,7 +101,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
             foreach (var c in claims)
             {
-                IDxUserClaim<string> claim = c as IDxUserClaim<string>;
+                IXPUserClaim<string> claim = c as IXPUserClaim<string>;
                 if (claim != null)
                 {
                     Claims.Add(new XpoDxUserClaim(Session)
@@ -121,7 +121,7 @@ namespace DX.Data.Xpo.Identity.Persistent
                 Logins.Remove(login as XpoDxUserLogin);
             foreach (var l in logins)
             {
-                IDxUserLogin<string> login = l as IDxUserLogin<string>;
+                IXPUserLogin<string> login = l as IXPUserLogin<string>;
                 if (l != null)
                 {
                     Logins.Add(new XpoDxUserLogin(Session)

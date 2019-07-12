@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxBaseClaim : IDxBaseClaim<string>
+    public partial class XpoDxBaseClaim : IXPBaseClaim<string>
     {
         public XpoDxBaseClaim(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }

@@ -20,76 +20,57 @@ namespace DX.Data.Xpo.Identity
 {
 
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
-		 where TUser : class, IDxUser<string>, new()
+		 where TUser : class, IXPUser<string>, new()
 	{
+		//public XPUserStore(string connectionName) : base(connectionName)
+		//{
 
-		public XPUserStore(string connectionName) :
-			base(connectionName)
-		{
-		}
+		//}
 
-		public XPUserStore(string connectionString, string connectionName) :
-			base(connectionString, connectionName)
-		{
+		//public XPUserStore(string connectionString, string name) : base(connectionString, name)
+		//{
 
-		}
+		//}
 
-		public XPUserStore(XpoDatabase database) :
-			base(database)
+		//public XPUserStore(string connectionName, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(connectionName, mapper, validator)
+		//{
+
+		//}
+
+		//public XPUserStore(string connectionName, XPDataMapper<string, TUser, XpoDxUser> mapper) : base(connectionName, mapper)
+		//{
+
+		//}
+
+		//public XPUserStore(XpoDatabase db) : base(db)
+		//{
+
+		//}
+
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(db, mapper, validator)
 		{
 
 		}
 	}
 #if (NETSTANDARD2_0)
 	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken>
-		 where TUser : IDxUser<string>, new()
-		 where TXPOUser : XpoDxUser, IDxUser<string>
+		 where TUser : class, IXPUser<string>, new()
+		 where TXPOUser : XPBaseObject, IXPUser<string>
 #else
 	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>		 
-		 where TUser :  class, IDxUser<string>, new()
-		 where TXPOUser : XpoDxUser, IDxUser<string>, IUser<string>
+		 where TUser :  class, IXPUser<string>, new()
+		 where TXPOUser : XpoDxUser, IXPUser<string>, IUser<string>
 #endif
 	{
-
-		public XPUserStore(string connectionName) :
-			base(connectionName)
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper, XPDataValidator<string, TUser, TXPOUser> validator) : base(db, mapper, validator)
 		{
 
 		}
-
-		public XPUserStore(string connectionString, string connectionName) :
-			base(connectionString, connectionName )
-		{
-
-		}
-
-		public XPUserStore(string connectionString, string connectionName, XPUserMapper<TUser, TXPOUser> mapper, XPUserStoreValidator<string, TUser, TXPOUser> validator) :
-			base(connectionString, connectionName, mapper, validator)
-		{
-
-		}
-
-		public XPUserStore(XpoDatabase database) :
-			base(database, new XPUserMapper<TUser, TXPOUser>(), new XPUserStoreValidator<string, TUser, TXPOUser>())
-		{
-
-		}
-		public XPUserStore(XpoDatabase database, XPUserMapper<TUser, TXPOUser> mapper, XPUserStoreValidator<string, TUser, TXPOUser> validator) :
-			base(database, mapper, validator)
-		{
-
-		}
-		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper)
-			: base(db, mapper, new XPUserStoreValidator<string, TUser, TXPOUser>())
-		{
-
-		}
-
 
 	}
 #if (NETSTANDARD2_0)
-	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,
-		 IUserLoginStore<TUser>,
+	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>, 
+		IUserLoginStore<TUser>,
 		 IUserClaimStore<TUser>,
 		 IUserRoleStore<TUser>,
 		 IUserPasswordStore<TUser>,
@@ -103,14 +84,15 @@ namespace DX.Data.Xpo.Identity
 		 IUserAuthenticatorKeyStore<TUser>,
 		 IUserTwoFactorRecoveryCodeStore<TUser>
 		 where TKey : IEquatable<TKey>
-		 where TUser : class, IDxUser<TKey>, new()
-		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
-		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
-		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
-		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
-		 where TXPOToken: XPBaseObject, IDxUserToken<TKey>
+		 where TUser : class, IXPUser<TKey>, new()
+		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
+		 where TXPORole : XPBaseObject, IXPRole<TKey>, IRole<TKey>
+		 where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
+		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
+		 where TXPOToken: XPBaseObject, IXPUserToken<TKey>
 #else
-	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,
+	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,		
+		 IUserStore<TUser, TKey>,
 		 IUserLoginStore<TUser, TKey>,
 		 IUserClaimStore<TUser, TKey>,
 		 IUserRoleStore<TUser, TKey>,
@@ -122,28 +104,39 @@ namespace DX.Data.Xpo.Identity
 		 IUserTwoFactorStore<TUser, TKey>,
 		 IUserLockoutStore<TUser, TKey>
 		 where TKey : IEquatable<TKey>
-		 where TUser : class, IDxUser<TKey>, new()
-		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
-		 where TXPORole : XPBaseObject, IDxRole<TKey>, IRole<TKey>
-		 where TXPOLogin : XPBaseObject, IDxUserLogin<TKey>
-		 where TXPOClaim : XPBaseObject, IDxUserClaim<TKey>
+		 where TUser : class, IXPUser<TKey>, IUser<TKey>, new()
+		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
+		 where TXPORole : XPBaseObject, IXPRole<TKey>, IRole<TKey>
+		 where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
+		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 #endif
 	{
 
-		public XPUserStore(string connectionName) 
-			: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
-		{
-		}
-		public XPUserStore(string connectionString, string name) 
-			: this(new XpoDatabase(connectionString, name), new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		{
-		}
+		//public XPUserStore(string connectionName) 
+		//	: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
+		//{
+		//}
+		//public XPUserStore(string connectionString, string name) 
+		//	: this(new XpoDatabase(connectionString, name), new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
+		//{
+		//}
 
-		public XPUserStore(XpoDatabase db) 
-			: base(db, new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		{
+		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator)
+		//	: this(new XpoDatabase(connectionName), mapper, validator)
+		//{
 
-		}
+		//}
+		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper)
+		//	: this(new XpoDatabase(connectionName), mapper, new XPUserStoreValidator<TKey, TUser, TXPOUser>())
+		//{
+
+		//}
+
+		//public XPUserStore(XpoDatabase db) 
+		//	: base(db, new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
+		//{
+
+		//}
 
 		public XPUserStore(XpoDatabase db, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator) 
 			: base(db, mapper, validator)
@@ -414,7 +407,7 @@ namespace DX.Data.Xpo.Identity
 				var results = new List<UserLoginInfo>();
 				foreach (var r in new XPCollection(wrk, typeof(TXPOLogin), CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
 				{
-					IDxUserLogin<TKey> xpoLogin = r as IDxUserLogin<TKey>;
+					IXPUserLogin<TKey> xpoLogin = r as IXPUserLogin<TKey>;
 #if (NETSTANDARD2_0)
 					results.Add(new UserLoginInfo(xpoLogin.LoginProvider, xpoLogin.ProviderKey, xpoLogin.LoginProvider));
 #else

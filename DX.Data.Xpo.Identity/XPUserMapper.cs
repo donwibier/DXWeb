@@ -11,15 +11,15 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 	public class XPUserMapper<TUser, TXPOUser> : XPUserMapper<string, TUser, TXPOUser>
-	 where TUser : IDxUser<string>, new()
-	 where TXPOUser : XPBaseObject, IDxUser<string>, IUser<string>
+	 where TUser : class, IXPUser<string>, new()
+	 where TXPOUser : XPBaseObject, IXPUser<string>, IUser<string>
 	{
 	}
 
 	public class XPUserMapper<TKey, TUser, TXPOUser> : XPDataMapper<TKey, TUser, TXPOUser>
 		 where TKey : IEquatable<TKey>
-		 where TUser : IDxUser<TKey>, new()
-		 where TXPOUser : XPBaseObject, IDxUser<TKey>, IUser<TKey>
+		 where TUser : class, IXPUser<TKey>, new()
+		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
 	{
 		public override Func<TXPOUser, TUser> CreateModel => (source) =>
 		{

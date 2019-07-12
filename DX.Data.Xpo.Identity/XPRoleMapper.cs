@@ -18,11 +18,25 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
+	//public class XPRoleMapper<TKey, TRole, TXPORole>: XPRoleMapper<TKey, TRole, TXPORole, XpoDxRoleClaim, XpoDxUser, XpoDxUserClaim, XpoDxUserLogin, XpoDxUserToken>
+	//	where TKey : IEquatable<TKey>
+	//	where TRole : class, IDataStoreModel<TKey>, IRole<TKey>, new()
+	//	where TXPORole : class, IXPSimpleObject, IXPRole<TKey, TXPORole, XpoDxRoleClaim, XpoDxUser, XpoDxUserClaim, XpoDxUserLogin, XpoDxUserToken>
+	//{
 
+	//}
+#if (NETSTANDARD2_0)
+	public class XPRoleMapper<TKey, TRole, TXPORole/*, TXPORoleClaim*/> : XPDataMapper<TKey, TRole, TXPORole>
+		where TKey : IEquatable<TKey>
+		where TRole : class, IDataStoreModel<TKey>, IRole<TKey>, new()
+		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
+		//where TXPORoleClaim : class, IXPSimpleObject, IXPRoleClaim<TKey>
+#else
 	public class XPRoleMapper<TKey, TRole, TXPORole> : XPDataMapper<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
-		where TRole : class, IDxRole<TKey>, new()
-		where TXPORole : XPBaseObject, IDxRole<TKey>
+		where TRole : class, IDataStoreModel<TKey>, IRole<TKey>, new()
+		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
+#endif
 	{
 		public override Func<TXPORole, TRole> CreateModel
 			=> (source) => new TRole

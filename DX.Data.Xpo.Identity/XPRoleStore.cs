@@ -20,52 +20,15 @@ namespace DX.Data.Xpo.Identity
 {
 #if (NETSTANDARD2_0)
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
-        where TRole : class, IDxRole<string>, new()
-		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
+        where TRole : class, IXPRole<string>, new()
+		where TXPORole : XPBaseObject, IXPRole<string>
 #else
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole>
-        where TRole : class, IDxRole<string>, IRole<string>, new()
-		where TXPORole : XPBaseObject, IDxRole<string>, IRole<string>
+        where TRole : class, IXPRole<string>, IRole<string>, new()
+		where TXPORole : XPBaseObject, IXPRole<string>
 #endif
     {
-		public XPRoleStore(string connectionName)
-			: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
-
-		{
-
-		}
-//#if (NETSTANDARD2_0)
-//#else
-//#endif
-
-
-		public XPRoleStore(string connectionString, string name)
-#if (NETSTANDARD2_0)
-			: this(new XpoDatabase(connectionString, name), new XPRoleMapper<string, TRole, TXPORole, XpoDxRoleClaim>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
-#else
-			: this(new XpoDatabase(connectionString, name), new XPRoleMapper<string, TRole, TXPORole>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
-#endif
-		{
-
-		}
-
-		public XPRoleStore(XpoDatabase db)
-#if (NETSTANDARD2_0)
-			: base(db, new XPRoleMapper<string, TRole, TXPORole, XpoDxRoleClaim>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
-#else
-			: base(db, new XPRoleMapper<string, TRole, TXPORole>(), new XPRoleStoreValidator<string, TRole, TXPORole>())
-#endif
-		{
-
-		}
-
-		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) 
-			: base(db, mapper, validator)
-		{
-
-		}
-		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper)
-			: base(db, mapper, new XPRoleStoreValidator<string, TRole, TXPORole>())
+		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) : base(db, mapper, validator)
 		{
 
 		}
@@ -75,40 +38,25 @@ namespace DX.Data.Xpo.Identity
 	public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim> : XPDataStore<TKey, TRole, TXPORole>, 
 				IQueryableRoleStore<TRole>, IRoleClaimStore<TRole>
         where TKey : IEquatable<TKey>
-        where TRole : class, IDxRole<TKey>, new()
-        where TXPORole : XPBaseObject, IDxRole<TKey>
-        where TXPORoleClaim: XPBaseObject, IDxRoleClaim<TKey>
+        where TRole : class, IXPRole<TKey>, new()
+        where TXPORole : XPBaseObject, IXPRole<TKey>
+		where TXPORoleClaim: XPBaseObject, IXPRoleClaim<TKey>
 #else
-	public class XPRoleStore<TKey, TRole, TXPORole/*, TXPOUser*/> : XPDataStore<TKey, TRole, TXPORole>, //XpoStore<TXPORole, TKey>,
+	public class XPRoleStore<TKey, TRole, TXPORole> : XPDataStore<TKey, TRole, TXPORole>,
     			IQueryableRoleStore<TRole, TKey>
     	where TKey : IEquatable<TKey>
-    	where TRole : class, IDxRole<TKey>, new()
-    	where TXPORole : XPBaseObject, IDxRole<TKey>
+        where TRole : class, IXPRole<TKey>, new()
+        where TXPORole : XPBaseObject, IXPRole<TKey>
 #endif
 	{
-		public XPRoleStore(string connectionName) :
-			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
-		{
-		}
-		public XPRoleStore(string connectionString, string name) :
-			this(new XpoDatabase(connectionString, name))
-		{
-		}
-
-#if (NETSTANDARD2_0)
-		public XPRoleStore(XpoDatabase db) : base(db, new XPRoleMapper<TKey, TRole, TXPORole, TXPORoleClaim>(), new XPRoleStoreValidator<TKey, TRole, TXPORole>())
-#else
-		public XPRoleStore(XpoDatabase db) : base(db, new XPRoleMapper<TKey, TRole, TXPORole>(), new XPRoleStoreValidator<TKey, TRole, TXPORole>())
-#endif
-		{
-
-		}
-		public XPRoleStore(XpoDatabase db, XPDataMapper<TKey, TRole, TXPORole> mapper, XPDataValidator<TKey, TRole, TXPORole> validator) : base(db, mapper, validator)
+		public XPRoleStore(XpoDatabase db, XPDataMapper<TKey, TRole, TXPORole> mapper, XPDataValidator<TKey, TRole, TXPORole> validator)
+			: base(db, mapper, validator)
 		{
 
 		}
 
-#region abstract implementation
+
+		#region abstract implementation
 
 
 		protected override IQueryable<TXPORole> Query(Session s)

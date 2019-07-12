@@ -8,7 +8,7 @@ using DX.Utils.Data;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	public partial class XpoDxBase : IDataStoreModel<string>, IXPSimpleObject
+	public partial class XpoDxBase : IDataStoreModel<string>
 	{
 		public XpoDxBase(Session session) : base(session) { }
 		public override void AfterConstruction() { base.AfterConstruction(); }

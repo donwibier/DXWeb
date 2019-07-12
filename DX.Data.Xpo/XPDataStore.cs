@@ -9,7 +9,7 @@ namespace DX.Data.Xpo
 	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
 	{
 
 	}
@@ -18,7 +18,7 @@ namespace DX.Data.Xpo
 	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
 	{
 		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{

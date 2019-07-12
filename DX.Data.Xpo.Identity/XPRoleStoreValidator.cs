@@ -15,7 +15,7 @@ namespace DX.Data.Xpo.Identity
 	public class XPRoleStoreValidator<TKey, TRole, TXPORole> : XPDataValidator<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : IDataStoreModel<TKey>
-		where TXPORole : XPBaseObject, IDataStoreModel<TKey>, IDxRole<TKey>
+		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
 	{
 
 		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)

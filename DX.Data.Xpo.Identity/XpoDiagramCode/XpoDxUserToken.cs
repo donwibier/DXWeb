@@ -6,7 +6,7 @@ using System.ComponentModel;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-    public partial class XpoDxUserToken : IDxUserToken<string>
+    public partial class XpoDxUserToken : IXPUserToken<string>
     {
         public XpoDxUserToken(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }

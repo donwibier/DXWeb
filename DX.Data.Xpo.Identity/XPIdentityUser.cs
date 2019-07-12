@@ -28,7 +28,7 @@ namespace DX.Data.Xpo.Identity
 		}
 	}
 
-	public class XPIdentityUser<TKey> : XPIdentityUser<TKey, XPIdentityUserLogin, XPIdentityRole, XPIdentityUserClaim>
+	public class XPIdentityUser<TKey> : XPIdentityUser<TKey, XPIdentityUserLogin<TKey>, XPIdentityRole<TKey>, XPIdentityUserClaim<TKey>>
 		 where TKey : IEquatable<TKey>
 		 
 	{
@@ -48,7 +48,7 @@ namespace DX.Data.Xpo.Identity
 	/// <typeparam name="TLogin"></typeparam>
 	/// <typeparam name="TRole"></typeparam>
 	/// <typeparam name="TClaim"></typeparam>
-	public class XPIdentityUser<TKey, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IDxUser<TKey> 
+	public class XPIdentityUser<TKey, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IXPUser<TKey>, IUser<TKey>
 		 where TKey : IEquatable<TKey>		 
 		 where TRole : class
 		 where TLogin : class

@@ -11,16 +11,16 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 	public class XPUserStoreValidator<TUser, TXPOUser> : XPUserStoreValidator<string, TUser, TXPOUser>
-		where TUser : IDxUser<string>
-		where TXPOUser : XPBaseObject, IDxUser<string>
+		where TUser : IXPUser<string>
+		where TXPOUser : XPBaseObject, IXPUser<string>
 	{
 
 	}
 
 	public class XPUserStoreValidator<TKey, TUser, TXPOUser> : XPDataValidator<TKey, TUser, TXPOUser>
 		where TKey : IEquatable<TKey>
-		where TUser : IDxUser<TKey>
-		where TXPOUser : XPBaseObject, IDxUser<TKey>
+		where TUser : IXPUser<TKey>
+		where TXPOUser : XPBaseObject, IXPUser<TKey>
 	{
 		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
 		{
