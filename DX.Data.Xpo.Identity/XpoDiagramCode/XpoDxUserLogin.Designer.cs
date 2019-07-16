@@ -41,11 +41,6 @@ namespace DX.Data.Xpo.Identity.Persistent
 			get { return _User; }
 			set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
 		}
-		[PersistentAlias("[User!Key]")]
-		public string UserId
-		{
-			get { return (string)(EvaluateAlias("UserId")); }
-		}
 	}
 
 }
