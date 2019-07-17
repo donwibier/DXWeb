@@ -57,7 +57,8 @@ namespace DX.Data.Xpo.Identity
 		 where TUser : class, IXPUser<string>, new()
 		 where TXPOUser : XPBaseObject, IXPUser<string>
 #else
-	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>		 
+	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
+		IUserStore<TUser>
 		 where TUser :  class, IXPUser<string>, new()
 		 where TXPOUser : XpoDxUser, IXPUser<string>, IUser<string>
 #endif
@@ -97,7 +98,7 @@ namespace DX.Data.Xpo.Identity
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 		 where TXPOToken: XPBaseObject, IXPUserToken<TKey>
 #else
-	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,		
+	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, 	
 		 IUserStore<TUser, TKey>,
 		 IUserLoginStore<TUser, TKey>,
 		 IUserClaimStore<TUser, TKey>,
@@ -117,36 +118,6 @@ namespace DX.Data.Xpo.Identity
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 #endif
 	{
-
-		//public XPUserStore(string connectionName) 
-		//	: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
-		//{
-		//}
-		//public XPUserStore(string connectionString, string name) 
-		//	: this(new XpoDatabase(connectionString, name), new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-		//}
-
-		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator)
-		//	: this(new XpoDatabase(connectionName), mapper, validator)
-		//{
-
-		//}
-		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper)
-		//	: this(new XpoDatabase(connectionName), mapper, new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-
-		//}
-
-		//public XPUserStore(XpoDatabase db) 
-		//	: base(db, new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-
-		//}
-		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator)
-		//	: this(new XpoDatabase(connectionName), mapper, validator)
-		//{
-		//}
 		public XPUserStore(XpoDatabase db, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator) 
 			: base(db, mapper, validator)
 		{
