@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.0.8</Version>
-    <FileVersion>1.0.0.8</FileVersion>
+    <Version>1.0.0.10</Version>
+    <FileVersion>1.0.0.10</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
-    <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
+    <Copyright>Copyright (c) 2019 Don Wibier</Copyright>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -15,11 +15,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
-	  1.0.0.8: Small refactorings to improve speed and support for Pageable (XP)DataStore	
-	  1.0.0.7: Abstract Generic DTO DataStore and Validator classes added	
-      1.0.0.6: Changed .NET Framework to v4.6.1
-      1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
-Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
+		1.0.0.10: Small fixes and implementation of DataMapper and DataValidator
+		1.0.0.8: Small refactorings to improve speed and support for Pageable (XP)DataStore
+		1.0.0.7: Abstract Generic DTO DataStore and Validator classes added
+		1.0.0.6: Changed .NET Framework to v4.6.1
+		1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
+		Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
