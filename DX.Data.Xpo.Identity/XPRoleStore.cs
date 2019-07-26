@@ -28,10 +28,17 @@ namespace DX.Data.Xpo.Identity
 		where TXPORole : XPBaseObject, IXPRole<string>
 #endif
     {
-		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) : base(db, mapper, validator)
+		public XPRoleStore(XpoDatabase db, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) 
+			: base(db, mapper, validator)
 		{
 
 		}
+
+		//public XPRoleStore(string connectionName, XPDataMapper<string, TRole, TXPORole> mapper, XPDataValidator<string, TRole, TXPORole> validator) 
+		//	: base(connectionName, mapper, validator)
+		//{
+
+		//}
 	}
 
 #if (NETSTANDARD2_0)
@@ -49,6 +56,11 @@ namespace DX.Data.Xpo.Identity
         where TXPORole : XPBaseObject, IXPRole<TKey>
 #endif
 	{
+		//public XPRoleStore(string connectionName, XPDataMapper<TKey, TRole, TXPORole> mapper, XPDataValidator<TKey, TRole, TXPORole> validator)
+		//	: this(new XpoDatabase(connectionName), mapper, validator)
+		//{
+
+		//}
 		public XPRoleStore(XpoDatabase db, XPDataMapper<TKey, TRole, TXPORole> mapper, XPDataValidator<TKey, TRole, TXPORole> validator)
 			: base(db, mapper, validator)
 		{

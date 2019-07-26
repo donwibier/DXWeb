@@ -43,7 +43,7 @@ namespace DX.Test.Web.MVC
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
         {
 			var db = context.Get<XpoDatabase>();
-			var store = new XPUserStore<ApplicationUser, XpoApplicationUser>(db, new ApplicationUserMapper(), null/*, new ApplicationValidator()*/ );
+			var store = new XPUserStore<ApplicationUser, XpoApplicationUser>(db, new ApplicationUserMapper(), new XPUserStoreValidator<ApplicationUser, XpoApplicationUser>() );
 
 			var manager = new ApplicationUserManager(store /*new XPUserStore<ApplicationUser, XpoApplicationUser>(context.Get<XpoDatabase>())*/);
             // Configure validation logic for usernames

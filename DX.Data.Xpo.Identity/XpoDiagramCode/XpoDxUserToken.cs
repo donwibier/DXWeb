@@ -10,9 +10,13 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxUserToken(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-
-        // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/8/2018 3:43 AM
-        public new class FieldsClass : XpoDxBase.FieldsClass
+		[PersistentAlias("[User!Key]")]
+		public string UserId
+		{
+			get { return (string)(EvaluateAlias("UserId")); }
+		}
+		// Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/8/2018 3:43 AM
+		public new class FieldsClass : XpoDxBase.FieldsClass
         {
             public FieldsClass()
             {

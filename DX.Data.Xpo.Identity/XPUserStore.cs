@@ -57,16 +57,23 @@ namespace DX.Data.Xpo.Identity
 		 where TUser : class, IXPUser<string>, new()
 		 where TXPOUser : XPBaseObject, IXPUser<string>
 #else
-	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>		 
+	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
+		IUserStore<TUser>
 		 where TUser :  class, IXPUser<string>, new()
 		 where TXPOUser : XpoDxUser, IXPUser<string>, IUser<string>
 #endif
 	{
-		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper, XPDataValidator<string, TUser, TXPOUser> validator) : base(db, mapper, validator)
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper, XPDataValidator<string, TUser, TXPOUser> validator) 
+			: base(db, mapper, validator)
 		{
 
 		}
 
+		//public XPUserStore(string connectionName, XPDataMapper<string, TUser, TXPOUser> mapper, XPDataValidator<string, TUser, TXPOUser> validator) 
+		//	: base(connectionName, mapper, validator)
+		//{
+
+		//}
 	}
 #if (NETSTANDARD2_0)
 	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>, 
@@ -91,7 +98,7 @@ namespace DX.Data.Xpo.Identity
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 		 where TXPOToken: XPBaseObject, IXPUserToken<TKey>
 #else
-	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>,		
+	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim> : XPDataStore<TKey, TUser, TXPOUser>, 	
 		 IUserStore<TUser, TKey>,
 		 IUserLoginStore<TUser, TKey>,
 		 IUserClaimStore<TUser, TKey>,
@@ -111,33 +118,6 @@ namespace DX.Data.Xpo.Identity
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 #endif
 	{
-
-		//public XPUserStore(string connectionName) 
-		//	: this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
-		//{
-		//}
-		//public XPUserStore(string connectionString, string name) 
-		//	: this(new XpoDatabase(connectionString, name), new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-		//}
-
-		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator)
-		//	: this(new XpoDatabase(connectionName), mapper, validator)
-		//{
-
-		//}
-		//public XPUserStore(string connectionName, XPDataMapper<TKey, TUser, TXPOUser> mapper)
-		//	: this(new XpoDatabase(connectionName), mapper, new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-
-		//}
-
-		//public XPUserStore(XpoDatabase db) 
-		//	: base(db, new XPUserMapper<TKey, TUser, TXPOUser>(), new XPUserStoreValidator<TKey, TUser, TXPOUser>())
-		//{
-
-		//}
-
 		public XPUserStore(XpoDatabase db, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator) 
 			: base(db, mapper, validator)
 		{
@@ -215,7 +195,9 @@ namespace DX.Data.Xpo.Identity
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", loginProvider, providerKey));
-				return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
+
+				//return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
+				return (xpoUser == null) ? null : Mapper.CreateModel(xpoUser as TXPOUser);
 			});
 			return result;
 		}
@@ -388,8 +370,15 @@ namespace DX.Data.Xpo.Identity
 			}
 			var result = await DB.ExecuteAsync((db, s) =>
 			{
-				var userLogin = s.FindObject(XPOLoginType, CriteriaOperator.Parse("(LoginProvider == ?) AND (ProviderKey == ?)", login.LoginProvider, login.ProviderKey)) as XPBaseObject;
-				return (userLogin == null) ? null : Activator.CreateInstance(typeof(TUser), userLogin.GetMemberValue("User"), DxIdentityUserFlags.FLAG_FULL) as TUser;
+				var xpoUser = s.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", login.LoginProvider, login.ProviderKey)) as TXPOUser;
+				return xpoUser == null ? null : Mapper.CreateModel(xpoUser);
+				//var userLogin = s.FindObject(XPOLoginType, CriteriaOperator.Parse("(LoginProvider == ?) AND (ProviderKey == ?)", login.LoginProvider, login.ProviderKey)) as XPBaseObject;
+				//if (userLogin != null)
+				//{
+				//	var xpoUser = userLogin.GetMemberValue("User") as TXPOUser;
+				//	return xpoUser == null ? null : Mapper.CreateModel(xpoUser);
+				//}
+				//return null;
 			});
 			return result;
 		}
@@ -492,17 +481,18 @@ namespace DX.Data.Xpo.Identity
 		{
 			ThrowIfDisposed();
 
-			var result = await DB.ExecuteAsync((db, wrk) =>
-			{
+			var result = await this.FindByIdAsync((TKey)userId);
+			//	await DB.ExecuteAsync((db, wrk) =>
+			//{
 
-				var xpoUser = wrk.GetObjectByKey(XPORoleType, userId);
-				if (xpoUser != null)
-				{
-					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);					
-					return r;
-				}
-				return null;
-			});
+			//	var xpoUser = wrk.GetObjectByKey(XPOUserType, userId);
+			//	if (xpoUser != null)
+			//	{
+			//		TUser r = Mapper.CreateModel(xpoUser as TXPOUser);					
+			//		return r;
+			//	}
+			//	return null;
+			//});
 			return result;
 		}
 		public async virtual Task<TUser> FindByIdAsync(TKey userId)
@@ -591,7 +581,7 @@ namespace DX.Data.Xpo.Identity
 			await DB.ExecuteAsync((db, wrk) =>
 			{
 				XPCollection xpoClaims = new XPCollection(typeof(XpoDxUserClaim),
-					CriteriaOperator.Parse("[User!Id] == ? AND ClaimValue == ? AND ClaimType == ?", 
+					CriteriaOperator.Parse("[User!Key] == ? AND ClaimValue == ? AND ClaimType == ?", 
 											user.Id, claim.Value, claim.Type), null);
 
 				foreach (var item in xpoClaims)
@@ -616,7 +606,7 @@ namespace DX.Data.Xpo.Identity
 				foreach (var claim in claims)
 				{
 					XPCollection xpoClaims = new XPCollection(wrk, typeof(XpoDxUserClaim),
-						CriteriaOperator.Parse("[User!Id] == ? AND ClaimValue == ? AND ClaimType == ?",
+						CriteriaOperator.Parse("[User!Key] == ? AND ClaimValue == ? AND ClaimType == ?",
 											user.Id, claim.Value, claim.Type), null);
 					foreach (var item in xpoClaims)
 					{
@@ -806,7 +796,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				List<string> r = new List<string>();
 				foreach (var role in new XPCollection(wrk, XPORoleType,
-						 CriteriaOperator.Parse($"Users[ID == ?]", userId),
+						 CriteriaOperator.Parse("Users[ID == ?]", userId),
 						 new SortProperty("Name", SortingDirection.Ascending)))
 				{
 					r.Add(((TXPORole)role).Name);
@@ -1067,13 +1057,7 @@ namespace DX.Data.Xpo.Identity
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("EmailUpper == ?", email.ToUpperInvariant()));
-				if (xpoUser != null)
-				{
-					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);// Assign(xpoUser as TXPOUser, new TUser() as TUser);
-					return r;
-				}
-				return null;
-				//return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
+				return (xpoUser == null) ? null : Mapper.CreateModel(xpoUser as TXPOUser);
 			});
 			return result;
 		}
@@ -1380,7 +1364,7 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException(nameof(wrk));
 
 			TXPOToken xpoToken = wrk.FindObject(XPOTokenType,
-				CriteriaOperator.Parse("UserId == ? AND LoginProvider == ? AND Name == ?", user.Id, loginProvider, name)) as TXPOToken;
+				CriteriaOperator.Parse("[User!Key] == ? AND LoginProvider == ? AND Name == ?", user.Id, loginProvider, name)) as TXPOToken;
 
 			if (createIfNotFound && (xpoToken == null))
 			{

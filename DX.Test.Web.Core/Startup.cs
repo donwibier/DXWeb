@@ -32,7 +32,7 @@ namespace DX.Test.Web.Core
 			
             services
 				.AddSingleton<IConfiguration>(Configuration) // Needed for XPO!
-				.AddXpoDatabase(connStrName/*, connStr*/);   //Initialize XPODataLayer / Database			
+				.AddXpoDatabase(connStrName);   //Initialize XPODataLayer / Database			
 			
 			//Initialize identity to use XPO
 			services

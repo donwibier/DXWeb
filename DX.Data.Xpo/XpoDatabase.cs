@@ -12,7 +12,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+
 #if (NETSTANDARD2_0)
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 #endif
@@ -43,15 +45,23 @@ namespace DX.Data.Xpo
 		public string DataLayerName { get { return dataLayerName; } }
 		/// Default constructor which uses the "DefaultConnection" connectionString
 		/// </summary>
+		
+#if (NETSTANDARD2_0)
+		public XpoDatabase(string connectionName, IConfiguration cfg) :
+			this(cfg.GetConnectionString(connectionName), connectionName)
+		{
+		}
+#else
 		public XpoDatabase()
 			: this("DefaultConnection")
 		{
 		}
+
 		public XpoDatabase(string connectionName) :
 			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
-
+#endif
 
 		/// <summary>
 		/// Constructor which takes the connection string name
@@ -114,7 +124,7 @@ namespace DX.Data.Xpo
 		}
 
 
-		#region Static Helpers
+#region Static Helpers
 		public static Session GetSession(string connectionString, string dataLayerName)
 		{
 			return new Session(GetDataLayer(connectionString, dataLayerName));
@@ -140,7 +150,7 @@ namespace DX.Data.Xpo
 
 		//}
 
-		#endregion
+#endregion
 
 		private static IDataLayer createDataLayer(string connectionString, string datalayerName)
 		{
@@ -234,7 +244,7 @@ namespace DX.Data.Xpo
 			return result.ToArray();
 		}
 
-		#region Cloning
+#region Cloning
 
 		public T[] CloneCollection<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
@@ -444,9 +454,9 @@ namespace DX.Data.Xpo
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region IDisposable Support
+#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
 
 		protected virtual void Dispose(bool disposing)
@@ -492,7 +502,7 @@ namespace DX.Data.Xpo
 			// TODO: uncomment the following line if the finalizer is overridden above.
 			// GC.SuppressFinalize(this);
 		}
-		#endregion
+#endregion
 
 	}
 }
