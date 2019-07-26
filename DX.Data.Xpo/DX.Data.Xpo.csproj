@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>19.1.3.6</Version>
-    <FileVersion>19.1.3.6</FileVersion>
+    <Version>19.1.4.6</Version>
+    <FileVersion>19.1.4.6</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		19.1.4.6: Upgrade to DevExpress v19.1.4
 		19.1.3.6: Upgrade to DevExpress v19.1.3
 		18.2.3.6: Small optimisations and upgrade to DevExpress v18.2.3
 		18.1.4.4: Refactorings to improve speed and support for Pageable (XP)DataStore
@@ -52,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="19.1.3" />    
+    <PackageReference Include="DevExpress.Xpo" Version="19.1.4" />    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>19.1.3.4</Version>
-    <FileVersion>19.1.3.4</FileVersion>
+    <Version>19.1.4.4</Version>
+    <FileVersion>19.1.4.4</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,8 +15,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
-		19.1.3.4: Upgrade to DevExpress v19.1.3
-		18.2.3.4: Upgrade to DevExpress v18.2.3 
+		19.1.4.4: Upgrade to DevExpress v19.1.4
+		19.1.3.4: Upgrade to DevExpress v19.1.3 and fixes on DTO Mapper and Validator design patterns in the Stores
+		18.2.3.4: Upgrade to DevExpress v18.2.3
 		18.1.4.3: BREAKING CHANGE ON EXISTING DATA: Rename table XpoDxUserToken in your db to DXUserTokens !!
 		18.1.4.2: XPUserStore FindByIdAsync(TKey userId) didn't call FindByIdAsync(object userId) because of invalid cast for .NET Framework
 		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
@@ -50,7 +51,7 @@
 	</ItemGroup>-->
 
 	<ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="19.1.3" />    
+    <PackageReference Include="DevExpress.Xpo" Version="19.1.4" />    
   </ItemGroup>
 
 	<ItemGroup>    
