@@ -30,18 +30,19 @@ namespace DX.Data.Xpo.Mvc
 		static Regex regexFilter = new Regex("\\[.*?\\]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 		static Regex regexBrackets = new Regex("[\\[\\]]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-		protected abstract Dictionary<string, string> PropertyMap { get; }
-		protected virtual string PrepareProperty(string dtoProperty, Dictionary<string, string> map = null)
+		//protected abstract Dictionary<string, string> PropertyMap { get; }
+		protected virtual string PrepareProperty(string dtoProperty/*, Dictionary<string, string> map = null*/)
 		{
 			if (String.IsNullOrEmpty(dtoProperty))
 				return dtoProperty;
 
-			map = map ?? PropertyMap;
+			//map = map ?? PropertyMap;
 			var key = regexBrackets.Replace(dtoProperty, "");
-			return map.ContainsKey(key) ? regexBrackets.Replace(map[key], "") : key;
+			//return map.ContainsKey(key) ? regexBrackets.Replace(map[key], "") : key;
+			return regexBrackets.Replace(Mapper.Map(key), "");
 		}
 
-		protected virtual string PrepareFilterExpression(string filterExpression, Dictionary<string, string> propertyMap = null)
+		protected virtual string PrepareFilterExpression(string filterExpression/*, Dictionary<string, string> propertyMap = null*/)
 		{
 			if (String.IsNullOrEmpty(filterExpression))
 				return filterExpression;
@@ -49,7 +50,7 @@ namespace DX.Data.Xpo.Mvc
 			string result = regexFilter.Replace(filterExpression, m =>
 			{
 				string f = m.ToString();
-				return PrepareProperty(f, propertyMap);
+				return PrepareProperty(f/*, propertyMap*/);
 			});
 			return result;
 		}
