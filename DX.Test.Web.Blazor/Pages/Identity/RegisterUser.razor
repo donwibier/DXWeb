@@ -1,0 +1,64 @@
+﻿@page "/user/register"
+@using Microsoft.AspNetCore.Identity
+@using DX.Test.Web.Blazor.Data
+@using System.ComponentModel.DataAnnotations;
+@inject UserManager<ApplicationUser> UserManager
+@*@inject RegisterUser UserModel*@ 
+
+
+
+<h1>Register</h1>
+<EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" Context="EditFormContext">
+	<DataAnnotationsValidator />
+	<DxFormLayout>
+		<DxFormLayoutItem Caption="Email address:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.EmailAddress"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="Password:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.Password"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="Confirm Password:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.PasswordConfirm"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem ColSpanMd="12">
+			<Template>
+				<button type="submit">Register</button>
+			</Template>
+		</DxFormLayoutItem>
+	</DxFormLayout>
+</EditForm>
+
+@code {
+	public class RegisterUserModel
+	{
+		[Required()]
+		[EmailAddress()]
+		public string EmailAddress { get; set; }
+		//[RegularExpression("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,20}$", ErrorMessage = "Your password is not secure enough")]
+		[Required()]		
+		public string Password { get; set; }
+		[Compare("Password", ErrorMessage ="Passwords must match")]
+		public string PasswordConfirm { get; set; }
+	}
+	private RegisterUserModel userModel = new RegisterUserModel();	
+
+	private void HandleValidSubmit()
+	{
+		Console.WriteLine("OnValidSubmit");
+	}
+	private void HandleInvalidSubmit()
+	{
+		Console.WriteLine("OnInvalidSubmit");
+	}
+
+
+}

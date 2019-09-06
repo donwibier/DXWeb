@@ -6,16 +6,18 @@ using System.Linq;
 
 namespace DX.Data.Xpo
 {
-	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>
+	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>, 
+																  IXPDataMapper<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
-	{
+	{		
 
 	}
 
 
-	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>
+	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>,
+															IXPDataStoreValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
@@ -92,23 +94,20 @@ namespace DX.Data.Xpo
 		where TModel : class, IDataStoreModel<TKey>, new()
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>		
 	{
-		private readonly XpoDatabase xpo;
-		private readonly XPDataValidator<TKey, TModel, TXPOClass> val;
-		private readonly XPDataMapper<TKey, TModel, TXPOClass> map;
-		public XPDataStore(XpoDatabase db, XPDataMapper<TKey, TModel, TXPOClass> mapper, XPDataValidator<TKey, TModel, TXPOClass> validator = null)
+		public XPDataStore(XpoDatabase db, IXPDataMapper<TKey, TModel, TXPOClass> mapper, IXPDataStoreValidator<TKey, TModel, TXPOClass> validator = null)
 		{
 			if (db == null)
 				throw new ArgumentNullException("db");
 			if (mapper == null)
 				throw new ArgumentNullException("mapper");
-			xpo = db;
-			map = mapper;
-			val = validator;
+			DB = db;
+			Mapper = mapper;
+			Validator = validator;
 		}
-		public XpoDatabase DB => xpo;
+		public XpoDatabase DB { get; protected set; }
 
-		public XPDataMapper<TKey, TModel, TXPOClass> Mapper => map;
-		public XPDataValidator<TKey, TModel, TXPOClass> Validator => val;
+		public IXPDataMapper<TKey, TModel, TXPOClass> Mapper { get; protected set; }
+		public IXPDataStoreValidator<TKey, TModel, TXPOClass> Validator { get; protected set; }
 
 		public Type XpoType => typeof(TXPOClass);
 
@@ -124,7 +123,7 @@ namespace DX.Data.Xpo
 
 		protected TXPOClass Assign(TModel source, TXPOClass destination)
 		{
-			return map.Assign(source, destination);
+			return Mapper.Assign(source, destination);
 		}
 
 		public override TModel GetByKey(TKey key)
@@ -146,7 +145,7 @@ namespace DX.Data.Xpo
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 
-			result = xpo.Execute((db, w) =>
+			result = DB.Execute((db, w) =>
 			{
 				// need to keep the xpo entities together with the model items so we can update 
 				// the id's of the models afterwards.
@@ -155,7 +154,7 @@ namespace DX.Data.Xpo
 				var r = new DataValidationResults<TKey>();
 				foreach (var item in items)
 				{
-					var canInsert = val?.Inserting(item, r);
+					var canInsert = Validator?.Inserting(item, r);
 					if (canInsert.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();
@@ -166,7 +165,7 @@ namespace DX.Data.Xpo
 					TXPOClass newItem = Assign(item, Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
 					batchPairs.Add(newItem, item);
 
-					var hasInserted = val?.Inserted(item, newItem, r);
+					var hasInserted = Validator?.Inserted(item, newItem, r);
 					if (hasInserted.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();
@@ -210,12 +209,12 @@ namespace DX.Data.Xpo
 				throw new ArgumentNullException("items");
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
-			result = xpo.Execute((db, w) =>
+			result = DB.Execute((db, w) =>
 			{
 				var r = new DataValidationResults<TKey>();
 				foreach (var item in items)
 				{
-					var canUpdate = val?.Updating(item, r);
+					var canUpdate = Validator?.Updating(item, r);
 					if (canUpdate.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();
@@ -232,7 +231,7 @@ namespace DX.Data.Xpo
 
 					Assign(item, updatedItem);
 
-					var hasUpdated = val?.Updated(item, updatedItem, r);
+					var hasUpdated = Validator?.Updated(item, updatedItem, r);
 					if (hasUpdated.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();
@@ -261,7 +260,7 @@ namespace DX.Data.Xpo
 
 		public override IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids)
 		{
-			var result = xpo.Execute((db, w) =>
+			var result = DB.Execute((db, w) =>
 			{ 
 				var r = new DataValidationResults<TKey>();
 				foreach (var id in ids)
@@ -273,7 +272,7 @@ namespace DX.Data.Xpo
 						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
 						break;
 					}
-					var canDelete = val?.Deleting(id, item, r);
+					var canDelete = Validator?.Deleting(id, item, r);
 					if (canDelete.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();
@@ -283,7 +282,7 @@ namespace DX.Data.Xpo
 					
 					item.Delete();
 					//val.Deleted(id, item, r);
-					var hasDeleted = val?.Deleted(id, item, r);
+					var hasDeleted = Validator?.Deleted(id, item, r);
 					if (hasDeleted.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();

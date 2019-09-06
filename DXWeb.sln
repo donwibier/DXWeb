@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Mvc", "DX.Data.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Projects", "Test Projects", "{C779871D-BAC2-4997-A06F-8B8EC5265091}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Test.Web.Blazor", "DX.Test.Web.Blazor\DX.Test.Web.Blazor.csproj", "{75813F2B-496F-44D3-80D6-4943C7D8822B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{7FB29A1D-64E9-4B58-A40D-F455097500DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FB29A1D-64E9-4B58-A40D-F455097500DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FB29A1D-64E9-4B58-A40D-F455097500DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75813F2B-496F-44D3-80D6-4943C7D8822B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75813F2B-496F-44D3-80D6-4943C7D8822B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75813F2B-496F-44D3-80D6-4943C7D8822B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75813F2B-496F-44D3-80D6-4943C7D8822B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +70,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3CE1EC26-90CE-4A43-A835-759BD60937E4} = {C779871D-BAC2-4997-A06F-8B8EC5265091}
 		{54DA526C-F036-4892-8209-E6AF7EB00AF0} = {C779871D-BAC2-4997-A06F-8B8EC5265091}
+		{75813F2B-496F-44D3-80D6-4943C7D8822B} = {C779871D-BAC2-4997-A06F-8B8EC5265091}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {30AFBBD3-FE5B-48CA-BAB2-94646300AE21}

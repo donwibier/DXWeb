@@ -18,7 +18,9 @@ namespace DX.Data.Xpo.Mvc
 		where TModel : class, IDataStoreModel<TKey>, new()
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
-		public XPPagedDataStore(XpoDatabase db, XPDataMapper<TKey, TModel, TXPOClass> mapper, XPDataValidator<TKey, TModel, TXPOClass> validator) 
+		public XPPagedDataStore(XpoDatabase db, 
+					IXPDataMapper<TKey, TModel, TXPOClass> mapper, 
+					IXPDataStoreValidator<TKey, TModel, TXPOClass> validator) 
 			: base(db, mapper, validator)
 		{
 
