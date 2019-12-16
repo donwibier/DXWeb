@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>19.1.5.7</Version>
-		<FileVersion>19.1.5.7</FileVersion>
+		<Version>19.2.4.7</Version>
+		<FileVersion>19.2.4.7</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -10,11 +10,12 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
 	  <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
-	  <PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>
+	  <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageTags>DXWeb Wibier DevExpress XPO ORM GridView ASP.NET MVC</PackageTags>	  
 	  <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	  <PackageReleaseNotes>
+		  19.2.4.7: Upgrade to DevExpress v19.2.4
 		  19.1.5.7: Upgrade to DevExpress v19.1.5 and XPDataStore constructor uses interface types for mapper and validator
 		  19.1.4.6: abstract PropertyMap removed and replaced by the Mapper.Map(..) method
 		  19.1.4.5: Upgrade to DevExpress v19.1.4
@@ -38,8 +39,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="19.1.5" />
+		<PackageReference Include="DevExpress.Xpo" Version="19.2.4" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="19.2.4" />
 	</ItemGroup>
 
 	<ItemGroup>

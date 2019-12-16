@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.0.10</Version>
-    <FileVersion>1.0.0.10</FileVersion>
+    <Version>1.0.0.11</Version>
+    <FileVersion>1.0.0.11</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
-    <Copyright>Copyright (c) 2019 Don Wibier</Copyright>
+    <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
   </PropertyGroup>
   
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>    
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
-    <PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>
+    <!--<PackageIcon>favicon.ico</PackageIcon>-->
+	
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
@@ -22,7 +23,6 @@
 		Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -34,17 +34,16 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />    
-    
-    
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Configuration.ConfigurationManager">
-      <Version>4.6.0-preview9.19421.4</Version>
+      <Version>4.7.0</Version>
     </PackageReference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="rem if exists &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; copy /Y &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; &quot;$(SolutionDir).deploy\$(ConfigurationName)&quot;" />
   </Target>
+
 </Project>
