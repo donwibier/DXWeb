@@ -10,7 +10,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
 using DX.Utils.Data;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -25,7 +25,7 @@ namespace DX.Data.Xpo.Identity
 	//{
 
 	//}
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 	public class XPRoleMapper<TKey, TRole, TXPORole/*, TXPORoleClaim*/> : XPDataMapper<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : class, IDataStoreModel<TKey>, IRole<TKey>, new()
@@ -42,7 +42,7 @@ namespace DX.Data.Xpo.Identity
 			=> (source) => new TRole
 			{
 				ID = source.ID,
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 				NormalizedName = source.NormalizedName,
 #endif
 				Name = source.Name
@@ -57,7 +57,7 @@ namespace DX.Data.Xpo.Identity
 
 			destination.ID = source.ID;
 			destination.Name = source.Name;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 			destination.NormalizedName = source.NormalizedName;
 #endif
 			return destination;
@@ -65,7 +65,7 @@ namespace DX.Data.Xpo.Identity
 		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>()
 		{
 			{"Id", "Id"},			
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 			{"NormalizedName", "NormalizedName"},
 #endif
 			{"Name", "Name"}

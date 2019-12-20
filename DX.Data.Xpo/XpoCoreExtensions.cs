@@ -2,7 +2,7 @@
 using System.Linq;
 using DevExpress.Xpo;
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DX.Data.Xpo
 {
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
     public static class XpoCoreExtensions
     {
         public static IServiceCollection AddXpoDatabase(this IServiceCollection services, string connectionName/*, string connectionString*/)

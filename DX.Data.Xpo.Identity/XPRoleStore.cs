@@ -10,7 +10,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
 using DX.Utils.Data;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -18,7 +18,7 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
     public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
         where TRole : class, IXPRole<string>, new()
 		where TXPORole : XPBaseObject, IXPRole<string>
@@ -41,7 +41,7 @@ namespace DX.Data.Xpo.Identity
 		//}
 	}
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 	public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim> : XPDataStore<TKey, TRole, TXPORole>, 
 				IQueryableRoleStore<TRole>, IRoleClaimStore<TRole>
         where TKey : IEquatable<TKey>
@@ -100,7 +100,7 @@ namespace DX.Data.Xpo.Identity
 		protected static Type XPORoleType { get { return typeof(TXPORole); } }
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
         protected static Type XPORoleClaimType { get { return typeof(TXPORoleClaim); } }
         protected static TXPORoleClaim XPOCreateRoleClaim(Session s) { return Activator.CreateInstance(typeof(TXPORoleClaim), s) as TXPORoleClaim; }
 #endif
@@ -210,7 +210,7 @@ namespace DX.Data.Xpo.Identity
 
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
                 var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse("NormalizedName == ?", roleName));
 #else
                 var xpoRole = wrk.FindObject(XPORoleType, CriteriaOperator.Parse("NameUpper == ?", roleName.ToUpperInvariant()));
@@ -244,7 +244,7 @@ namespace DX.Data.Xpo.Identity
 		}
 
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
         public async virtual Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

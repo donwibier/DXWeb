@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -46,7 +46,7 @@ namespace DX.Data.Xpo
 		/// Default constructor which uses the "DefaultConnection" connectionString
 		/// </summary>
 		
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 		public XpoDatabase(string connectionName, IConfiguration cfg) :
 			this(cfg.GetConnectionString(connectionName), connectionName)
 		{

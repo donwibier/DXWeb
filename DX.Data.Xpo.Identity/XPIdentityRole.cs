@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DX.Utils.Data;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 
 #else
 using Microsoft.AspNet.Identity;
@@ -13,7 +13,7 @@ using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Data.Xpo.Identity
 {
-//#if (NETSTANDARD2_0)
+//#if (NETSTANDARD2_1)
 //    public class XPIdentityRole : XPIdentityRole<string, XpoDxRole, XpoDxRoleClaim, XpoDxUser, XpoDxUserClaim, XpoDxUserLogin, XpoDxUserToken>
 //#else
 //#endif
@@ -25,7 +25,7 @@ namespace DX.Data.Xpo.Identity
 
 		}
     }
-	//#if (NETSTANDARD2_0)
+	//#if (NETSTANDARD2_1)
 	//    public class XPIdentityRole<TKey> : XPIdentityRole<string, XpoDxRoleClaim>
 	//		where TKey : IEquatable<TKey>
 	//#else
@@ -44,7 +44,7 @@ namespace DX.Data.Xpo.Identity
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TUserRole"></typeparam>
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 	//public abstract class XPIdentityRole<TKey, TXPORole, TXPORoleClaim, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken> : IDataStoreModel<TKey>, IRole<TKey>
 	public abstract class XPIdentityRole<TKey> : IDataStoreModel<TKey>, IXPRole<TKey>
 		where TKey : IEquatable<TKey>
@@ -82,7 +82,7 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public string Name { get; set; }
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
         public string NormalizedName { get; set; }
 
         //public virtual Type XPORoleClaimType

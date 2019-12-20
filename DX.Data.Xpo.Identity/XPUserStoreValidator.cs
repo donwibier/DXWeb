@@ -3,7 +3,7 @@ using DX.Utils.Data;
 using System;
 using System.Linq;
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 #else
 using Microsoft.AspNet.Identity;
 #endif

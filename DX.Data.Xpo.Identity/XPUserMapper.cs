@@ -3,7 +3,7 @@ using DX.Utils.Data;
 using System;
 using System.Linq;
 
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 #else
 using Microsoft.AspNet.Identity;
 #endif
@@ -36,7 +36,7 @@ namespace DX.Data.Xpo.Identity
 				TwoFactorEnabled = source.TwoFactorEnabled,
 				LockoutEndDateUtc = source.LockoutEndDateUtc,
 				LockoutEnabled = source.LockoutEnabled,
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 				NormalizedName = source.NormalizedName,
 				NormalizedEmail = source.NormalizedEmail,
 #endif
@@ -60,7 +60,7 @@ namespace DX.Data.Xpo.Identity
 			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
 			destination.LockoutEnabled = source.LockoutEnabled;
 			destination.AccessFailedCount = source.AccessFailedCount;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 			destination.NormalizedName = source.NormalizedName;
 			destination.NormalizedEmail = source.NormalizedEmail;
 #endif

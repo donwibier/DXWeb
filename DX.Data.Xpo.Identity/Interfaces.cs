@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
 using DX.Utils.Data;
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -15,7 +15,7 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_0)
+#if (NETSTANDARD2_1)
     public interface IUser<TKey> 
          where TKey : IEquatable<TKey>
     {
@@ -117,12 +117,12 @@ namespace DX.Data.Xpo.Identity
 		//        TKey Id { get; set; }
 		//        string Name { get; set; }
 
-		//#if (NETSTANDARD2_0)
+		//#if (NETSTANDARD2_1)
 		//		string NormalizedName { get; set; }
 		//#endif
 		//		IList UsersList { get; }
 //		XPCollection<TXPOUser> Users { get; }
-//#if (NETSTANDARD2_0)
+//#if (NETSTANDARD2_1)
 //		XPCollection<TXPORoleClaim> Claims { get; }
 //#endif
 	}

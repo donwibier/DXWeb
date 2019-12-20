@@ -7,7 +7,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="19.2.4" />
+    <PackageReference Include="DevExpress.Xpo" Version="19.2.5" />
 	<!--<PackageReference Include="Microsoft.AspNetCore.Identity" Version="3.1.0" />-->
 	<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.0" />
 
