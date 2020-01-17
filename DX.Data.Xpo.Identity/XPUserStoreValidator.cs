@@ -33,7 +33,7 @@ namespace DX.Data.Xpo.Identity
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
 			var result = new DataValidationResult<TKey>
 			{

@@ -101,7 +101,7 @@ namespace DX.Utils.Data
 	{
 		IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
 		IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
-		IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults);
+		IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 
 	}
 	public interface IDataStoreValidator<TKey, TModel, TDBModel>: IDataStoreValidator<TKey, TModel>

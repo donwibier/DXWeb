@@ -60,7 +60,7 @@ namespace DX.Utils.Data
 		//public abstract bool Inserting(TModel model);
 		//public abstract bool Updating(TModel model);
 		//public abstract bool Deleting(TModel model);
-		public abstract IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 		public abstract IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
 		public abstract IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
 	}

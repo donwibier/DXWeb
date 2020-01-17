@@ -33,7 +33,7 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
 			var result = new DataValidationResult<TKey>
 			{
@@ -118,7 +118,15 @@ namespace DX.Data.Xpo
 						 select n;
 			return result;
 		}
-
+		protected override IEnumerable<TModel> Query()
+		{
+			var result = DB.Execute((db, w) =>
+			{
+				var r = Query(w).Select(CreateModelInstance);
+				return r.ToList();
+			});
+			return result;
+		}
 		protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
 
 		protected TXPOClass Assign(TModel source, TXPOClass destination)
@@ -272,7 +280,7 @@ namespace DX.Data.Xpo
 						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TXPOClass).Name, item.ID), 0);
 						break;
 					}
-					var canDelete = Validator?.Deleting(id, item, r);
+					var canDelete = Validator?.Deleting(id, r, item);
 					if (canDelete.ResultType == DataValidationResultType.Error)
 					{
 						w.RollbackTransaction();

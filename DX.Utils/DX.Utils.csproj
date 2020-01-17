@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.0.12</Version>
-    <FileVersion>1.0.0.12</FileVersion>
+    <Version>1.0.0.14</Version>
+    <FileVersion>1.0.0.14</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
@@ -11,11 +11,14 @@
     <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
 	<LangVersion>7.3</LangVersion>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
-    <!--<PackageIcon>favicon.ico</PackageIcon>-->
-	
+    <!--<PackageIcon>favicon.ico</PackageIcon>-->	
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		1.0.0.14: BREAKING CHANGE: Signature-change on IDataValidator&lt;..&gt;.Deleting(..):
+			        Was: Deleting(TKey id, object arg, IDataValidationResults&lt;TKey&gt; validationResults);
+				    Is:  Deleting(TKey id, IDataValidationResults&lt;TKey&gt; validationResults, params object[] args);
+		1.0.0.13: ListExtensions added
 		1.0.0.12: dotnet standard 2.1 for dotnet core v3.1 support
 		1.0.0.10: Small fixes and implementation of DataMapper and DataValidator
 		1.0.0.8: Small refactorings to improve speed and support for Pageable (XP)DataStore

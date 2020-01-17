@@ -18,10 +18,12 @@ namespace DX.Data.Xpo.Identity
 		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
 	{
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, object arg, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
+			if (args == null || args.Length == 0)
+				throw new ArgumentNullException("args[0] should contain reference to XPO entity");
 			IDataValidationResult<TKey> result = null;
-			TXPORole role = arg as TXPORole;
+			TXPORole role = args[0] as TXPORole;
 			if (role != null)
 			{
 				int userCount = (int)role.Session.Evaluate(typeof(XpoDxUser),
@@ -38,7 +40,7 @@ namespace DX.Data.Xpo.Identity
 
 			if (result == null)
 			{
-				result = base.Deleting(id, arg, validationResults);
+				result = base.Deleting(id, validationResults, args);
 			}
 			validationResults.Add(result);
 			return result;
