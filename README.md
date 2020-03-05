@@ -11,8 +11,10 @@ This package contains several helper classes for working with:
 * Url manipulations
 * DataStore<TKey, TModel> base class to work with DataSets ->
   DTO's  including Mapper and Validator classes to support LINQ and CRUD operations.
+
 #### DX.Data.Xpo
 This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern incl. XPMapper and XPValidator classes
+
 #### DX.Data.Xpo.Identity
 This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines.
 
@@ -51,6 +53,9 @@ public void ConfigureServices(IServiceCollection services)
 
 
 #### DX.Data.Xpo.Mvc (For ASP.NET Framework ASPxGridView MVC Extension only)
+
+**Please note:** _You will need at least an **active** [DevExpress ASP.NET **License**](https://www.devexpress.com/products/net/controls/asp/) for this package_
+
 Some helper classes to have the ASPxGridView extensions support server-side filtering and sorting based on the XPDataStore implementation.
 
 More documentation to follow...
