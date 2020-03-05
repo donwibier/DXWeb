@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>19.2.5.11</Version>
-    <FileVersion>19.2.5.11</FileVersion>
+    <Version>19.2.6.12</Version>
+    <FileVersion>19.2.6.12</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several XPO Related Helper classes</Description>
     <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
     <PackageReleaseNotes>
+		19.2.6.12: DI Extensionmethod now uses an options object for initialisation. Other refactorings done as well
+		19.2.6.11: Upgrade to DX v19.2.6
 		19.2.5.11: Signature-change on IDataValidator&lt;..&gt;.Deleting(..)
 		19.2.5.10: XpoStore.Query() not abstract anymore
 		19.2.5.9: dotnet standard v2.1 for dotnet core v3.1 support + upgrade to DX v19.2.5
@@ -52,11 +54,11 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="19.2.5" />    
+    <PackageReference Include="DevExpress.Xpo" Version="19.2.6" />    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

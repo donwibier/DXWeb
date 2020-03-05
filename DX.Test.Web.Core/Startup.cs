@@ -32,14 +32,14 @@ namespace DX.Test.Web.Core
         public void ConfigureServices(IServiceCollection services)
         {
             string connStrName = "DefaultConnection";
-            string connStr = Configuration.GetConnectionString(connStrName);
-			
+            //Initialize XPODataLayer / Database	
+            services.AddXpoDatabase((o) => {
+                o.Name = connStrName;
+                o.ConnectionString = Configuration.GetConnectionString(connStrName);
+            });
+
+            //Initialize identity to use XPO
             services
-				.AddSingleton<IConfiguration>(Configuration) // Needed for XPO!
-				.AddXpoDatabase(connStrName);   //Initialize XPODataLayer / Database			
-			
-			//Initialize identity to use XPO
-			services
                 .AddIdentity<ApplicationUser, ApplicationRole>(options => {
                     options.Lockout.AllowedForNewUsers = true;
                     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);

@@ -34,12 +34,12 @@ namespace DX.Test.Web.Blazor
 		public void ConfigureServices(IServiceCollection services)
 		{
 			string connStrName = "DefaultConnection";
-			string connStr = Configuration.GetConnectionString(connStrName);
+			//Initialize XPODataLayer / Database	
+			services.AddXpoDatabase((o) => {
+				o.Name = connStrName;
+				o.ConnectionString = Configuration.GetConnectionString(connStrName);
+			});			
 
-			services
-				.AddSingleton(Configuration) // Needed for XPO!
-				.AddXpoDatabase(connStrName);   //Initialize XPODataLayer / Database	
-												//Initialize identity to use XPO
 			services
 				.AddIdentity<ApplicationUser, ApplicationRole>(options => {
 					options.Lockout.AllowedForNewUsers = true;
@@ -52,13 +52,7 @@ namespace DX.Test.Web.Blazor
 					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
 					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())
 				.AddDefaultTokenProviders();
-			/*
-			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(
-					Configuration.GetConnectionString("DefaultConnection")));
-			services.AddDefaultIdentity<IdentityUser>()
-				.AddEntityFrameworkStores<ApplicationDbContext>();
-			*/
+
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
 			services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider<ApplicationUser>>();

@@ -31,68 +31,132 @@ namespace DX.Data.Xpo
 		public string DataLayerName { get; private set; }
 	}
 
+	public class XpoDatabaseOptions
+	{
+		public string Name { get; set; }
+		public string ConnectionString { get; set; }
+		public bool EnableCaching { get; set; } = false;
+		public AutoCreateOption UpdateSchema { get; set; } = AutoCreateOption.None;
+	}
+
 	public class XpoDatabase : IDisposable
 	{
 		//private IDataLayer dataLayer;
-		private readonly static object lockObj = new object();
+		//private readonly static object lockObj = new object();
 		private readonly static ConcurrentDictionary<string, IDataLayer> dataLayers =
 			new ConcurrentDictionary<string, IDataLayer>();
 
-		private readonly string connectionString;
-		public string ConnectionString { get { return connectionString; } }
+		private readonly XpoDatabaseOptions options;
+		public string ConnectionString { get { return options.ConnectionString; } }
+		public string DataLayerName { get { return options.Name; } }		
 
-		private readonly string dataLayerName;
-		public string DataLayerName { get { return dataLayerName; } }
-		/// Default constructor which uses the "DefaultConnection" connectionString
-		/// </summary>
-		
 #if (NETSTANDARD2_1)
+		[Obsolete("Please use the new constructor with the options argument or options builder", false)]
 		public XpoDatabase(string connectionName, IConfiguration cfg) :
-			this(cfg.GetConnectionString(connectionName), connectionName)
+					this(cfg.GetConnectionString(connectionName), connectionName)
 		{
+
 		}
 #else
+		[Obsolete("Please use the new constructor with the options argumentor options builder", false)]
 		public XpoDatabase()
 			: this("DefaultConnection")
 		{
 		}
-
+		[Obsolete("Please use the new constructor with the options argumentor options builder", false)]
 		public XpoDatabase(string connectionName) :
 			this(ConfigurationManager.ConnectionStrings[connectionName].ConnectionString, connectionName)
 		{
 		}
-#endif
 
+#endif
 		/// <summary>
 		/// Constructor which takes the connection string name
 		/// </summary>
 		/// <param name="connectionString"></param>
-		public XpoDatabase(string connectionString, string connectionName)
+		[Obsolete("Please use the new constructor with the options argument or options builder", false)]
+		public XpoDatabase(string connectionString, string connectionName):
+			this(new XpoDatabaseOptions { 
+				Name = connectionName,
+				ConnectionString = connectionString
+			})
 		{
-			if (String.IsNullOrEmpty(connectionString))
-				throw new ArgumentNullException("connectionString");
-			if (String.IsNullOrEmpty(connectionName))
-				throw new ArgumentNullException("connectionName");
+		}
+		public XpoDatabase(Action<XpoDatabaseOptions> setupAction)
+		{
+			var o = new XpoDatabaseOptions();
+			setupAction(o);
+			AddDataLayer(o);
+		}
 
-			this.connectionString = connectionString;
-			this.dataLayerName = connectionName;
+		public XpoDatabase(Action<XpoDatabaseOptions>[] setupActions)			
+		{
+			for (int i = 0; i < setupActions.Length; i++)
+			{
+				var o = new XpoDatabaseOptions();
+				setupActions[i](o);
+				AddDataLayer(o);
+				if (i == 0)
+					this.options = o;
+			}
+		}
 
-			IDataLayer dataLayer = GetDataLayer(this.connectionString, this.dataLayerName);
+		public XpoDatabase(XpoDatabaseOptions options) :
+			this(new XpoDatabaseOptions[] { options })
+		{
+		}
+
+		public XpoDatabase(XpoDatabaseOptions[] options)
+		{
+			for (int i = 0; i < options.Length; i++)
+			{
+				AddDataLayer(options[i]);
+				if (i == 0)
+					this.options = options[i];
+			}
+		}
+
+		protected void AddDataLayer(XpoDatabaseOptions option)
+		{
+			if (string.IsNullOrEmpty(option.ConnectionString))
+				throw new ArgumentNullException("ConnectionString");
+			if (string.IsNullOrEmpty(option.Name))
+				throw new ArgumentNullException("Name");
+			GetDataLayer(option);
 		}
 
 		public virtual Session GetSession()
 		{
-			return GetSession(ConnectionString, DataLayerName);
+			return GetSession(DataLayerName);
 		}
 
 		public virtual UnitOfWork GetUnitOfWork()
 		{
-			return GetUnitOfWork(ConnectionString, DataLayerName);
+			return GetUnitOfWork(DataLayerName);
 		}
 
 		public virtual void Execute(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
 		{
-			using (Session s = transactional ? GetUnitOfWork() : GetSession())
+			Execute(DataLayerName, work, transactional, commit);
+		}
+		public virtual T Execute<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
+		{
+			return Execute<T>(DataLayerName, work, transactional, commit);
+		}
+
+		public async virtual Task<T> ExecuteAsync<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
+		{
+			return await Task.FromResult<T>(Execute<T>(DataLayerName, work, transactional, commit));
+		}
+
+		public async virtual Task ExecuteAsync(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
+		{
+			await Task.Run(() => { Execute(DataLayerName, work, transactional, commit); });
+		}
+
+		public virtual void Execute(string dataLayer, Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
+		{
+			using (Session s = transactional ? GetUnitOfWork(dataLayer) : GetSession(dataLayer))
 			{
 				work(this, s);
 				if (transactional && commit && (s is UnitOfWork))
@@ -101,10 +165,10 @@ namespace DX.Data.Xpo
 				}
 			}
 		}
-		public virtual T Execute<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
+		public T Execute<T>(string dataLayer, Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
 		{
-			T result = default(T);
-			using (Session s = transactional ? GetUnitOfWork() : GetSession())
+			T result = default;
+			using (Session s = transactional ? GetUnitOfWork(dataLayer) : GetSession(dataLayer))
 			{
 				result = work(this, s);
 				if (transactional && commit && (s is UnitOfWork))
@@ -113,35 +177,43 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
-		public async virtual Task<T> ExecuteAsync<T>(Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
+		public async virtual Task<T> ExecuteAsync<T>(string dataLayer, Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
 		{
-			return await Task.FromResult<T>(Execute<T>(work, transactional, commit));
+			return await Task.FromResult<T>(Execute<T>(dataLayer, work, transactional, commit));
 		}
 
-		public async virtual Task ExecuteAsync(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
+		public async virtual Task ExecuteAsync(string dataLayer, Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
 		{
-			await Task.Run(() => { Execute(work, transactional, commit); });
+			await Task.Run(() => { Execute(dataLayer, work, transactional, commit); });
 		}
 
 
-#region Static Helpers
-		public static Session GetSession(string connectionString, string dataLayerName)
+
+
+		#region Static Helpers
+		public static Session GetSession(string dataLayerName)
 		{
-			return new Session(GetDataLayer(connectionString, dataLayerName));
+			// datalayer must be initialized already
+			return new Session(GetDataLayer(new XpoDatabaseOptions { Name = dataLayerName }));
 		}
 
-		public static UnitOfWork GetUnitOfWork(string connectionString, string dataLayerName)
+		public static UnitOfWork GetUnitOfWork(string dataLayerName)
 		{
-			return new UnitOfWork(GetDataLayer(connectionString, dataLayerName));
+			return new UnitOfWork(GetDataLayer(new XpoDatabaseOptions { Name = dataLayerName }));
 		}
-		public static IDataLayer GetDataLayer(string connectionString, string dataLayerName)
+
+		public static IDataLayer GetDataLayer(XpoDatabaseOptions options)
 		{
-			IDataLayer result = null;
-			if (!dataLayers.TryGetValue(dataLayerName, out result))
+			if (!dataLayers.TryGetValue(options.Name, out IDataLayer result))
 			{
-				result = createDataLayer(connectionString, dataLayerName);
-				dataLayers.AddOrUpdate(dataLayerName, result, (s, l) => l);
+				if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+				{
+					result = CreateDataLayer(options);
+					dataLayers.AddOrUpdate(options.Name, result, (s, l) => l);
+				}
 			}
+			if (result == null)
+				throw new Exception("DataLayer was not found!");
 			return result;
 		}
 
@@ -152,9 +224,10 @@ namespace DX.Data.Xpo
 
 #endregion
 
-		private static IDataLayer createDataLayer(string connectionString, string datalayerName)
+		private static IDataLayer CreateDataLayer(XpoDatabaseOptions options)
+			//string connectionString, string datalayerName, bool? updateSchema, bool enableCache)
 		{
-			if (String.IsNullOrEmpty(connectionString))
+			if (String.IsNullOrEmpty(options.ConnectionString))
 				throw new ArgumentNullException("connectionString");
 			// set XpoDefault.Session to null to prevent accidental use of XPO default session
 			XpoDefault.Session = null;
@@ -164,12 +237,12 @@ namespace DX.Data.Xpo
 			XpoDefault.IdentityMapBehavior = IdentityMapBehavior.Strong;
 
 			// autocreate option in connectionstring
-			AutoCreateOption createOption = AutoCreateOption.None;
-			bool enableCachingNode = false;
+			AutoCreateOption createOption;
+			bool enableCachingNode;
 			try
 			{
-				createOption = Conversion.GetConfigOption<AutoCreateOption>(connectionString, "AutoCreateOption", AutoCreateOption.DatabaseAndSchema);
-				enableCachingNode = Conversion.GetConfigOption(connectionString, "EnableCachingNode", false);
+				createOption = Conversion.GetConfigOption<AutoCreateOption>(options.ConnectionString, "AutoCreateOption", options.UpdateSchema);
+				enableCachingNode = Conversion.GetConfigOption(options.ConnectionString, "EnableCachingNode", options.EnableCaching);
 			}
 			catch (Exception ex)
 			{
@@ -178,10 +251,10 @@ namespace DX.Data.Xpo
 			}
 
 			XPDictionary dataDictionary = new ReflectionDictionary();
-			IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(connectionString), createOption);
+			IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(options.ConnectionString), createOption);
 
 			// Initialize the XPO dictionary
-			dataDictionary.GetDataStoreSchema(GetDataTypes(datalayerName));
+			dataDictionary.GetDataStoreSchema(GetDataTypes(options.Name));
 
 			// make sure everything exists in the db
 			if (createOption == AutoCreateOption.DatabaseAndSchema)
@@ -261,10 +334,10 @@ namespace DX.Data.Xpo
 				{
 					using (UnitOfWork targetSession = target.GetUnitOfWork())
 					{
-						Cloner c = new Cloner(sourceSession, targetSession, excludedClasses, synchronizeProperties);
+						Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses, synchronizeProperties);
 						foreach (T sourceItem in sourceList)
 						{
-							result.Add(c.Clone<T>(sourceItem, synchronize));
+							result.Add(c.Clone(sourceItem, synchronize));
 						}
 						targetSession.CommitChanges();
 					}
@@ -294,8 +367,8 @@ namespace DX.Data.Xpo
 			using (Session sourceSession = this.GetSession())
 			using (UnitOfWork targetSession = target.GetUnitOfWork())
 			{
-				Cloner c = new Cloner(sourceSession, targetSession, excludedClasses, synchronizeProperties);
-				T result = c.Clone<T>(source, synchronize);
+				Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses, synchronizeProperties);
+				T result = c.Clone(source, synchronize);
 				targetSession.CommitChanges();
 				return result;
 			}
@@ -328,22 +401,22 @@ namespace DX.Data.Xpo
 			/// target session as values
 			/// </summary>
 			/// <returns></returns>
-			Dictionary<object, object> clonedObjects = new Dictionary<object, object>();
-			List<XPClassInfo> _excluded = new List<XPClassInfo>();
-			List<String> _syncProps = new List<string>();
-			Session _source = null;
-			Session _target = null;
+			readonly Dictionary<object, object> clonedObjects = new Dictionary<object, object>();
+			readonly List<XPClassInfo> _excluded = new List<XPClassInfo>();
+			readonly List<String> _syncProps = new List<string>();
+			//readonly Session _source = null;
+			readonly Session _target = null;
 
 			/// <summary>
 			/// Initializes a new instance of the CloneIXPSimpleObjectHelper class.
 			/// </summary>
-			public Cloner(Session source, Session target)
+			public Cloner(/*Session source,*/ Session target)
 			{
-				_source = source;
+				//_source = source;
 				_target = target;
 			}
 
-			public Cloner(Session source, Session target,
+			public Cloner(/*Session source,*/ Session target,
 				IEnumerable<XPClassInfo> excludedclasses, IEnumerable<string> synchronizeproperties)
 			{
 				if (excludedclasses != null)
@@ -351,7 +424,7 @@ namespace DX.Data.Xpo
 				if (synchronizeproperties != null)
 					_syncProps.AddRange(synchronizeproperties);
 
-				_source = source;
+				//_source = source;
 				_target = target;
 			}
 
