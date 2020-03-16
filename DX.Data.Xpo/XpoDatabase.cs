@@ -82,11 +82,12 @@ namespace DX.Data.Xpo
 			})
 		{
 		}
-		public XpoDatabase(Action<XpoDatabaseOptions> setupAction)
+		public XpoDatabase(Action<XpoDatabaseOptions> setupAction):
+			this(new Action<XpoDatabaseOptions>[] { setupAction })
 		{
-			var o = new XpoDatabaseOptions();
-			setupAction(o);
-			AddDataLayer(o);
+			//var o = new XpoDatabaseOptions();
+			//setupAction(o);
+			//AddDataLayer(o);
 		}
 
 		public XpoDatabase(Action<XpoDatabaseOptions>[] setupActions)			

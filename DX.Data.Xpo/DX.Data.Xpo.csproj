@@ -1,66 +1,69 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Version>19.2.6.12</Version>
-    <FileVersion>19.2.6.12</FileVersion>
-    <Authors>Don Wibier (DevExpress)</Authors>
-    <Description>Several XPO Related Helper classes</Description>
-    <Copyright>Copyright (c) 2017 Don Wibier</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Version>19.2.6.13</Version>
+		<FileVersion>19.2.6.13</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
+		<Description>Several XPO Related Helper classes</Description>
+		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
-	<LangVersion>7.3</LangVersion>
-    <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
-    <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
-    <PackageReleaseNotes>
-		19.2.6.12: DI Extensionmethod now uses an options object for initialisation. Other refactorings done as well
-		19.2.6.11: Upgrade to DX v19.2.6
-		19.2.5.11: Signature-change on IDataValidator&lt;..&gt;.Deleting(..)
-		19.2.5.10: XpoStore.Query() not abstract anymore
-		19.2.5.9: dotnet standard v2.1 for dotnet core v3.1 support + upgrade to DX v19.2.5
-		19.2.4.7: Upgrade to DevExpress v19.2.4
-		19.1.5.7: Upgrade to DevExpress v19.1.5 and XPDataStore constructor uses interface types for mapper and validator
-		19.1.4.6: Upgrade to DevExpress v19.1.4
-		19.1.3.8: Fixes on DataMapper implementation
-		19.1.3.6: Upgrade to DevExpress v19.1.3
-		18.2.3.6: Small optimisations and upgrade to DevExpress v18.2.3
-		18.1.4.4: Refactorings to improve speed and support for Pageable (XP)DataStore
-		18.1.4.3: Abstract Generic DTO XPDataStore and XPValidator classes added
-		18.1.4.2: Better exception message on invalid connection string
-		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
-		17.2.6.2: Upgrade to DevExpress v17.2.6
-		17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
-		17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
-		17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
-		Not operational on .NET Standard 2.0 yet
-	</PackageReleaseNotes>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
+		<LangVersion>7.3</LangVersion>
+		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
+		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
+		<PackageReleaseNotes>
+			19.2.6.13: Bug fixed in overloaded method to get XpoDatabase instance with options object
+			19.2.6.12: DI Extensionmethod now uses an options object for initialisation. Other refactorings done as well
+			19.2.6.11: Upgrade to DX v19.2.6
+			19.2.5.11: Signature-change on IDataValidator&lt;..&gt;.Deleting(..)
+			19.2.5.10: XpoStore.Query() not abstract anymore
+			19.2.5.9: dotnet standard v2.1 for dotnet core v3.1 support + upgrade to DX v19.2.5
+			19.2.4.7: Upgrade to DevExpress v19.2.4
+			19.1.5.7: Upgrade to DevExpress v19.1.5 and XPDataStore constructor uses interface types for mapper and validator
+			19.1.4.6: Upgrade to DevExpress v19.1.4
+			19.1.3.8: Fixes on DataMapper implementation
+			19.1.3.6: Upgrade to DevExpress v19.1.3
+			18.2.3.6: Small optimisations and upgrade to DevExpress v18.2.3
+			18.1.4.4: Refactorings to improve speed and support for Pageable (XP)DataStore
+			18.1.4.3: Abstract Generic DTO XPDataStore and XPValidator classes added
+			18.1.4.2: Better exception message on invalid connection string
+			18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
+			17.2.6.2: Upgrade to DevExpress v17.2.6
+			17.2.5.2: DI Extension methods added and upgrade to DevExpress v17.2.5
+			17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
+			17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
+			Not operational on .NET Standard 2.0 yet
+		</PackageReleaseNotes>
+		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+		<Reference Include="System" />
+		<Reference Include="System.Configuration" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="System.Data.DataSetExtensions" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Net.Http" />
+		<Reference Include="System.Xml" />
+	</ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.2" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 
-  <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="19.2.6" />    
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DevExpress.Xpo" Version="19.2.6" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+	</ItemGroup>
 </Project>
