@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>19.2.6.7</Version>
-		<FileVersion>19.2.6.7</FileVersion>
+		<Version>20.1.2.7-pre-20064</Version>
+		<FileVersion>20.1.2.7-pre-20064</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
 	  <PackageTags>DXWeb Wibier DevExpress XPO ORM GridView ASP.NET MVC</PackageTags>	  
 	  <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	  <PackageReleaseNotes>
+		  20.1.2.7-pre-20064: Upgrade to DX v20.1.2-pre-20064 and .NET preview 5
 		  19.2.6.7: Upgrade to DevExpress v19.2.6
 		  19.2.5.7: Upgrade to DevExpress v19.2.5
 		  19.2.4.5: Upgrade to DevExpress v19.2.4
@@ -41,8 +42,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="19.2.6" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="19.2.6" />
+		<PackageReference Include="DevExpress.Xpo" Version="20.1.2-pre-20064" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="20.1.2-pre-20064" />
 	</ItemGroup>
 
 	<ItemGroup>
