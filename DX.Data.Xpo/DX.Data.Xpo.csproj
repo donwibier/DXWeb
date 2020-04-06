@@ -57,8 +57,8 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0-preview.1.20120.4" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0-preview.1.20120.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0-preview.2.20160.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0-preview.2.20160.3" />
 	</ItemGroup>
 
 	<ItemGroup>
