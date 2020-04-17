@@ -28,7 +28,7 @@ namespace DX.Data.EF
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					work(this, ctx, dbTransaction);
-					if (transactional && commit)
+					if (transactional && commit && ctx.ChangeTracker.HasChanges())
 					{
 						ctx.SaveChanges();
 						dbTransaction.Commit();
@@ -51,8 +51,8 @@ namespace DX.Data.EF
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					result = work(this, ctx, dbTransaction);
-					if (transactional && commit)
-					{
+					if (transactional && commit && ctx.ChangeTracker.HasChanges())
+					{						
 						ctx.SaveChanges();
 						dbTransaction.Commit();
 					}

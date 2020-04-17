@@ -1,4 +1,5 @@
-﻿using DX.Utils.Data;
+﻿using DX.Utils;
+using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,7 +208,7 @@ namespace DX.Data.EF
 				}
 
 				try
-				{					
+				{
 					//ctx.ObjectSaved += (s, e) => {
 					//	// sync the model ids with the newly generated xpo id's
 					//	var xpoItem = e.Object as TEFClass;
@@ -217,6 +218,7 @@ namespace DX.Data.EF
 					//		batchPairs[xpoItem].ID = xpoItem.ID;
 					//	}
 					//};
+					ctx.SaveChanges();
 					tran.Commit();
 
 				}
@@ -226,11 +228,11 @@ namespace DX.Data.EF
 					r.Add(new DataValidationResult<TKey>
 					{
 						ResultType = DataValidationResultType.Error,
-						Message = e.InnerException != null ? e.InnerException.Message : e.Message
+						Message = e.GetInnerException().Message
 					});
 				}
 				return r;
-			});
+			}, true, false );
 
 			return result;
 		}
@@ -248,7 +250,7 @@ namespace DX.Data.EF
 				{
 					var canUpdate = Validator?.Updating(item, r);
 					if (canUpdate.ResultType == DataValidationResultType.Error)
-					{
+					{						
 						tran.Rollback();
 						r.Add(canUpdate);
 						break;
@@ -283,11 +285,11 @@ namespace DX.Data.EF
 					r.Add(new DataValidationResult<TKey>
 					{
 						ResultType = DataValidationResultType.Error,
-						Message = e.InnerException != null ? e.InnerException.Message : e.Message
+						Message = e.GetInnerException().Message
 					});
 				}
 				return r;
-			});
+			}, true, false);
 
 			return result;
 		}
@@ -339,7 +341,7 @@ namespace DX.Data.EF
 					});
 				}
 				return r;
-			});
+			}, true, false);
 			return result;
 		}
 	}
