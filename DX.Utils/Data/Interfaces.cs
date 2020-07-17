@@ -17,6 +17,10 @@ namespace DX.Utils.Data
 	{
 		TKey ID { get; set; }
 	}
+	public interface IDataStoreMapper<TKey, TModel, TDBModel>
+	{
+
+	}
 
 	public interface IDataStoreLookupModel<TKey> : IDataStoreModel<TKey>
 		where TKey : IEquatable<TKey>
@@ -37,6 +41,11 @@ namespace DX.Utils.Data
 		Type KeyType { get; }
 		Type ModelType { get; }
 
+		//IDataMapper<TKey, TModel, TDBModel> GetMapper<TDBModel>()
+		//	where TDBModel : class, IDataStoreModel<TKey>;
+
+		//IDataStoreValidator<TKey, TModel> GetValidator();
+
 		//IEnumerable<TModel> Query();
 		//Task<IEnumerable<TModel>> QueryAsync();
 		TModel GetByKey(TKey key);
@@ -50,6 +59,11 @@ namespace DX.Utils.Data
 		IDataValidationResults<TKey> Update(TKey id, TModel item);
 		Task<IDataValidationResults<TKey>> UpdateAsync(IEnumerable<TModel> items);
 		Task<IDataValidationResults<TKey>> UpdateAsync(TKey id, TModel item);
+
+		IDataValidationResults<TKey> Store(IEnumerable<TModel> items);
+		IDataValidationResults<TKey> Store(TKey id, TModel item);
+		Task<IDataValidationResults<TKey>> StoreAsync(IEnumerable<TModel> items);
+		Task<IDataValidationResults<TKey>> StoreAsync(TKey id, TModel item);
 
 		IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids);
 		IDataValidationResults<TKey> Delete(IEnumerable<TModel> items);
@@ -73,7 +87,7 @@ namespace DX.Utils.Data
 
 	}
 
-	public interface IDataValidationResult<TKey> 
+	public interface IDataValidationResult<TKey>
 	where TKey : IEquatable<TKey>
 	{
 		DataValidationResultType ResultType { get; set; }
@@ -84,14 +98,16 @@ namespace DX.Utils.Data
 
 	}
 
-	public interface IDataValidationResults<TKey> 
+	public interface IDataValidationResults<TKey>
 	where TKey : IEquatable<TKey>
 	{
-		IEnumerable<IDataValidationResult<TKey>> Results { get ; }
+		IEnumerable<IDataValidationResult<TKey>> Results { get; }
 		void Add(IDataValidationResult<TKey> error);
 		void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code);
 
-		bool Success { get;}
+		bool Success { get; }
+
+		string[] Messages(params DataValidationResultType[] resultsTypes);
 
 	}
 
@@ -104,7 +120,7 @@ namespace DX.Utils.Data
 		IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 
 	}
-	public interface IDataStoreValidator<TKey, TModel, TDBModel>: IDataStoreValidator<TKey, TModel>
+	public interface IDataStoreValidator<TKey, TModel, TDBModel> : IDataStoreValidator<TKey, TModel>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
 		where TDBModel : class, IDataStoreModel<TKey>

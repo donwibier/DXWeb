@@ -18,7 +18,7 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 	  <PackageReference Include="Microsoft.EntityFrameworkCore">
-	    <Version>5.0.0-preview.2.20159.4</Version>
+	    <Version>5.0.0-preview.3.20181.2</Version>
 	  </PackageReference>
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">

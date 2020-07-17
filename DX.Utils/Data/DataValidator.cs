@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DX.Utils.Data
@@ -11,7 +13,7 @@ namespace DX.Utils.Data
 		Error = 3
 	}
 	public class DataValidationResult<TKey> : IDataValidationResult<TKey>
-		where TKey: IEquatable<TKey>
+		where TKey : IEquatable<TKey>
 	{
 		public DataValidationResult()
 		{
@@ -30,12 +32,12 @@ namespace DX.Utils.Data
 		public string Message { get; set; }
 		public int Code { get; set; }
 		public TKey ID { get; set; }
-	
+
 	}
 
-	public class DataValidationResults<TKey> :IDataValidationResults<TKey>
-		where TKey: IEquatable<TKey>
-	{		
+	public class DataValidationResults<TKey> : IDataValidationResults<TKey>
+		where TKey : IEquatable<TKey>
+	{
 		private readonly List<IDataValidationResult<TKey>> errors = new List<IDataValidationResult<TKey>>();
 
 		public IEnumerable<IDataValidationResult<TKey>> Results { get => errors; }
@@ -49,8 +51,46 @@ namespace DX.Utils.Data
 			errors.Add(new DataValidationResult<TKey>(resultType, id, fieldName, message, code));
 		}
 
+		public string[] Messages(params DataValidationResultType[] resultsTypes)
+		{
+			string[] results = new string[] { };
+			if (errors == null || errors.Count() == 0)
+				return results;
 
-		public bool Success { get => (errors.Count == 0 )|| (errors.Count == errors.FindAll(x => x.ResultType == DataValidationResultType.Success).Count); }
+			if (resultsTypes == null || resultsTypes.Length == 0)
+				results = errors.Select(r => r.Message).ToArray();
+			else
+				results = errors.Where(r => resultsTypes.Contains(r.ResultType))
+					.Select(r => r.Message)
+					.ToArray();
+			return results;
+		}
+
+		public bool Success { get => (errors.Count == 0) || (errors.Count == errors.FindAll(x => x.ResultType == DataValidationResultType.Success).Count); }
+	}
+
+	public class DataValidationException<TKey> : Exception
+		where TKey : IEquatable<TKey>
+	{
+		public DataValidationException(IDataValidationResults<TKey> validationResults)
+			: base()
+		{
+			ValidationResults = validationResults;
+		}
+
+		public IDataValidationResults<TKey> ValidationResults { get; protected set; }
+		public override IDictionary Data
+		{
+			get
+			{
+				var results = ValidationResults.Results.ToDictionary(r => r.ID, r => r.Message);
+				return results;
+			}
+		}
+		public override string Message
+		{
+			get { return String.Join("\n", ValidationResults.Messages(DataValidationResultType.Error, DataValidationResultType.Warning)); }
+		}
 	}
 
 	public abstract class DataValidator<TKey, TModel> : IDataStoreValidator<TKey, TModel>

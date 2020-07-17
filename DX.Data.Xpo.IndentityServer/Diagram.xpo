@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<dataBaseObjectModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" dslVersion="1.0.0.0" Id="18ece3eb-c3fe-4394-89ff-fe1c8f273c98" namespace="DX.Data.Xpo.IndentityServer.XPModels" dataBaseShemaInfo="H4sIAAAAAAAEAN1YW09bORB+r9T/EPHMJL5fqpBqC12EuluhAqu+ju0xnN3kBJ1zAvTfrw+ES6DdpWpEJF4Q/mYc+5tv7Bmf8fur2XRwQU1bzeudLT5kW+8nb9+MP2BLR928wVM6qPN8ULzq9t1VW+1snXXd+bvR6PLycngph/PmdCQY46Ovf/5xFM9ohlDVbYd1pK27Wen/Z22VVQeD8TGGKbX9ktfjW+QBcAt9xhlN9r4e9ltvO0r7DdZdOx7dG+/8P9Y9NumaBY1Hy8Gdca9qe+DkPGFHk4zTtjitgne++4sqHaRJEBh49gk8MgIlrAZ0yUJSSiIZq5wuv7F0vpu8O58uZnW7QuWHcDH0HG6Mk4M0Hj0Yrrj9F7mfJfiQpDIkKWEGzwwDpTUHH2QGzNFwbzAKxZ6QLNNHv8Dz+Ns5vTzT6JCzrGVRUgdQuSiJTDKI0cUotPEW5bqZHi3C3xS7TQgrhBeSogJpr7OXRQhOBJDOZSaRe+fzuunuTiuqN8I2eJYtRg4yeQ3KGQnBWwvOesl5JhKE62a7R21sqvOuXKkvT5gRT9xIAtImg+IWwSnPgUdrlObS6/j0cvpVeRvCnu1xNdvA+eXWSa1MgpxMkVgZ1asbIVqRU/Qp6Lz28/vx6rxqcDMK+2CySSmCMU6A8tKCtx4hBoZSI3cG9dpTGjt8eaY2ZYWEATQnVWqQkOC5tmCtiYIiovTu2Uy/hy7bhZ/oN/boooolCIlepteILMtAOQAKLMnNcgTvsoSEkTmhPdMsrLXXOGmp6eltoDDFLHhOHAzyUpiyL+dYFeaJCS64KZFIaz/H93JuoDS5aKV1GawMqWS34qU0SQU2cEpaoSv6vqK+g2kjTSx6amS2FKbQFyZRGsrkvAg8OOb86+k7HHdFUfJQ+isOKtoEQeSS1tYFZQ2iJ/HKyjCWphJjBOSl+1BMJ3DJELisjdbalYfR2h8MGy3DUnqrowRjyx+ViQMq7yGYpKWPTGdhX0cZNpSc4bLoGaMHJR1CYLY00uU0c6eNzeH5L4bnlOHl+N5l3H+LoHTYzOM1OBjdwH/dfLjor/GSCg217bAP0fBCsCHfHizNO/1oKIdse7C7mHaLhnZqWnQNTrcHh4swreIn+nY8/4fqneBc4larZBkj5Uuwb5e4Xm93im1LbS/Al8VddMe/pbI1ytXVcl830NEir0BfaDa/oMeON+hj311saXJSxzOsT6lcX9fjm9B8bw/jEplzarpqw3v7wTbG+1RTOacla2ezciG3yxx9Aq84l2dUdVr+/b0qqfBoxqrtetrnxXTaZ80HOsOLat6UpMhY5C7n5bHl7Zvx6NEXrsm/iVQASgoTAAA=" generateStoredProcedures="false" fieldNameCase="Unchanged" fieldNamePrefix="_" generateDefaultConstructors="false" useNameOf="true" createdInVersion="20.1.3.0" generateJsonSerializationContractResolver="false" generateServiceCollectionExtensions="false" lastModifiedInVersion="20.1.3.0" xmlns="http://schemas.microsoft.com/dsltools/ORMDataModel">
+  <classes>
+    <dataBaseObjectModelHasClasses Id="1a5009d0-3f95-417b-bec2-7db1681eb5d7">
+      <xpObject Id="b2ab1f9d-9a0e-4275-a8d7-d443ae67485e" name="XpoPersistedGrant" baseClass="XPLiteObject" userFileName="XpoPersistedGrant" designerFileName="XpoPersistedGrant.Designer" className="XpoPersistedGrant" virtualBaseClass="XPLiteObject" persistent="DXPersistedGrants" virtualName="XpoPersistedGrant">
+        <fields>
+          <generalXpObjectHasFields Id="a78e0d87-0732-4641-b4e7-aabaefd2c011">
+            <field Id="46e3edaf-9060-4551-9b3f-afc6196ac240" name="Id" key="true" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="50" readOnly="true" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="7d34f92d-eef3-4da5-b52e-65cc6571bd5e">
+            <field Id="c8a10f53-425b-4fd7-a030-cc8cc25697a3" name="Type" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="50" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="67c1f82e-0198-46d9-bb5e-b083b5610040">
+            <field Id="22923ec4-370e-420c-b82b-388f03a1989f" name="SubjectId" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" isNullable="true" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="33410804-abe0-46f9-a342-1dfae9e55b4a">
+            <field Id="b90f7ac1-3d95-4863-b977-879311fee2ea" name="ClientId" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="092df5f9-d261-4e63-8280-f259e2bf1c32">
+            <field Id="0e1d163e-e56f-417a-8491-1c76451395ce" name="Description" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="93599dfa-99ea-47de-8cb6-f2982f578048">
+            <field Id="1783546d-fd65-4464-879c-c72fdc9db5f3" name="CreationTime" columnType="DateTime" virtualColumnType="DateTime" delayedUpdateModifiedOnly="false" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="69783da3-d64c-4c35-aac1-48c5721bf9f2">
+            <field Id="9b6f6ddc-6682-4937-979a-cb0a35a186a5" name="Expiration" columnType="DateTime" virtualColumnType="DateTime" delayedUpdateModifiedOnly="false" isNullable="true" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="dbf0d97c-9038-457d-bd88-f0608fd62207">
+            <field Id="7df4aeab-51e4-4523-9157-776c2ecaa398" name="Data" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="Unlimited" />
+          </generalXpObjectHasFields>
+        </fields>
+        <indexes>
+          <xpObjectHasIndexes Id="1dda218b-e766-450d-8d02-ba4531a08ae6">
+            <index Id="519a8582-06cd-4173-ad84-23f66e517905" name="IDXGrant_Subject_Client_Type">
+              <fieldsInIndex>
+                <indexReferencesFields Id="0dabcb5b-4ba0-431c-a7af-cfc14f7490bc">
+                  <fieldMoniker Id="c8a10f53-425b-4fd7-a030-cc8cc25697a3" />
+                </indexReferencesFields>
+                <indexReferencesFields Id="66e7bdee-56c8-4b66-b3a9-fdc638fb82b3">
+                  <fieldMoniker Id="22923ec4-370e-420c-b82b-388f03a1989f" />
+                </indexReferencesFields>
+                <indexReferencesFields Id="7afb2e7d-6365-4706-9529-5a16b34d28fd">
+                  <fieldMoniker Id="b90f7ac1-3d95-4863-b977-879311fee2ea" />
+                </indexReferencesFields>
+              </fieldsInIndex>
+            </index>
+          </xpObjectHasIndexes>
+          <xpObjectHasIndexes Id="687b22b2-3f8b-4da0-ba38-244fb39e165f">
+            <index Id="1673afed-cbd0-4143-8b95-4b9876339eec" name="IDXGrant_Expiration">
+              <fieldsInIndex>
+                <indexReferencesFields Id="19807ed5-9503-4965-9486-a27f4ae043c1">
+                  <fieldMoniker Id="9b6f6ddc-6682-4937-979a-cb0a35a186a5" />
+                </indexReferencesFields>
+              </fieldsInIndex>
+            </index>
+          </xpObjectHasIndexes>
+        </indexes>
+      </xpObject>
+    </dataBaseObjectModelHasClasses>
+    <dataBaseObjectModelHasClasses Id="8c090f39-93e1-4fca-a103-9dbd066866aa">
+      <xpObject Id="c0f3befb-a2a5-40fc-98f3-dac08259050b" name="XpoDeviceCode" baseClass="XPLiteObject" userFileName="XpoDeviceCode" designerFileName="XpoDeviceCode.Designer" className="XpoDeviceCode" virtualBaseClass="XPLiteObject" persistent="DXDeviceCodes" virtualName="XpoDeviceCode">
+        <fields>
+          <generalXpObjectHasFields Id="c59f5bd5-bf98-4067-a34b-d53843992736">
+            <field Id="2cf21fd1-6a1e-4f94-84fb-d021216c0fd3" name="UserCode" key="true" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="9f6608f8-8d04-447c-a7f3-674404e2ef4f">
+            <field Id="b8c7378f-73bd-4541-b934-7b1ed54a8825" name="DeviceCode" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="e8491304-b68b-4a3b-bfa8-1cc9aed0f129">
+            <field Id="05636cfb-5a07-41ba-842f-ad892b1b8089" name="SubjectId" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" isNullable="true" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="d35d3794-e515-460a-b256-603644bd71a3">
+            <field Id="818454e9-20c1-4c7d-b2fe-478b476aa9e2" name="ClientId" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="200" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="e9b5b3a5-d821-47f2-9a95-eba2954f3e30">
+            <field Id="1aec4acc-a13e-405d-8d6e-8f565558e670" name="CreationTime" columnType="DateTime" virtualColumnType="DateTime" delayedUpdateModifiedOnly="false" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="450d3021-aa76-4783-b302-c5769b3539a6">
+            <field Id="933975c3-67c3-4fe1-a499-b6d539c05f27" name="Expiration" columnType="DateTime" virtualColumnType="DateTime" delayedUpdateModifiedOnly="false" isNullable="true" />
+          </generalXpObjectHasFields>
+          <generalXpObjectHasFields Id="3ac48dec-219d-4b90-9ce8-cfe216d95db4">
+            <field Id="6ed8613d-8cc9-438a-b073-bcfb18567fbf" name="Data" virtualColumnType="String" delayedUpdateModifiedOnly="false" size="Unlimited" />
+          </generalXpObjectHasFields>
+        </fields>
+        <indexes>
+          <xpObjectHasIndexes Id="c14e1537-cfbc-4f25-ae26-7b118b658f3e">
+            <index Id="08409f6b-b63b-4c35-bb25-4a982fcd16ff" name="IDXDeviceCode_DeviceCode" unique="true">
+              <fieldsInIndex>
+                <indexReferencesFields Id="4f15aeb7-dc31-4059-b422-4acf83f31c54">
+                  <fieldMoniker Id="b8c7378f-73bd-4541-b934-7b1ed54a8825" />
+                </indexReferencesFields>
+              </fieldsInIndex>
+            </index>
+          </xpObjectHasIndexes>
+          <xpObjectHasIndexes Id="a4e9625e-1370-4dba-a0af-de1c79b5019a">
+            <index Id="81336828-c600-4474-adc9-9075b6b68cb3" name="IDXDeviceCode_Expiration">
+              <fieldsInIndex>
+                <indexReferencesFields Id="6dbe9657-8f34-4ce2-b6c3-a9008b33324e">
+                  <fieldMoniker Id="933975c3-67c3-4fe1-a499-b6d539c05f27" />
+                </indexReferencesFields>
+              </fieldsInIndex>
+            </index>
+          </xpObjectHasIndexes>
+        </indexes>
+      </xpObject>
+    </dataBaseObjectModelHasClasses>
+  </classes>
+</dataBaseObjectModel>
