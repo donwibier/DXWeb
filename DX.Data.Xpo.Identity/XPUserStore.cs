@@ -194,7 +194,8 @@ namespace DX.Data.Xpo.Identity
 
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", loginProvider, providerKey));
+				var xpoLogin = (TXPOLogin)wrk.FindObject(XPOLoginType, CriteriaOperator.Parse("(LoginProvider == ?) AND (ProviderKey == ?)", loginProvider, providerKey));
+				var xpoUser = xpoLogin == null ? null : wrk.GetObjectByKey(XPOUserType, xpoLogin.UserId);
 
 				//return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
 				return (xpoUser == null) ? null : Mapper.CreateModel(xpoUser as TXPOUser);
