@@ -1,22 +1,22 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
+using DX.Data.Xpo.Identity.Persistent;
+using DX.Data.Xpo.IndentityServer.XPModels;
+using DX.Utils.Data;
+using IdentityServer4.Models;
+using IdentityServer4.Stores;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using DX.Data.Xpo.Identity.Persistent;
 using System.Threading;
-using DX.Utils.Data;
-using System.Configuration;
-using IdentityServer4.Stores;
-using Microsoft.Extensions.Logging;
-using IdentityServer4.Models;
-using DX.Data.Xpo.IndentityServer.XPModels;
+using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.IdentityServer.Stores
 {
+	/*
 	public class XPPersistedGrant : PersistedGrant, IDataStoreModel<string>
 	{		
 		public XPPersistedGrant()
@@ -40,7 +40,7 @@ namespace DX.Data.Xpo.IdentityServer.Stores
 		/// <param name="logger">The logger.</param>
 		public XPPersistedGrantStore(XpoDatabase db, ILogger<XPPersistedGrantStore> logger, 
             IXPDataMapper<string, PersistedGrant, XpoPersistedGrant> mapper)
-            : base(db, )
+            : base(db)
         {
 			DB = db;
 			Logger = logger;
@@ -179,5 +179,5 @@ namespace DX.Data.Xpo.IdentityServer.Stores
         //}
 
     }
-
+*/
 }
