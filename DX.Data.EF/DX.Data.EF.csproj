@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Version>20.1.2.13-pre-20064</Version>
+		<FileVersion>20.1.2.13-pre-20064</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
+		<Description>DataStore implementation for use with EF</Description>
+		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
+		<LangVersion>7.3</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+	  <PackageReference Include="Microsoft.EntityFrameworkCore">
+	    <Version>5.0.0-preview.3.20181.2</Version>
+	  </PackageReference>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+		<PackageReference Include="EntityFramework" Version="6.4.0" />
+	</ItemGroup>
+
+
+</Project>

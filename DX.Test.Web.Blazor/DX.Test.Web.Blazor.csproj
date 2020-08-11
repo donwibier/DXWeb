@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="19.2.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
+    <PackageReference Include="DevExpress.Blazor" Version="19.2.5-preview" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>
 
