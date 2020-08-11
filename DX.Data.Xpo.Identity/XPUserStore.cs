@@ -320,7 +320,8 @@ namespace DX.Data.Xpo.Identity
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			var result = await FindByIdAsync(userId);
+			var id = System.ComponentModel.TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromString(userId);
+			var result = await FindByIdAsync(id);
 			return result;
 		}
 
@@ -422,7 +423,7 @@ namespace DX.Data.Xpo.Identity
 			await DB.ExecuteAsync((db, wrk) =>
 			{
 				wrk.Delete(wrk.FindObject(typeof(TXPOLogin),
-						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND )ProviderKey == ?)",
+						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND (ProviderKey == ?)",
 														 user.Id, login.LoginProvider, login.ProviderKey)));
 				//return 0;
 			});
