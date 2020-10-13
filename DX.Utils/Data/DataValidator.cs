@@ -12,27 +12,38 @@ namespace DX.Utils.Data
 		Warning = 2,
 		Error = 3
 	}
+	public enum DataValidationEventType
+	{
+		Unknown,
+		Inserting,
+		Inserted,
+		Updating,
+		Updated,
+		Deleting,
+		Deleted
+	}
 	public class DataValidationResult<TKey> : IDataValidationResult<TKey>
 		where TKey : IEquatable<TKey>
 	{
 		public DataValidationResult()
 		{
 		}
-		public DataValidationResult(DataValidationResultType resultType, TKey id, string fieldName, string message, int code)
+		public DataValidationResult(DataValidationResultType resultType, TKey id, string fieldName,
+			string message, int code, DataValidationEventType eventType)
 		{
 			ResultType = resultType;
 			ID = id;
 			FieldName = fieldName;
 			Message = message;
 			Code = code;
-
+			EventType = eventType;
 		}
 		public DataValidationResultType ResultType { get; set; }
 		public string FieldName { get; set; }
 		public string Message { get; set; }
 		public int Code { get; set; }
 		public TKey ID { get; set; }
-
+		public DataValidationEventType EventType { get; set; }
 	}
 
 	public class DataValidationResults<TKey> : IDataValidationResults<TKey>
@@ -46,9 +57,10 @@ namespace DX.Utils.Data
 			errors.Add(error);
 
 		}
-		public void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code)
+		public void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code,
+			DataValidationEventType eventType)
 		{
-			errors.Add(new DataValidationResult<TKey>(resultType, id, fieldName, message, code));
+			errors.Add(new DataValidationResult<TKey>(resultType, id, fieldName, message, code, eventType));
 		}
 
 		public string[] Messages(params DataValidationResultType[] resultsTypes)

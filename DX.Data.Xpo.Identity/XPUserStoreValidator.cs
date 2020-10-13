@@ -26,6 +26,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Deleted,
 				ResultType = DataValidationResultType.Success,
 				ID = id
 			};
@@ -37,6 +38,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Deleting,
 				ResultType = DataValidationResultType.Success,
 				ID = id
 			};
@@ -48,6 +50,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Inserted,
 				ResultType = DataValidationResultType.Success,
 				ID = dbModel.ID
 			};
@@ -59,6 +62,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Inserting,
 				ResultType = DataValidationResultType.Success,
 				ID = model.ID
 			};
@@ -70,6 +74,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Updated,
 				ResultType = DataValidationResultType.Success,
 				ID = model.ID
 			};
@@ -81,6 +86,7 @@ namespace DX.Data.Xpo.Identity
 		{
 			var result = new DataValidationResult<TKey>
 			{
+				EventType = DataValidationEventType.Updating,
 				ResultType = DataValidationResultType.Success,
 				ID = model.ID
 			};

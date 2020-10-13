@@ -13,7 +13,7 @@ using System.Data.Entity;
 
 namespace DX.Data.EF
 {
-	public abstract class EFDataMapper<TKey, TModel, TEFClasss> : 
+	public abstract class EFDataMapper<TKey, TModel, TEFClasss> :
 			DataMapper<TKey, TModel, TEFClasss>,
 			IEFDataMapper<TKey, TModel, TEFClasss>
 		where TKey : IEquatable<TKey>
@@ -23,7 +23,7 @@ namespace DX.Data.EF
 
 	}
 
-	public class EFDataValidator<TKey, TModel, TEFClass> : 
+	public class EFDataValidator<TKey, TModel, TEFClass> :
 			DataValidator<TKey, TModel, TEFClass>,
 			IEFDataStoreValidator<TKey, TModel, TEFClass>
 		where TKey : IEquatable<TKey>
@@ -97,7 +97,7 @@ namespace DX.Data.EF
 		}
 	}
 
-	
+
 
 	public abstract class EFDataStore<TDBContext, TKey, TModel, TEFClass> : DataStore<TKey, TModel>
 			where TDBContext : DbContext, new()
@@ -106,13 +106,13 @@ namespace DX.Data.EF
 			where TEFClass : class, IDataStoreModel<TKey>
 	{
 		public EFDataStore(EFDatabase<TDBContext> db,
-			IEFDataMapper<TKey, TModel, TEFClass> mapper, 
+			IEFDataMapper<TKey, TModel, TEFClass> mapper,
 			IEFDataStoreValidator<TKey, TModel, TEFClass> validator = null)
 		{
 			if (db == null)
-				throw new ArgumentNullException("db");
+				throw new ArgumentNullException(nameof(db));
 			if (mapper == null)
-				throw new ArgumentNullException("mapper");
+				throw new ArgumentNullException(nameof(mapper));
 			DB = db;
 			Mapper = mapper;
 			Validator = validator;
@@ -173,7 +173,7 @@ namespace DX.Data.EF
 		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
 		{
 			if (items == null)
-				throw new ArgumentNullException("items");
+				throw new ArgumentNullException(nameof(items));
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 
@@ -232,7 +232,7 @@ namespace DX.Data.EF
 					});
 				}
 				return r;
-			}, true, false );
+			}, true, false);
 
 			return result;
 		}
@@ -240,7 +240,7 @@ namespace DX.Data.EF
 		public override IDataValidationResults<TKey> Update(IEnumerable<TModel> items)
 		{
 			if (items == null)
-				throw new ArgumentNullException("items");
+				throw new ArgumentNullException(nameof(items));
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 			result = DB.Execute((db, ctx, tran) =>
@@ -250,22 +250,22 @@ namespace DX.Data.EF
 				{
 					var canUpdate = Validator?.Updating(item, r);
 					if (canUpdate.ResultType == DataValidationResultType.Error)
-					{						
+					{
 						tran.Rollback();
 						r.Add(canUpdate);
 						break;
 					}
 
-					var updatedItem = EFQuery(ctx).Where(m=>m.ID.Equals(item.ID)).FirstOrDefault();
+					var updatedItem = EFQuery(ctx).Where(m => m.ID.Equals(item.ID)).FirstOrDefault();
 					if (updatedItem == null)
 					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TEFClass).Name, item.ID), 0);
+						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Updating);
 						break;
 					}
 
 					Assign(item, updatedItem);
 					ctx.Entry(updatedItem).State = EntityState.Modified;
-					
+
 					var hasUpdated = Validator?.Updated(item, updatedItem, r);
 					if (hasUpdated.ResultType == DataValidationResultType.Error)
 					{
@@ -305,7 +305,7 @@ namespace DX.Data.EF
 					var item = EFQuery(ctx).Where(m => m.ID.Equals(id)).FirstOrDefault();
 					if (item == null)
 					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", String.Format("Unable to locate {0}({1}) in datastore", typeof(TEFClass).Name, item.ID), 0);
+						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Deleting);
 						break;
 					}
 					var canDelete = Validator?.Deleting(id, r, item);
@@ -317,7 +317,7 @@ namespace DX.Data.EF
 					}
 
 					ctx.Entry(item).State = EntityState.Deleted;
-					
+
 					//val.Deleted(id, item, r);
 					var hasDeleted = Validator?.Deleted(id, item, r);
 					if (hasDeleted.ResultType == DataValidationResultType.Error)

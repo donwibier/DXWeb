@@ -21,29 +21,24 @@ namespace DX.Data.Xpo.Identity
 		 where TUser : class, IXPUser<TKey>, new()
 		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
 	{
-		public override Func<TXPOUser, TUser> CreateModel => (source) =>
+		public override Func<TXPOUser, TUser> CreateModel => (source) => new TUser
 		{
-			var result = new TUser
-			{
-				ID = source.Id,
-				UserName = source.UserName,
-				Email = source.Email,
-				EmailConfirmed = source.EmailConfirmed,
-				PasswordHash = source.PasswordHash,
-				SecurityStamp = source.SecurityStamp,
-				PhoneNumber = source.PhoneNumber,
-				PhoneNumberConfirmed = source.PhoneNumberConfirmed,
-				TwoFactorEnabled = source.TwoFactorEnabled,
-				LockoutEndDateUtc = source.LockoutEndDateUtc,
-				LockoutEnabled = source.LockoutEnabled,
+			ID = source.Id,
+			UserName = source.UserName,
+			Email = source.Email,
+			EmailConfirmed = source.EmailConfirmed,
+			PasswordHash = source.PasswordHash,
+			SecurityStamp = source.SecurityStamp,
+			PhoneNumber = source.PhoneNumber,
+			PhoneNumberConfirmed = source.PhoneNumberConfirmed,
+			TwoFactorEnabled = source.TwoFactorEnabled,
+			LockoutEndDateUtc = source.LockoutEndDateUtc,
+			LockoutEnabled = source.LockoutEnabled,
 #if (NETSTANDARD2_1)
-				NormalizedName = source.NormalizedName,
-				NormalizedEmail = source.NormalizedEmail,
+			NormalizedName = source.NormalizedName,
+			NormalizedEmail = source.NormalizedEmail,
 #endif
-				AccessFailedCount = source.AccessFailedCount
-			};
-
-			return result;
+			AccessFailedCount = source.AccessFailedCount
 		};
 
 		public override TXPOUser Assign(TUser source, TXPOUser destination)
@@ -66,7 +61,7 @@ namespace DX.Data.Xpo.Identity
 #endif
 			if (destination is IAssignable)
 				(destination as IAssignable).Assign(source);
-			
+
 			return destination;
 		}
 

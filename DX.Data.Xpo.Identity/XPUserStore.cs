@@ -2,10 +2,12 @@
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils;
 using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -23,31 +25,6 @@ namespace DX.Data.Xpo.Identity
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
 		 where TUser : class, IXPUser<string>, new()
 	{
-		//public XPUserStore(string connectionName) : base(connectionName)
-		//{
-
-		//}
-
-		//public XPUserStore(string connectionString, string name) : base(connectionString, name)
-		//{
-
-		//}
-
-		//public XPUserStore(string connectionName, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(connectionName, mapper, validator)
-		//{
-
-		//}
-
-		//public XPUserStore(string connectionName, XPDataMapper<string, TUser, XpoDxUser> mapper) : base(connectionName, mapper)
-		//{
-
-		//}
-
-		//public XPUserStore(XpoDatabase db) : base(db)
-		//{
-
-		//}
-
 		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(db, mapper, validator)
 		{
 
@@ -449,16 +426,8 @@ namespace DX.Data.Xpo.Identity
 				user.UserName = user.Email;
 
 			var result = await base.CreateAsync(user);
-
-
-			//await DB.ExecuteAsync((db, wrk) =>
-			//{
-			//	var xpoUser = XPOCreateUser(wrk);
-			//	Assign(user, xpoUser);				
-			//	wrk.CommitTransaction();
-			//	Assign(xpoUser, user);
-			//	return 0;
-			//});
+			if (!result.Success)
+				throw new DataValidationException<TKey>(result);
 		}
 
 
@@ -470,11 +439,8 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException(nameof(user));
 			}
 			var result = await base.DeleteAsync(user.Id);
-			//await DB.ExecuteAsync((db, wrk) =>
-			//{
-			//	wrk.Delete(wrk.GetObjectByKey(XPOUserType, user.Id));
-
-			//});
+			if (!result.Success)
+				throw new DataValidationException<TKey>(result);
 		}
 
 		public async virtual Task<TUser> FindByIdAsync(object userId)
@@ -482,17 +448,6 @@ namespace DX.Data.Xpo.Identity
 			ThrowIfDisposed();
 
 			var result = await FindByIdAsync((TKey)userId);
-			//	await DB.ExecuteAsync((db, wrk) =>
-			//{
-
-			//	var xpoUser = wrk.GetObjectByKey(XPOUserType, userId);
-			//	if (xpoUser != null)
-			//	{
-			//		TUser r = Mapper.CreateModel(xpoUser as TXPOUser);					
-			//		return r;
-			//	}
-			//	return null;
-			//});
 			return result;
 		}
 		public async virtual Task<TUser> FindByIdAsync(TKey userId)
@@ -988,9 +943,14 @@ namespace DX.Data.Xpo.Identity
 			get
 			{
 				//TODO: Might need to check this for memoryleak
-				var s = DB.GetSession();
-				var r = from n in Query(s) select CreateModelInstance(n);
-				return r;
+				var session = DB.GetSession();
+				session.Disposed += (s, e) =>
+				{
+					Trace.WriteLine("IQueryable<TUser> Users session disposed");
+				};
+
+				var r = session.Query<TXPOUser>().Select(CreateModelInstance);
+				return r.AsQueryable();
 			}
 		}
 

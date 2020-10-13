@@ -182,7 +182,7 @@ namespace DX.Data.Xpo
 				var r = new DataValidationResults<TKey>();
 				foreach (var item in items)
 				{
-					if (item.ID.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+					if (item.ID == null || item.ID.Equals(EmptyKeyValue) || mode == StoreMode.Create)
 					{
 						var canInsert = Validator?.Inserting(item, r);
 						if (canInsert.ResultType == DataValidationResultType.Error)
@@ -226,7 +226,7 @@ namespace DX.Data.Xpo
 						var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
 						if (updatedItem == null)
 						{
-							r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0);
+							r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Updating);
 							break;
 						}
 
@@ -320,7 +320,7 @@ namespace DX.Data.Xpo
 					var item = w.GetObjectByKey<TXPOClass>(id);
 					if (item == null)
 					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0);
+						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Deleting);
 						break;
 					}
 					var canDelete = Validator?.Deleting(id, r, item);

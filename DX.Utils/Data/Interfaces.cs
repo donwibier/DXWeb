@@ -103,7 +103,8 @@ namespace DX.Utils.Data
 	{
 		IEnumerable<IDataValidationResult<TKey>> Results { get; }
 		void Add(IDataValidationResult<TKey> error);
-		void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code);
+		void Add(DataValidationResultType resultType, TKey id, string fieldName, string message, int code,
+			DataValidationEventType eventType);
 
 		bool Success { get; }
 

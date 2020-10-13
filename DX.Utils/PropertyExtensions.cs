@@ -68,5 +68,19 @@ namespace DX.Utils
 			}
 			return dataItem;
 		}
+
+		//public static T Assign<T>(this object source, T destination, params string[] excludeProps)
+		//{
+		//	foreach(var propInfo in source.GetType().GetProperties())
+		//	{
+		//		var name = propInfo.Name;
+		//		var excl = excludeProps != null && excludeProps.Contains(name);
+		//		if (!excl && destination.HasProperty(propInfo.Name))
+		//		{
+		//			destination.SetPropertyValue(name, source.GetPropertyValue(name));
+		//		} 
+		//	}
+		//	return destination;
+		//}
 	}
 }
