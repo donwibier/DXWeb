@@ -146,6 +146,7 @@ namespace DX.Data.Xpo.Identity
 			{
 				throw new ArgumentNullException(nameof(role));
 			}
+
 			var result = await base.DeleteAsync(role.ID);
 		}
 
