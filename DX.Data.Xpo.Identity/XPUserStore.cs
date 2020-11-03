@@ -6,6 +6,7 @@ using DX.Utils;
 using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -297,7 +298,10 @@ namespace DX.Data.Xpo.Identity
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			var result = await FindByIdAsync(userId);
+			//Change by picopixel 
+			var id = TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromString(userId);
+			var result = await FindByIdAsync(id);
+			//var result = await FindByIdAsync(userId);
 			return result;
 		}
 
@@ -398,8 +402,9 @@ namespace DX.Data.Xpo.Identity
 			}
 			await DB.ExecuteAsync((db, wrk) =>
 			{
+				//Typo in CriteriaOperator found by picopixel
 				wrk.Delete(wrk.FindObject(typeof(TXPOLogin),
-						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND )ProviderKey == ?)",
+						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND (ProviderKey == ?)",
 														 user.Id, login.LoginProvider, login.ProviderKey)));
 				//return 0;
 			});

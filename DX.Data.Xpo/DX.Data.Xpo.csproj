@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.1.7.15</Version>
+		<Version>20.2.3.15</Version>
 		<FileVersion>20.1.7.15</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
@@ -59,13 +59,12 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0-preview.3.20215.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0-preview.3.20215.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.9" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.9" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="20.1.7" />
-		<!--<PackageReference Include="DevExpress.Data" Version="20.1.3" />-->
+		<PackageReference Include="DevExpress.Xpo" Version="20.2.3" />	
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
