@@ -2,10 +2,12 @@
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils;
 using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
@@ -18,11 +20,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNet.Identity;
 #endif
 
-namespace DX.Data.Xpo.Identity {
+namespace DX.Data.Xpo.Identity
+{
 
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
-		 where TUser : class, IXPUser<string>, new() {
-		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(db, mapper, validator) {
+		 where TUser : class, IXPUser<string>, new()
+	{
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(db, mapper, validator)
+		{
 
 		}
 	}
@@ -38,7 +43,8 @@ namespace DX.Data.Xpo.Identity {
 #endif
 	{
 		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, TXPOUser> mapper, XPDataValidator<string, TUser, TXPOUser> validator)
-			: base(db, mapper, validator) {
+			: base(db, mapper, validator)
+		{
 
 		}
 
@@ -92,18 +98,22 @@ namespace DX.Data.Xpo.Identity {
 #endif
 	{
 		public XPUserStore(XpoDatabase db, XPDataMapper<TKey, TUser, TXPOUser> mapper, XPDataValidator<TKey, TUser, TXPOUser> validator)
-			: base(db, mapper, validator) {
+			: base(db, mapper, validator)
+		{
 
 		}
 
-		protected override IQueryable<TXPOUser> Query(Session s) {
+		protected override IQueryable<TXPOUser> Query(Session s)
+		{
 			var r = from n in s.Query<TXPOUser>()
 					select n;
 			return r;
 
 		}
-		protected override IEnumerable<TUser> Query() {
-			var results = DB.Execute((db, w) => {
+		protected override IEnumerable<TUser> Query()
+		{
+			var results = DB.Execute((db, w) =>
+			{
 				var r = Query(w).Select(CreateModelInstance);
 				return r.ToList();
 			});
@@ -132,23 +142,27 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserLoginStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken) {
+		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await AddLoginAsync(user, login);
 		}
 
-		public async virtual Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken) {
+		public async virtual Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await RemoveLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, string.Empty));
 		}
 
-		public async virtual Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var result = await GetLoginsAsync(user);
 			return result;
 		}
 
-		public async virtual Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken) {
+		public async virtual Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			if (String.IsNullOrEmpty(loginProvider))
@@ -156,7 +170,8 @@ namespace DX.Data.Xpo.Identity {
 			if (String.IsNullOrEmpty(providerKey))
 				throw new ArgumentNullException(nameof(providerKey));
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", loginProvider, providerKey));
 
 				//return xpoUser == null ? null : Activator.CreateInstance(typeof(TUser), xpoUser, DxIdentityUserFlags.FLAG_FULL) as TUser;
@@ -165,7 +180,8 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public virtual string ConvertIdToString(TKey id) {
+		public virtual string ConvertIdToString(TKey id)
+		{
 			if (id == null)
 				return null;
 			else if (id.Equals(default(TKey)))
@@ -174,25 +190,30 @@ namespace DX.Data.Xpo.Identity {
 			return id.ToString();
 		}
 
-		public virtual Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(ConvertIdToString(user.Id));
 		}
 
-		public virtual Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken)) {
+		public virtual Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.UserName);
 		}
 
-		public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken) {
+		public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			if (user == null)
@@ -204,7 +225,8 @@ namespace DX.Data.Xpo.Identity {
 			return Task.FromResult<object>(null);
 		}
 
-		public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken) {
+		public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			if (user == null)
@@ -213,7 +235,8 @@ namespace DX.Data.Xpo.Identity {
 			return Task.FromResult(user.NormalizedName);
 		}
 
-		public virtual Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken) {
+		public virtual Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			if (user == null)
@@ -226,40 +249,53 @@ namespace DX.Data.Xpo.Identity {
 
 		}
 
-		public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken) {
+		public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			try {
+			try
+			{
 				await CreateAsync(user);
-			} catch (Exception err) {
+			}
+			catch (Exception err)
+			{
 				return IdentityResult.Failed(new IdentityError { Code = "100", Description = err.Message });
 			}
 			return IdentityResult.Success;
 		}
 
-		public async virtual Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			try {
+			try
+			{
 				await UpdateAsync(user);
-			} catch (Exception err) {
+			}
+			catch (Exception err)
+			{
 				return IdentityResult.Failed(new IdentityError { Code = "100", Description = err.Message });
 			}
 			return IdentityResult.Success;
 		}
 
-		public async virtual Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			try {
+			try
+			{
 				await DeleteAsync(user);
-			} catch (Exception err) {
+			}
+			catch (Exception err)
+			{
 				return IdentityResult.Failed(new IdentityError { Code = "100", Description = err.Message });
 			}
 			return IdentityResult.Success;
 		}
 
-		public async virtual Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken) {
+		public async virtual Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			//Change by picopixel 
@@ -269,7 +305,8 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) {
+		public async virtual Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 			var result = await FindByNameAsync(normalizedUserName);
@@ -278,16 +315,20 @@ namespace DX.Data.Xpo.Identity {
 #endif
 
 
-		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login) {
+		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (login == null) {
+			if (login == null)
+			{
 				throw new ArgumentNullException(nameof(login));
 			}
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				TXPOLogin xpoLogin = XPOCreateLogin(wrk);
 				xpoLogin.LoginProvider = login.LoginProvider;
 				xpoLogin.ProviderKey = login.ProviderKey;
@@ -301,12 +342,15 @@ namespace DX.Data.Xpo.Identity {
 			});
 		}
 
-		public async virtual Task<TUser> FindAsync(UserLoginInfo login) {
+		public async virtual Task<TUser> FindAsync(UserLoginInfo login)
+		{
 			ThrowIfDisposed();
-			if (login == null) {
+			if (login == null)
+			{
 				throw new ArgumentNullException(nameof(login));
 			}
-			var result = await DB.ExecuteAsync((db, s) => {
+			var result = await DB.ExecuteAsync((db, s) =>
+			{
 				var xpoUser = s.FindObject(XPOUserType, CriteriaOperator.Parse("Logins[(LoginProvider == ?) AND (ProviderKey == ?)]", login.LoginProvider, login.ProviderKey)) as TXPOUser;
 				return xpoUser == null ? null : Mapper.CreateModel(xpoUser);
 				//var userLogin = s.FindObject(XPOLoginType, CriteriaOperator.Parse("(LoginProvider == ?) AND (ProviderKey == ?)", login.LoginProvider, login.ProviderKey)) as XPBaseObject;
@@ -320,15 +364,19 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user) {
+		public async virtual Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
-			var result = await DB.ExecuteAsync<IList<UserLoginInfo>>((db, wrk) => {
+			var result = await DB.ExecuteAsync<IList<UserLoginInfo>>((db, wrk) =>
+			{
 				var results = new List<UserLoginInfo>();
-				foreach (var r in new XPCollection(wrk, typeof(TXPOLogin), CriteriaOperator.Parse("[User!Key] == ?", user.Id))) {
+				foreach (var r in new XPCollection(wrk, typeof(TXPOLogin), CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
+				{
 					IXPUserLogin<TKey> xpoLogin = r as IXPUserLogin<TKey>;
 #if (NETSTANDARD2_1)
 					results.Add(new UserLoginInfo(xpoLogin.LoginProvider, xpoLogin.ProviderKey, xpoLogin.LoginProvider));
@@ -341,15 +389,19 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task RemoveLoginAsync(TUser user, UserLoginInfo login) {
+		public async virtual Task RemoveLoginAsync(TUser user, UserLoginInfo login)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (login == null) {
+			if (login == null)
+			{
 				throw new ArgumentNullException(nameof(login));
 			}
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				//Typo in CriteriaOperator found by picopixel
 				wrk.Delete(wrk.FindObject(typeof(TXPOLogin),
 						 CriteriaOperator.Parse("([User!Key] == ?) AND (LoginProvider == ?) AND (ProviderKey == ?)",
@@ -368,9 +420,11 @@ namespace DX.Data.Xpo.Identity {
 		//	throw new NotImplementedException();
 		//}
 
-		public new async virtual Task CreateAsync(TUser user) {
+		public new async virtual Task CreateAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			if (String.IsNullOrEmpty(user.UserName))
@@ -382,9 +436,11 @@ namespace DX.Data.Xpo.Identity {
 		}
 
 
-		public new async virtual Task DeleteAsync(TUser user) {
+		public new async virtual Task DeleteAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			var result = await base.DeleteAsync(user.Id);
@@ -392,29 +448,34 @@ namespace DX.Data.Xpo.Identity {
 				throw new DataValidationException<TKey>(result);
 		}
 
-		public async virtual Task<TUser> FindByIdAsync(object userId) {
+		public async virtual Task<TUser> FindByIdAsync(object userId)
+		{
 			ThrowIfDisposed();
 
 			var result = await FindByIdAsync((TKey)userId);
 			return result;
 		}
-		public async virtual Task<TUser> FindByIdAsync(TKey userId) {
+		public async virtual Task<TUser> FindByIdAsync(TKey userId)
+		{
 			ThrowIfDisposed();
 			var result = await base.GetByKeyAsync(userId);
 
 			return result;
 		}
 
-		public async virtual Task<TUser> FindByNameAsync(string userName) {
+		public async virtual Task<TUser> FindByNameAsync(string userName)
+		{
 			ThrowIfDisposed();
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 #if (NETSTANDARD2_1)
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("NormalizedName == ?", userName));
 #else
 				var xpoUser = wrk.FindObject(XPOUserType, XpoDxUser.Fields.UserNameUpper == userName.ToUpperInvariant());
 #endif
-				if (xpoUser != null) {
+				if (xpoUser != null)
+				{
 					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);
 					return r;
 				}
@@ -423,9 +484,11 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public new async virtual Task UpdateAsync(TUser user) {
+		public new async virtual Task UpdateAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
@@ -435,7 +498,8 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserClaimStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
@@ -443,19 +507,24 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken) {
+		public async virtual Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (claims == null) {
+			if (claims == null)
+			{
 				throw new ArgumentNullException(nameof(claims));
 			}
 
-			await DB.ExecuteAsync((db, wrk) => {
-				foreach (var claim in claims) {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
+				foreach (var claim in claims)
+				{
 					var xpoClaim = XPOCreateClaim(wrk);
 					xpoClaim.SetMemberValue("User", wrk.GetObjectByKey(XPOUserType, user.Id));
 					xpoClaim.ClaimType = claim.Type;
@@ -464,18 +533,22 @@ namespace DX.Data.Xpo.Identity {
 			});
 		}
 
-		public async virtual Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken) {
+		public async virtual Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				XPCollection xpoClaims = new XPCollection(typeof(XpoDxUserClaim),
 					CriteriaOperator.Parse("[User!Key] == ? AND ClaimValue == ? AND ClaimType == ?",
 											user.Id, claim.Value, claim.Type), null);
 
-				foreach (var item in xpoClaims) {
+				foreach (var item in xpoClaims)
+				{
 					var xpoClaim = item as XpoDxUserClaim;
-					if (xpoClaim != null) {
+					if (xpoClaim != null)
+					{
 						xpoClaim.ClaimType = newClaim.Type;
 						xpoClaim.ClaimValue = newClaim.Value;
 					}
@@ -483,18 +556,23 @@ namespace DX.Data.Xpo.Identity {
 			});
 		}
 
-		public async virtual Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken) {
+		public async virtual Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			await DB.ExecuteAsync((db, wrk) => {
-				foreach (var claim in claims) {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
+				foreach (var claim in claims)
+				{
 					XPCollection xpoClaims = new XPCollection(wrk, typeof(XpoDxUserClaim),
 						CriteriaOperator.Parse("[User!Key] == ? AND ClaimValue == ? AND ClaimType == ?",
 											user.Id, claim.Value, claim.Type), null);
-					foreach (var item in xpoClaims) {
+					foreach (var item in xpoClaims)
+					{
 						var xpoClaim = item as XpoDxUserClaim;
-						if (xpoClaim != null) {
+						if (xpoClaim != null)
+						{
 							xpoClaim.User = null;
 						}
 					}
@@ -503,21 +581,25 @@ namespace DX.Data.Xpo.Identity {
 			});
 		}
 
-		public async virtual Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken) {
+		public async virtual Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (claim == null) {
+			if (claim == null)
+			{
 				throw new ArgumentNullException(nameof(claim));
 			}
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				XPCollection list = new XPCollection(wrk, typeof(XpoDxUser),
 					XpoDxUser.Fields.Claims[
 						XpoDxUserClaim.Fields.ClaimType == claim.Type &
 						XpoDxUserClaim.Fields.ClaimValue == claim.Value], null);
 
 				List<TUser> users = new List<TUser>();
-				foreach (var item in list) {
+				foreach (var item in list)
+				{
 					TUser usr = Mapper.CreateModel(item as TXPOUser);
 					users.Add(usr);
 				}
@@ -528,15 +610,19 @@ namespace DX.Data.Xpo.Identity {
 		}
 #endif
 
-		public async virtual Task AddClaimAsync(TUser user, Claim claim) {
+		public async virtual Task AddClaimAsync(TUser user, Claim claim)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (claim == null) {
+			if (claim == null)
+			{
 				throw new ArgumentNullException(nameof(claim));
 			}
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoClaim = XPOCreateClaim(wrk);
 				xpoClaim.SetMemberValue("User", wrk.GetObjectByKey(XPOUserType, user.Id));
 				xpoClaim.ClaimType = claim.Type;
@@ -544,14 +630,18 @@ namespace DX.Data.Xpo.Identity {
 			});
 		}
 
-		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user) {
+		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				var results = new List<Claim>();
-				foreach (var c in new XPCollection(wrk, XPOClaimType, CriteriaOperator.Parse("[User!Key] == ?", user.Id))) {
+				foreach (var c in new XPCollection(wrk, XPOClaimType, CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
+				{
 					TXPOClaim xpoClaim = c as TXPOClaim;
 					results.Add(new Claim(xpoClaim.ClaimType, xpoClaim.ClaimValue));
 				}
@@ -560,15 +650,19 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task RemoveClaimAsync(TUser user, Claim claim) {
+		public async virtual Task RemoveClaimAsync(TUser user, Claim claim)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (claim == null) {
+			if (claim == null)
+			{
 				throw new ArgumentNullException(nameof(claim));
 			}
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				wrk.Delete(new XPCollection(wrk, XPOClaimType,
 						 CriteriaOperator.Parse("([User!Key] == ?) AND (ClaimType == ?) AND (ClaimValue == ?)",
 													user.Id, claim.Type, claim.Value), null));
@@ -579,31 +673,36 @@ namespace DX.Data.Xpo.Identity {
 		#region IUserRoleStore<TUser, TKey>
 #if (NETSTANDARD2_1)
 		public async virtual Task AddToRoleAsync(TUser user, string roleName,
-			CancellationToken cancellationToken = default(CancellationToken)) {
+			CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await AddToRoleAsync(user, roleName);
 		}
 
 		public async virtual Task RemoveFromRoleAsync(TUser user, string roleName,
-			CancellationToken cancellationToken = default(CancellationToken)) {
+			CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await RemoveFromRoleAsync(user, roleName);
 		}
 
 		public async virtual Task<IList<string>> GetRolesAsync(TUser user,
-			CancellationToken cancellationToken = default(CancellationToken)) {
+			CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return await GetRolesAsync(user);
 		}
 
 		public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName,
-			CancellationToken cancellationToken = default(CancellationToken)) {
+			CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return await IsInRoleAsync(user, roleName);
 		}
 
 		public async virtual Task<IList<TUser>> GetUsersInRoleAsync(string roleName,
-			CancellationToken cancellationToken = default(CancellationToken)) {
+			CancellationToken cancellationToken = default(CancellationToken))
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return await GetUsersInRoleAsync(roleName);
 		}
@@ -628,19 +727,24 @@ namespace DX.Data.Xpo.Identity {
 		}
 #endif
 
-		public async virtual Task AddToRoleAsync(TUser user, string roleName) {
+		public async virtual Task AddToRoleAsync(TUser user, string roleName)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (String.IsNullOrWhiteSpace(roleName)) {
+			if (String.IsNullOrWhiteSpace(roleName))
+			{
 				throw new ArgumentException("role cannot be empty");
 			}
 
 			string r = roleName.ToUpperInvariant();
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var u = wrk.GetObjectByKey<TXPOUser>(user.Id);
-				if (u != null) {
+				if (u != null)
+				{
 #if (NETSTANDARD2_1)
 					var role = wrk.FindObject(typeof(TXPORole),
 						CriteriaOperator.Parse("(NormalizedName == ?) AND (NOT Users[ID == ?])", roleName, u.Id)) as TXPORole;
@@ -658,17 +762,21 @@ namespace DX.Data.Xpo.Identity {
 			}, true);
 		}
 
-		public async virtual Task<IList<string>> GetRolesAsync(TUser user) {
+		public async virtual Task<IList<string>> GetRolesAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			var userId = user.Id;
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				List<string> r = new List<string>();
 				foreach (var role in new XPCollection(wrk, XPORoleType,
 						 CriteriaOperator.Parse("Users[ID == ?]", userId),
-						 new SortProperty("Name", SortingDirection.Ascending))) {
+						 new SortProperty("Name", SortingDirection.Ascending)))
+				{
 					r.Add(((TXPORole)role).Name);
 				}
 				return r;
@@ -676,15 +784,19 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName) {
+		public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (String.IsNullOrWhiteSpace(roleName)) {
+			if (String.IsNullOrWhiteSpace(roleName))
+			{
 				throw new ArgumentException("roleName cannot be empty");
 			}
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 #if (NETSTANDARD2_1)
 				var role = wrk.FindObject(typeof(TXPORole),
 						 CriteriaOperator.Parse("(NormalizedName == ?) AND (Users[ID == ?])", roleName, user.Id)) as TXPORole;
@@ -697,16 +809,20 @@ namespace DX.Data.Xpo.Identity {
 			return result;
 		}
 
-		public async virtual Task RemoveFromRoleAsync(TUser user, string roleName) {
+		public async virtual Task RemoveFromRoleAsync(TUser user, string roleName)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (String.IsNullOrWhiteSpace(roleName)) {
+			if (String.IsNullOrWhiteSpace(roleName))
+			{
 				throw new ArgumentException("role cannot be empty");
 			}
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				var u = wrk.FindObject(typeof(TXPOUser), CriteriaOperator.Parse("ID == ?", user.Id)) as TXPOUser;
 				if (u == null)
 					throw new InvalidOperationException($"User '{user.UserName}' was not found");
@@ -726,36 +842,43 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserPasswordStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken) {
+		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await SetPasswordHashAsync(user, passwordHash);
 		}
 
-		public async virtual Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var result = await GetPasswordHashAsync(user);
 			return result;
 		}
 
-		public async virtual Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var result = await HasPasswordAsync(user);
 			return result;
 		}
 #endif
 
-		public virtual Task<string> GetPasswordHashAsync(TUser user) {
+		public virtual Task<string> GetPasswordHashAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
 			return Task.FromResult(user.PasswordHash);
 		}
 
-		public virtual Task<bool> HasPasswordAsync(TUser user) {
+		public virtual Task<bool> HasPasswordAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
@@ -763,16 +886,20 @@ namespace DX.Data.Xpo.Identity {
 			return Task.FromResult(!String.IsNullOrEmpty(user.PasswordHash));
 		}
 
-		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash) {
+		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.PasswordHash = passwordHash;
 
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var u = wrk.GetObjectByKey<TXPOUser>(user.Id);
-				if (u != null) {
+				if (u != null)
+				{
 					u.PasswordHash = passwordHash;
 				}
 			});
@@ -783,34 +910,42 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserSecurityStampStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public async virtual Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken) {
+		public async virtual Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			await SetSecurityStampAsync(user, stamp);
 		}
 
-		public async virtual Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var result = await GetSecurityStampAsync(user);
 			return result;
 		}
 #endif
-		public virtual Task<string> GetSecurityStampAsync(TUser user) {
+		public virtual Task<string> GetSecurityStampAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.SecurityStamp);
 		}
 
-		public async virtual Task SetSecurityStampAsync(TUser user, string stamp) {
+		public async virtual Task SetSecurityStampAsync(TUser user, string stamp)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.SecurityStamp = stamp;
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var u = wrk.GetObjectByKey<TXPOUser>(user.Id);
-				if (u != null) {
+				if (u != null)
+				{
 					u.SecurityStamp = stamp;
 				}
 			});
@@ -826,11 +961,14 @@ namespace DX.Data.Xpo.Identity {
 		//	//result.Assign(x, 0);
 		//	return result;
 		//};
-		public virtual IQueryable<TUser> Users {
-			get {
+		public virtual IQueryable<TUser> Users
+		{
+			get
+			{
 				//TODO: Might need to check this for memoryleak
 				var session = DB.GetSession();
-				session.Disposed += (s, e) => {
+				session.Disposed += (s, e) =>
+				{
 					Trace.WriteLine("IQueryable<TUser> Users session disposed");
 				};
 
@@ -843,44 +981,53 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserEmailStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public virtual Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken) {
+		public virtual Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetEmailAsync(user, email);
 		}
 
-		public virtual Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetEmailAsync(user);
 		}
 
-		public virtual Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetEmailConfirmedAsync(user);
 		}
 
-		public virtual Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken) {
+		public virtual Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetEmailConfirmedAsync(user, confirmed);
 		}
 
-		public async virtual Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken) {
+		public async virtual Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return await FindByEmailAsync(normalizedEmail);
 		}
 
-		public virtual Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.NormalizedEmail);
 		}
 
-		public virtual Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken) {
+		public virtual Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.NormalizedEmail = normalizedEmail;
@@ -888,45 +1035,55 @@ namespace DX.Data.Xpo.Identity {
 		}
 #endif
 
-		public async virtual Task<TUser> FindByEmailAsync(string email) {
+		public async virtual Task<TUser> FindByEmailAsync(string email)
+		{
 			ThrowIfDisposed();
 
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("EmailUpper == ?", email.ToUpperInvariant()));
 				return (xpoUser == null) ? null : Mapper.CreateModel(xpoUser as TXPOUser);
 			});
 			return result;
 		}
 
-		public virtual Task<string> GetEmailAsync(TUser user) {
+		public virtual Task<string> GetEmailAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
 			return Task.FromResult(user.Email);
 		}
 
-		public virtual Task<bool> GetEmailConfirmedAsync(TUser user) {
+		public virtual Task<bool> GetEmailConfirmedAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.EmailConfirmed); ;
 		}
 
-		public virtual Task SetEmailAsync(TUser user, string email) {
+		public virtual Task SetEmailAsync(TUser user, string email)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.Email = email;
 			return Task.CompletedTask;
 		}
 
-		public virtual Task SetEmailConfirmedAsync(TUser user, bool confirmed) {
+		public virtual Task SetEmailConfirmedAsync(TUser user, bool confirmed)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.EmailConfirmed = confirmed;
@@ -936,56 +1093,68 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserPhoneNumberStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public virtual Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken) {
+		public virtual Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 
 			return SetPhoneNumberAsync(user, phoneNumber);
 		}
 
-		public virtual Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetPhoneNumberAsync(user);
 		}
 
-		public virtual Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetPhoneNumberConfirmedAsync(user);
 		}
 
-		public virtual Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken) {
+		public virtual Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetPhoneNumberConfirmedAsync(user, confirmed);
 		}
 
 #endif
-		public virtual Task<string> GetPhoneNumberAsync(TUser user) {
+		public virtual Task<string> GetPhoneNumberAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.PhoneNumber);
 		}
 
-		public virtual Task<bool> GetPhoneNumberConfirmedAsync(TUser user) {
+		public virtual Task<bool> GetPhoneNumberConfirmedAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.PhoneNumberConfirmed);
 		}
 
-		public virtual Task SetPhoneNumberAsync(TUser user, string phoneNumber) {
+		public virtual Task SetPhoneNumberAsync(TUser user, string phoneNumber)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.PhoneNumber = phoneNumber;
 			return Task.CompletedTask;
 		}
 
-		public virtual Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed) {
+		public virtual Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.PhoneNumberConfirmed = confirmed;
@@ -995,28 +1164,34 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserTwoFactorStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public virtual Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken) {
+		public virtual Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetTwoFactorEnabledAsync(user, enabled);
 		}
 
-		public virtual Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken) {
+		public virtual Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetTwoFactorEnabledAsync(user);
 		}
 
 #endif
-		public virtual Task<bool> GetTwoFactorEnabledAsync(TUser user) {
+		public virtual Task<bool> GetTwoFactorEnabledAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.TwoFactorEnabled);
 		}
 
-		public virtual Task SetTwoFactorEnabledAsync(TUser user, bool enabled) {
+		public virtual Task SetTwoFactorEnabledAsync(TUser user, bool enabled)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.TwoFactorEnabled = enabled;
@@ -1026,10 +1201,12 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserLockoutStore<TUser, TKey>
 #if (NETSTANDARD2_1)
-		public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken) {
+		public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			DateTimeOffset? result = null;
@@ -1041,56 +1218,68 @@ namespace DX.Data.Xpo.Identity {
 			return Task.FromResult(result);
 		}
 
-		public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken) {
+		public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetLockoutEndDateAsync(user, lockoutEnd.Value.UtcDateTime);
 		}
 
-		public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken) {
+		public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return IncrementAccessFailedCountAsync(user);
 		}
 
-		public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken) {
+		public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return ResetAccessFailedCountAsync(user);
 		}
 
-		public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken) {
+		public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetAccessFailedCountAsync(user);
 		}
 
-		public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken) {
+		public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return GetLockoutEnabledAsync(user);
 		}
 
-		public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken) {
+		public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			return SetLockoutEnabledAsync(user, enabled);
 		}
 
 #endif
-		public virtual Task<int> GetAccessFailedCountAsync(TUser user) {
+		public virtual Task<int> GetAccessFailedCountAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.AccessFailedCount);
 		}
 
-		public virtual Task<bool> GetLockoutEnabledAsync(TUser user) {
+		public virtual Task<bool> GetLockoutEnabledAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			return Task.FromResult(user.LockoutEnabled);
 		}
 
-		public virtual Task<DateTimeOffset> GetLockoutEndDateAsync(TUser user) {
+		public virtual Task<DateTimeOffset> GetLockoutEndDateAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
@@ -1101,18 +1290,22 @@ namespace DX.Data.Xpo.Identity {
 			return Task.FromResult(result);
 		}
 
-		public virtual Task<int> IncrementAccessFailedCountAsync(TUser user) {
+		public virtual Task<int> IncrementAccessFailedCountAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.AccessFailedCount++;
 			return Task.FromResult(user.AccessFailedCount);
 		}
 
-		public virtual Task ResetAccessFailedCountAsync(TUser user) {
+		public virtual Task ResetAccessFailedCountAsync(TUser user)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
@@ -1120,18 +1313,22 @@ namespace DX.Data.Xpo.Identity {
 			return Task.CompletedTask;
 		}
 
-		public virtual Task SetLockoutEnabledAsync(TUser user, bool enabled) {
+		public virtual Task SetLockoutEnabledAsync(TUser user, bool enabled)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.LockoutEnabled = enabled;
 			return Task.CompletedTask;
 		}
 
-		public virtual Task SetLockoutEndDateAsync(TUser user, DateTimeOffset lockoutEnd) {
+		public virtual Task SetLockoutEndDateAsync(TUser user, DateTimeOffset lockoutEnd)
+		{
 			ThrowIfDisposed();
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			user.LockoutEndDateUtc = lockoutEnd.UtcDateTime;
@@ -1146,14 +1343,16 @@ namespace DX.Data.Xpo.Identity {
 
 		#region IUserAuthenticationTokenStore<TUser>
 
-		protected virtual TXPOToken FindToken(Session wrk, TUser user, string loginProvider, string name, bool createIfNotFound = false) {
+		protected virtual TXPOToken FindToken(Session wrk, TUser user, string loginProvider, string name, bool createIfNotFound = false)
+		{
 			if (wrk == null)
 				throw new ArgumentNullException(nameof(wrk));
 
 			TXPOToken xpoToken = wrk.FindObject(XPOTokenType,
 				CriteriaOperator.Parse("[User!Key] == ? AND LoginProvider == ? AND Name == ?", user.Id, loginProvider, name)) as TXPOToken;
 
-			if (createIfNotFound && (xpoToken == null)) {
+			if (createIfNotFound && (xpoToken == null))
+			{
 				xpoToken = Activator.CreateInstance(XPOTokenType, wrk) as TXPOToken;
 				xpoToken.Name = name;
 				xpoToken.LoginProvider = loginProvider;
@@ -1166,30 +1365,36 @@ namespace DX.Data.Xpo.Identity {
 			}
 			return xpoToken;
 		}
-		public async virtual Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken) {
+		public async virtual Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoToken = FindToken(wrk, user, loginProvider, name, true);
 				xpoToken.Value = value;
 
 			});
 		}
 
-		public async virtual Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) {
+		public async virtual Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 
-			await DB.ExecuteAsync((db, wrk) => {
+			await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoToken = FindToken(wrk, user, loginProvider, name, false);
 				if (xpoToken != null)
 					wrk.Delete(xpoToken);
@@ -1197,14 +1402,17 @@ namespace DX.Data.Xpo.Identity {
 
 		}
 
-		public virtual async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) {
+		public virtual async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			var result = await DB.ExecuteAsync((db, wrk) => {
+			var result = await DB.ExecuteAsync((db, wrk) =>
+			{
 				var xpoToken = FindToken(wrk, user, loginProvider, name, false);
 				return xpoToken?.Value;
 			});
@@ -1217,36 +1425,43 @@ namespace DX.Data.Xpo.Identity {
 		private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
 		private const string RecoveryCodeTokenName = "RecoveryCodes";
 
-		public async virtual Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken) {
+		public async virtual Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
+		{
 			await SetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
 		}
 
-		public async virtual Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
+		{
 			var result = await GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
 			return result;
 		}
 		#endregion
 
 		#region IUserTwoFactorRecoveryCodeStore<TUser>
-		public virtual Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken) {
+		public virtual Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+		{
 			var mergedCodes = string.Join(";", recoveryCodes);
 			return SetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, mergedCodes, cancellationToken);
 		}
 
-		public async virtual Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken) {
+		public async virtual Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
-			if (code == null) {
+			if (code == null)
+			{
 				throw new ArgumentNullException(nameof(code));
 			}
 
 			var mergedCodes = await GetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? string.Empty;
 			var splitCodes = mergedCodes.Split(';');
-			if (splitCodes.Contains(code)) {
+			if (splitCodes.Contains(code))
+			{
 				var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
 				await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
 				return true;
@@ -1254,15 +1469,18 @@ namespace DX.Data.Xpo.Identity {
 			return false;
 		}
 
-		public async virtual Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken) {
+		public async virtual Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+		{
 			cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
 
-			if (user == null) {
+			if (user == null)
+			{
 				throw new ArgumentNullException(nameof(user));
 			}
 			var mergedCodes = await GetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? string.Empty;
-			if (mergedCodes.Length > 0) {
+			if (mergedCodes.Length > 0)
+			{
 				return mergedCodes.Split(';').Length;
 			}
 			return 0;
