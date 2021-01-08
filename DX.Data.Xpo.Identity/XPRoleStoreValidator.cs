@@ -18,11 +18,11 @@ namespace DX.Data.Xpo.Identity
 		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
 	{
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
+		public override IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
 			if (args == null || args.Length == 0)
 				throw new ArgumentNullException("args[0] should contain reference to XPO entity");
-			IDataValidationResult<TKey> result = null;
+			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 			TXPORole role = args[0] as TXPORole;
 			if (role != null)
 			{
@@ -30,19 +30,19 @@ namespace DX.Data.Xpo.Identity
 					CriteriaOperator.Parse("Count"),
 					CriteriaOperator.Parse("Roles[Id == ?]", role.ID));
 				if (userCount > 0)
-					result = new DataValidationResult<TKey>
+					result.Add(new DataValidationResult<TKey>
 					{
 						ResultType = DataValidationResultType.Error,
 						ID = role.ID,
-						Message = String.Format("Role '{0}' cannot be deleted because there are users in this Role", role.Name)
-					};
+						Message = $"Role '{role.Name}' cannot be deleted because there are users in this Role"
+					});
 			}
 
 			if (result == null)
 			{
 				result = base.Deleting(id, validationResults, args);
 			}
-			validationResults.Add(result);
+			validationResults.AddRange(result);
 			return result;
 		}
 

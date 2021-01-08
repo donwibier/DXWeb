@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace DX.Utils.Data
 {
@@ -51,6 +50,11 @@ namespace DX.Utils.Data
 	{
 		private readonly List<IDataValidationResult<TKey>> errors = new List<IDataValidationResult<TKey>>();
 
+		public DataValidationResults(params DataValidationResult<TKey>[] results)
+		{
+			errors.AddRange(results);
+		}
+
 		public IEnumerable<IDataValidationResult<TKey>> Results { get => errors; }
 		public void Add(IDataValidationResult<TKey> error)
 		{
@@ -76,6 +80,17 @@ namespace DX.Utils.Data
 					.Select(r => r.Message)
 					.ToArray();
 			return results;
+		}
+
+		public void AddRange(IEnumerable<IDataValidationResult<TKey>> range)
+		{
+			errors.AddRange(range);
+		}
+
+		public void AddRange(IDataValidationResults<TKey> source)
+		{
+			if (source != null)
+				errors.AddRange(source.Results);
 		}
 
 		public bool Success { get => (errors.Count == 0) || (errors.Count == errors.FindAll(x => x.ResultType == DataValidationResultType.Success).Count); }
@@ -109,23 +124,17 @@ namespace DX.Utils.Data
 			where TKey : IEquatable<TKey>
 			where TModel : IDataStoreModel<TKey>
 	{
-		//public abstract bool Inserting(TModel model);
-		//public abstract bool Updating(TModel model);
-		//public abstract bool Deleting(TModel model);
-		public abstract IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
-		public abstract IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
+		public abstract IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
 	}
 	public abstract class DataValidator<TKey, TModel, TDBModel> : DataValidator<TKey, TModel>, IDataStoreValidator<TKey, TModel, TDBModel>
 			where TKey : IEquatable<TKey>
 			where TModel : IDataStoreModel<TKey>
 			where TDBModel : class, IDataStoreModel<TKey>
 	{
-		//public abstract bool Deleted(TModel model, TDBModel dbModel);
-		//public abstract bool Inserted(TModel model, TDBModel dbModel);
-		//public abstract bool Updated(TModel model, TDBModel dbModel);
-		public abstract IDataValidationResult<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResult<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResult<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 	}
 }

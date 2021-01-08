@@ -14,7 +14,6 @@ namespace DX.Data.Xpo.Identity
 		where TUser : IXPUser<string>
 		where TXPOUser : XPBaseObject, IXPUser<string>
 	{
-
 	}
 
 	public class XPUserStoreValidator<TKey, TUser, TXPOUser> : XPDataValidator<TKey, TUser, TXPOUser>
@@ -22,75 +21,115 @@ namespace DX.Data.Xpo.Identity
 		where TUser : IXPUser<TKey>
 		where TXPOUser : XPBaseObject, IXPUser<TKey>
 	{
-		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Deleted(
+			TKey id,
+			TXPOUser dbModel,
+			IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Deleted,
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					id,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Deleted));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
+		public override IDataValidationResults<TKey> Deleting(
+			TKey id,
+			IDataValidationResults<TKey> validationResults,
+			params object[] args)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Deleting,
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					id,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Deleting));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserted(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserted(
+			TUser model,
+			TXPOUser dbModel,
+			IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Inserted,
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					dbModel.ID,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Inserted));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserting(TUser model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserting(
+			TUser model,
+			IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Inserting,
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					model.ID,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Inserting));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updated(TUser model, TXPOUser dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updated(
+			TUser model,
+			TXPOUser dbModel,
+			IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Updated,
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					dbModel.ID,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Updated));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updating(TUser model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updating(
+			TUser model,
+			IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				EventType = DataValidationEventType.Updating,
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>();
+			result.Add(
+				new DataValidationResult<TKey>(
+					DataValidationResultType.Success,
+					model.ID,
+					string.Empty,
+					string.Empty,
+					0,
+					DataValidationEventType.Updating));
+
+			validationResults.AddRange(result);
 			return result;
 		}
 	}

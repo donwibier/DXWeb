@@ -23,69 +23,57 @@ namespace DX.Data.Xpo
 		where TModel : IDataStoreModel<TKey>
 		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
 	{
-		public override IDataValidationResult<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
+		public override IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserted(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserted(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, model.ID, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updated(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updated(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, model.ID, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 	}
@@ -185,64 +173,70 @@ namespace DX.Data.Xpo
 					if (item.ID == null || item.ID.Equals(EmptyKeyValue) || mode == StoreMode.Create)
 					{
 						var canInsert = Validator?.Inserting(item, r);
-						if (canInsert.ResultType == DataValidationResultType.Error)
+						if (!canInsert.Success)
 						{
-							r.Add(canInsert);
 							if (!continueOnError)
 							{
 								w.RollbackTransaction();
 								break;
 							}
 						}
-
-						TXPOClass newItem = Assign(item,
-												Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
-
-						var hasInserted = Validator?.Inserted(item, newItem, r);
-						if (hasInserted.ResultType == DataValidationResultType.Error)
+						else
 						{
-							r.Add(hasInserted);
-							if (!continueOnError)
+							TXPOClass newItem = Assign(
+								item,
+								Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
+
+							var hasInserted = Validator?.Inserted(item, newItem, r);
+							if (!hasInserted.Success)
 							{
-								w.RollbackTransaction();
-								break;
+								if (!continueOnError)
+								{
+									w.RollbackTransaction();
+									break;
+								}
 							}
+							batchPairs.Add(newItem, new InsertHelper(item, canInsert.Results.FirstOrDefault(), hasInserted.Results.FirstOrDefault()));
 						}
-						batchPairs.Add(newItem, new InsertHelper(item, canInsert, hasInserted));
 					}
 					else if (!item.ID.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
 					{
 						var canUpdate = Validator?.Updating(item, r);
-						if (canUpdate.ResultType == DataValidationResultType.Error)
+						if (!canUpdate.Success)
 						{
-							r.Add(canUpdate);
 							if (!continueOnError)
 							{
 								w.RollbackTransaction();
 								break;
 							}
 						}
-
-						var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
-						if (updatedItem == null)
+						else
 						{
-							r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Updating);
-							break;
-						}
-
-						Assign(item, updatedItem);
-
-						var hasUpdated = Validator?.Updated(item, updatedItem, r);
-						if (hasUpdated.ResultType == DataValidationResultType.Error)
-						{
-							r.Add(hasUpdated);
-							if (!continueOnError)
+							var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
+							if (updatedItem == null)
 							{
-								w.RollbackTransaction();
+								r.Add(
+									DataValidationResultType.Error,
+									item.ID,
+									"KeyField",
+									$"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore",
+									0,
+									DataValidationEventType.Updating);
 								break;
 							}
-						}
 
+							Assign(item, updatedItem);
+
+							var hasUpdated = Validator?.Updated(item, updatedItem, r);
+							if (!hasUpdated.Success)
+							{
+								if (!continueOnError)
+								{
+									w.RollbackTransaction();
+									break;
+								}
+							}
+						}
 					}
 
 				}
@@ -324,20 +318,18 @@ namespace DX.Data.Xpo
 						break;
 					}
 					var canDelete = Validator?.Deleting(id, r, item);
-					if (canDelete.ResultType == DataValidationResultType.Error)
+					if (!canDelete.Success)
 					{
 						w.RollbackTransaction();
-						r.Add(canDelete);
 						break;
 					}
 
 					item.Delete();
 					//val.Deleted(id, item, r);
 					var hasDeleted = Validator?.Deleted(id, item, r);
-					if (hasDeleted.ResultType == DataValidationResultType.Error)
+					if (!hasDeleted.Success)
 					{
 						w.RollbackTransaction();
-						r.Add(hasDeleted);
 						break; // throw new Exception(hasInserted.Message);
 					}
 				}

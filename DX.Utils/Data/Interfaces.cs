@@ -110,15 +110,17 @@ namespace DX.Utils.Data
 
 		string[] Messages(params DataValidationResultType[] resultsTypes);
 
+		void AddRange(IEnumerable<IDataValidationResult<TKey>> range);
+		void AddRange(IDataValidationResults<TKey> source);
 	}
 
 	public interface IDataStoreValidator<TKey, TModel>
 		where TKey : IEquatable<TKey>
 		where TModel : IDataStoreModel<TKey>
 	{
-		IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
-		IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
-		IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
+		IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 
 	}
 	public interface IDataStoreValidator<TKey, TModel, TDBModel> : IDataStoreValidator<TKey, TModel>
@@ -126,9 +128,9 @@ namespace DX.Utils.Data
 		where TModel : IDataStoreModel<TKey>
 		where TDBModel : class, IDataStoreModel<TKey>
 	{
-		IDataValidationResult<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		IDataValidationResult<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		IDataValidationResult<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 	}
 
 	public interface IDataMapper<TKey, TModel, TDBModel>
