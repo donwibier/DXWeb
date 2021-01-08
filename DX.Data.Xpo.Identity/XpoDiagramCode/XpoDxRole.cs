@@ -39,14 +39,14 @@ namespace DX.Data.Xpo.Identity.Persistent
 
 		protected override void OnDeleting()
 		{
-			var users = new XPCollection<XpoDxUser>(CriteriaOperator.Parse("Roles[Id == ?]", Id), null);
+			var users = new XPCollection<XpoDxUser>(this.Session, CriteriaOperator.Parse("Roles[Id == ?]", Id), null);
 			foreach (var u in users)
 			{
 				Users.Remove(u);
 				if (!(Session is UnitOfWork))
 					u.Save();
 			}
-			Session.Delete(new XPCollection<XpoDxRoleClaim>(CriteriaOperator.Parse("Role.Id == ?", Id), null));
+			Session.Delete(new XPCollection<XpoDxRoleClaim>(this.Session, CriteriaOperator.Parse("Role.Id == ?", Id), null));
 			//int userCount = (int)Session.Evaluate(typeof(XpoDxUser),
 			//    CriteriaOperator.Parse("Count"),
 			//    CriteriaOperator.Parse("Roles[Id == ?]", this.Id));

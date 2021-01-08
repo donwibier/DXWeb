@@ -706,7 +706,25 @@ namespace DX.Data.Xpo.Identity
 			cancellationToken.ThrowIfCancellationRequested();
 			return await GetUsersInRoleAsync(roleName);
 		}
-
+		public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string roleName) {
+			this.ThrowIfDisposed();
+			IList<TUser> result = await this.DB
+				.ExecuteAsync(
+					(db, wrk) => {
+						var role = wrk.FindObject(
+							typeof(TXPORole),
+							CriteriaOperator.Parse("(NormalizedName == ?)", roleName)) as TXPORole;
+						var member = (XPBaseCollection)role.GetMemberValue(nameof(this.Users));
+						List<TUser> users = new List<TUser>();
+						foreach (var item in member) {
+							TUser usr = this.Mapper.CreateModel(item as TXPOUser);
+							users.Add(usr);
+						}
+						return users;
+					},
+					false);
+			return result;
+		}
 #endif
 
 		public async virtual Task AddToRoleAsync(TUser user, string roleName)
