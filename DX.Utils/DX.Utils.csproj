@@ -48,6 +48,10 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="rem if exists &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; copy /Y &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; &quot;$(SolutionDir).deploy\$(ConfigurationName)&quot;" />
   </Target>

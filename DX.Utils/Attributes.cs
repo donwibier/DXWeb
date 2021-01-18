@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -84,5 +85,81 @@ namespace DX.Utils
         //    }
         //    return false;
         //}
+    }
+
+    public enum RequiredIfComparison
+    {
+        IsEqualTo,
+        IsNotEqualTo
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public sealed class RequiredIfAttribute : ValidationAttribute
+    {
+        private const string DefaultErrorMessageFormatString = "The {0} field is required.";
+        public string OtherProperty { get; private set; }
+        public RequiredIfComparison Comparison { get; private set; }
+        public Object Value { get; private set; }
+
+        public RequiredIfAttribute(string otherProperty, RequiredIfComparison comparison, object value)
+        {
+            if (string.IsNullOrEmpty(otherProperty))
+            {
+                throw new ArgumentNullException("otherProperty");
+            }
+
+            OtherProperty = otherProperty;
+            Comparison = comparison;
+            Value = value;
+        }
+
+        public override string FormatErrorMessage(string name)
+        {
+            return string.Format(ErrorMessageString, name, OtherProperty);
+        }
+
+        public bool Validate(object actualPropertyValue)
+        {
+            switch (Comparison)
+            {
+                case RequiredIfComparison.IsNotEqualTo:
+                    return actualPropertyValue == null ? Value != null : !actualPropertyValue.Equals(Value);
+                default:
+                    return actualPropertyValue == null ? Value == null : actualPropertyValue.Equals(Value);
+            }
+        }
+
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            if (value == null)
+            {
+                try
+                {
+                    var property = validationContext.ObjectInstance.GetType().GetProperty(OtherProperty);
+                    var propertyValue = property.GetValue(validationContext.ObjectInstance, null);
+
+                    if (Validate(propertyValue))
+                    {
+                        return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                    }
+                }
+                catch (Exception)
+                {
+                    if (OtherProperty.Contains('_'))
+                    {
+                        var prop = OtherProperty.Split('_');
+
+                        var property = validationContext.ObjectInstance.GetType().GetProperty(prop.Last());
+                        var propertyValue = property.GetValue(validationContext.ObjectInstance, null);
+
+                        if (!Validate(propertyValue))
+                        {
+                            return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                        }
+                    }
+                }
+            }
+            return ValidationResult.Success;
+        }
     }
 }
