@@ -16,9 +16,11 @@ jobs:
       #   with:
       #     dotnet-version: 3.1.200
 
+      #- name: add dx nuget source
+        #id: prep_nuget      
+      - run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
+
       # Publish
-      - name: add dx nuget source
-        run dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
       - name: publish on version change
         id: publish_nuget
         uses: rohith/publish-nuget@v2
@@ -52,5 +54,4 @@ jobs:
 
           # Flag to toggle pushing symbols along with nuget package to the server, disabled by default
           # INCLUDE_SYMBOLS: false
-      - name: remove dx nuget source
-        run dotnet nuget remove source ${{secrets.DX_PRIVATE_NUGET}}
+      - run: dotnet nuget remove source ${{secrets.DX_PRIVATE_NUGET}}
