@@ -10,6 +10,8 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
 		<LangVersion>7.3</LangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

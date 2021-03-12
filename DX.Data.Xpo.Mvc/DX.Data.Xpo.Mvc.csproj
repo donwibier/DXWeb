@@ -13,7 +13,6 @@
 	  <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageTags>DXWeb Wibier DevExpress XPO ORM GridView ASP.NET MVC</PackageTags>	  
-	  <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	  <PackageReleaseNotes>
 		  20.2.3.11: Upgrade to DevExpress v20.2.3
 		  20.1.7.11: Upgrade to DevExpress v20.1.7
@@ -63,8 +62,4 @@
 	  </None>
 	</ItemGroup>
 
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="rem if exists &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; copy /Y &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; &quot;$(SolutionDir).deploy\$(ConfigurationName)&quot;" />
-  </Target>
 </Project>

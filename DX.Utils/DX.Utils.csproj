@@ -30,7 +30,6 @@
 		1.0.0.6: Changed .NET Framework to v4.6.1
 		1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
 		Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
     <Reference Include="System" />
@@ -52,9 +51,5 @@
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="rem if exists &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; copy /Y &quot;$(ProjectDir)bin\$(ConfigurationName)\*.nupkg&quot; &quot;$(SolutionDir).deploy\$(ConfigurationName)&quot;" />
-  </Target>
 
 </Project>
