@@ -1,6 +1,7 @@
-﻿using DevExpress.Web.Mvc;
+﻿using DevExpress.Data;
+using DevExpress.Data.Linq.Helpers;
+using DevExpress.Web.Mvc;
 using DevExpress.Xpo;
-using DevExpress.Data;
 using DX.Data.Xpo;
 using DX.Data.Xpo.Mvc.Utils;
 using DX.Utils.Data;
@@ -8,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DevExpress.Data.Linq.Helpers;
 using System.Web.Hosting;
 
 namespace DX.Data.Xpo.Mvc
@@ -18,9 +18,9 @@ namespace DX.Data.Xpo.Mvc
 		where TModel : class, IDataStoreModel<TKey>, new()
 		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
 	{
-		public XPPagedDataStore(XpoDatabase db, 
-					IXPDataMapper<TKey, TModel, TXPOClass> mapper, 
-					IXPDataStoreValidator<TKey, TModel, TXPOClass> validator) 
+		public XPPagedDataStore(XpoDatabase db,
+					IXPDataMapper<TKey, TModel, TXPOClass> mapper,
+					IXPDataStoreValidator<TKey, TModel, TXPOClass> validator)
 			: base(db, mapper, validator)
 		{
 
@@ -39,9 +39,9 @@ namespace DX.Data.Xpo.Mvc
 				return dtoProperty;
 
 			//map = map ?? PropertyMap;
-			var key = regexBrackets.Replace(dtoProperty, "");
+			var key = regexBrackets.Replace(dtoProperty, string.Empty);
 			//return map.ContainsKey(key) ? regexBrackets.Replace(map[key], "") : key;
-			return regexBrackets.Replace(Mapper.Map(key), "");
+			return regexBrackets.Replace(Mapper.Map(key), string.Empty);
 		}
 
 		protected virtual string PrepareFilterExpression(string filterExpression/*, Dictionary<string, string> propertyMap = null*/)
@@ -85,10 +85,11 @@ namespace DX.Data.Xpo.Mvc
 		{
 			get
 			{
-				var result = HostingEnvironment.Cache["Counts_" + this.GetType().FullName] as Dictionary<string, int>;
-				if (result == null) {
+				var result = HostingEnvironment.Cache[$"Counts_{GetType().FullName}"] as Dictionary<string, int>;
+				if (result == null)
+				{
 					result = new Dictionary<string, int>();
-					HostingEnvironment.Cache["Counts_" + this.GetType().FullName] = result;
+					HostingEnvironment.Cache[$"Counts_{GetType().FullName}"] = result;
 				}
 				return result;
 			}
@@ -108,13 +109,13 @@ namespace DX.Data.Xpo.Mvc
 		#endregion
 
 		#region GridView CustomBinding Methods
-		public virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)    		     
+		public virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)
 		{
 			int rowCount;
 			if (CacheTryGetCount(e.FilterExpression, out rowCount))
 				e.DataRowCount = rowCount;
 			else
-				e.DataRowCount = DB.Execute((db, w) => Query(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());				
+				e.DataRowCount = DB.Execute((db, w) => Query(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());
 		}
 
 		public virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
@@ -135,7 +136,7 @@ namespace DX.Data.Xpo.Mvc
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				var r =  Query(w)
+				var r = Query(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.GetGroupInfo(PrepareProperty(e.FieldName), e.SortOrder);
@@ -143,8 +144,8 @@ namespace DX.Data.Xpo.Mvc
 			});
 			e.Data = result;
 		}
-		
-		public virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)				 
+
+		public virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)
 		{
 			var result = DB.Execute((db, w) =>
 			{
@@ -199,8 +200,9 @@ namespace DX.Data.Xpo.Mvc
 			}
 			else
 			{
-				e.RowValues = DB.Execute((db, w) => {
-					var r = Query(w).Where(c => e.KeyValues.Contains(c.ID)).Select(CreateModelInstance);
+				e.RowValues = DB.Execute((db, w) =>
+				{
+					var r = Query(w).Where(c => e.KeyValues.Contains(c.Id)).Select(CreateModelInstance);
 					return r.ToList();
 				});
 			}

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.0</Version>
-		<FileVersion>20.2.3.0</FileVersion>
+		<Version>20.2.3.1</Version>
+		<FileVersion>20.2.3.1</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DataStore implementation for use with EF</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>

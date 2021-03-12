@@ -7,8 +7,8 @@ namespace DX.Data.EF
 {
 	public interface IEFDataMapper<TKey, TModel, TEFClass> : IDataMapper<TKey, TModel, TEFClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TEFClass : class, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TEFClass : class, new()
 	{
 
 		//Func<TDBModel, TModel> CreateModel { get; }
@@ -18,8 +18,8 @@ namespace DX.Data.EF
 
 	public interface IEFDataStoreValidator<TKey, TModel, TEFClass> : IDataStoreValidator<TKey, TModel, TEFClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TEFClass : class, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TEFClass : class, new()
 	{
 	}
 }

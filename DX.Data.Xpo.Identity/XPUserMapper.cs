@@ -12,18 +12,18 @@ namespace DX.Data.Xpo.Identity
 {
 	public class XPUserMapper<TUser, TXPOUser> : XPUserMapper<string, TUser, TXPOUser>
 	 where TUser : class, IXPUser<string>, new()
-	 where TXPOUser : XPBaseObject, IXPUser<string>, IUser<string>
+	 where TXPOUser : XPBaseObject, IXPUser<string>
 	{
 	}
 
 	public class XPUserMapper<TKey, TUser, TXPOUser> : XPDataMapper<TKey, TUser, TXPOUser>
 		 where TKey : IEquatable<TKey>
 		 where TUser : class, IXPUser<TKey>, new()
-		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
+		 where TXPOUser : XPBaseObject, IXPUser<TKey>
 	{
 		public override Func<TXPOUser, TUser> CreateModel => (source) => new TUser
 		{
-			ID = source.Id,
+			Id = source.Id,
 			UserName = source.UserName,
 			Email = source.Email,
 			EmailConfirmed = source.EmailConfirmed,

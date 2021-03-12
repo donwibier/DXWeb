@@ -14,7 +14,7 @@ namespace DX.Data.Xpo.Identity
 {
 	public class XPRoleStoreValidator<TKey, TRole, TXPORole> : XPDataValidator<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
-		where TRole : IDataStoreModel<TKey>
+		where TRole : class, new()
 		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
 	{
 
@@ -28,12 +28,12 @@ namespace DX.Data.Xpo.Identity
 			{
 				int userCount = (int)role.Session.Evaluate(typeof(XpoDxUser),
 					CriteriaOperator.Parse("Count"),
-					CriteriaOperator.Parse("Roles[Id == ?]", role.ID));
+					CriteriaOperator.Parse("Roles[Id == ?]", role.Id));
 				if (userCount > 0)
 					result.Add(new DataValidationResult<TKey>
 					{
 						ResultType = DataValidationResultType.Error,
-						ID = role.ID,
+						ID = id,
 						Message = $"Role '{role.Name}' cannot be deleted because there are users in this Role"
 					});
 			}

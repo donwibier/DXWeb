@@ -9,17 +9,12 @@ namespace DX.Utils.Data
 {
 	public abstract class DataStore<TKey, TModel> : IDataStore<TKey, TModel>, IDisposable
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
+		where TModel : class, new()
 	{
 		public virtual Type KeyType => typeof(TKey);
 		public virtual Type ModelType => typeof(TModel);
 
 		public abstract TModel GetByKey(TKey key);
-
-		//public abstract IDataMapper<TKey, TModel, TDBModel> GetMapper<TDBModel>()
-		//	where TDBModel : class, IDataStoreModel<TKey>;
-
-		//public abstract IDataStoreValidator<TKey, TModel> GetValidator();
 
 		public async virtual Task<TModel> GetByKeyAsync(TKey key)
 		{
@@ -54,7 +49,7 @@ namespace DX.Utils.Data
 		public abstract IDataValidationResults<TKey> Update(IEnumerable<TModel> items);
 		public IDataValidationResults<TKey> Update(TKey id, TModel item)
 		{
-			item.ID = id;
+			//item.Id = id;
 			return Update(new TModel[] { item });
 		}
 		public IDataValidationResults<TKey> Update(TModel item)
@@ -79,6 +74,10 @@ namespace DX.Utils.Data
 
 		protected TKey EmptyKeyValue => default;
 
+		public abstract TKey GetModelKey(TModel model);
+
+		public abstract void SetModelKey(TModel model, TKey key);
+
 		/// <summary>
 		/// When ID = null/default, it will add otherwise it will update and collect the results
 		/// </summary>
@@ -86,8 +85,8 @@ namespace DX.Utils.Data
 		/// <returns></returns>
 		public virtual IDataValidationResults<TKey> Store(IEnumerable<TModel> items)
 		{
-			var updated = Update(items.Where(o => !o.ID.Equals(EmptyKeyValue)));
-			var inserted = Create(items.Where(o => o.ID.Equals(EmptyKeyValue)));
+			var updated = Update(items.Where(o => !GetModelKey(o).Equals(EmptyKeyValue)));
+			var inserted = Create(items.Where(o => GetModelKey(o).Equals(EmptyKeyValue)));
 			foreach (var r in inserted.Results)
 				updated.Add(r);
 			return updated;
@@ -115,7 +114,8 @@ namespace DX.Utils.Data
 		public abstract IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids);
 		public virtual IDataValidationResults<TKey> Delete(IEnumerable<TModel> items)
 		{
-			return Delete(from n in items select n.ID);
+			var deleted = items.Select(i => GetModelKey(i));
+			return Delete(deleted);
 		}
 		public virtual IDataValidationResults<TKey> Delete(TKey id)
 		{

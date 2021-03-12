@@ -49,7 +49,10 @@ namespace DX.Utils.Data
 		where TKey : IEquatable<TKey>
 	{
 		private readonly List<IDataValidationResult<TKey>> errors = new List<IDataValidationResult<TKey>>();
-
+		public DataValidationResults()
+		{
+			errors = new List<IDataValidationResult<TKey>>();
+		}
 		public DataValidationResults(params DataValidationResult<TKey>[] results)
 		{
 			errors.AddRange(results);
@@ -122,19 +125,19 @@ namespace DX.Utils.Data
 
 	public abstract class DataValidator<TKey, TModel> : IDataStoreValidator<TKey, TModel>
 			where TKey : IEquatable<TKey>
-			where TModel : IDataStoreModel<TKey>
+			where TModel : class, new()
 	{
 		public abstract IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 		public abstract IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults);
 	}
 	public abstract class DataValidator<TKey, TModel, TDBModel> : DataValidator<TKey, TModel>, IDataStoreValidator<TKey, TModel, TDBModel>
 			where TKey : IEquatable<TKey>
-			where TModel : IDataStoreModel<TKey>
-			where TDBModel : class, IDataStoreModel<TKey>
+			where TModel : class, new()
+			where TDBModel : class
 	{
 		public abstract IDataValidationResults<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResults<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		public abstract IDataValidationResults<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Inserted(TKey id, TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		public abstract IDataValidationResults<TKey> Updated(TKey id, TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 	}
 }

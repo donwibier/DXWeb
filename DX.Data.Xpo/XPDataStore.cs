@@ -10,23 +10,23 @@ namespace DX.Data.Xpo
 	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>,
 																  IXPDataMapper<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TXPOClass : class, IXPSimpleObject
 	{
 
 	}
 
 
-	public class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>,
+	public abstract class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>,
 															IXPDataStoreValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TXPOClass : class, IXPSimpleObject
 	{
 		public override IDataValidationResults<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
 			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
 
 			validationResults.AddRange(result.Results);
 			return result;
@@ -41,10 +41,10 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
-		public override IDataValidationResults<TKey> Inserted(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserted(TKey id, TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
 			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
 
 			validationResults.AddRange(result.Results);
 			return result;
@@ -53,35 +53,35 @@ namespace DX.Data.Xpo
 		public override IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
 		{
 			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, model.ID, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
+				new DataValidationResult<TKey>(DataValidationResultType.Success, default, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
 
 			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResults<TKey> Updated(TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updated(TKey id, TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
 			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, dbModel.ID, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
 
 			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults)
 		{
 			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, model.ID, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
 
 			validationResults.AddRange(result.Results);
 			return result;
 		}
 	}
 
-	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>
+	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>, IXPDataStore<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
-		where TModel : class, IDataStoreModel<TKey>, new()
-		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TXPOClass : XPBaseObject
 	{
 		public XPDataStore(XpoDatabase db, IXPDataMapper<TKey, TModel, TXPOClass> mapper, IXPDataStoreValidator<TKey, TModel, TXPOClass> validator = null)
 		{
@@ -170,7 +170,8 @@ namespace DX.Data.Xpo
 				var r = new DataValidationResults<TKey>();
 				foreach (var item in items)
 				{
-					if (item.ID == null || item.ID.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+					var modelKey = GetModelKey(item);
+					if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
 					{
 						var canInsert = Validator?.Inserting(item, r);
 						if (!canInsert.Success)
@@ -183,11 +184,10 @@ namespace DX.Data.Xpo
 						}
 						else
 						{
-							TXPOClass newItem = Assign(
-								item,
-								Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass);
-
-							var hasInserted = Validator?.Inserted(item, newItem, r);
+							TXPOClass newItem = Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass;
+							newItem = Assign(item, newItem);
+							newItem.Save();
+							var hasInserted = Validator?.Inserted((TKey)w.GetKeyValue(newItem), item, newItem, r);
 							if (!hasInserted.Success)
 							{
 								if (!continueOnError)
@@ -199,9 +199,9 @@ namespace DX.Data.Xpo
 							batchPairs.Add(newItem, new InsertHelper(item, canInsert.Results.FirstOrDefault(), hasInserted.Results.FirstOrDefault()));
 						}
 					}
-					else if (!item.ID.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+					else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
 					{
-						var canUpdate = Validator?.Updating(item, r);
+						var canUpdate = Validator?.Updating(modelKey, item, r);
 						if (!canUpdate.Success)
 						{
 							if (!continueOnError)
@@ -212,14 +212,14 @@ namespace DX.Data.Xpo
 						}
 						else
 						{
-							var updatedItem = w.GetObjectByKey<TXPOClass>(item.ID);
+							var updatedItem = w.GetObjectByKey<TXPOClass>(modelKey);
 							if (updatedItem == null)
 							{
 								r.Add(
 									DataValidationResultType.Error,
-									item.ID,
+									modelKey,
 									"KeyField",
-									$"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore",
+									$"Unable to locate {typeof(TXPOClass).Name}({modelKey}) in datastore",
 									0,
 									DataValidationEventType.Updating);
 								break;
@@ -227,7 +227,7 @@ namespace DX.Data.Xpo
 
 							Assign(item, updatedItem);
 
-							var hasUpdated = Validator?.Updated(item, updatedItem, r);
+							var hasUpdated = Validator?.Updated(modelKey, item, updatedItem, r);
 							if (!hasUpdated.Success)
 							{
 								if (!continueOnError)
@@ -249,9 +249,10 @@ namespace DX.Data.Xpo
 						var xpoItem = e.Object as TXPOClass;
 						if (xpoItem != null && batchPairs.ContainsKey(xpoItem))
 						{
-							batchPairs[xpoItem].Model.ID = xpoItem.ID;
-							batchPairs[xpoItem].InsertingResult.ID = xpoItem.ID;
-							batchPairs[xpoItem].InsertedResult.ID = xpoItem.ID;
+							TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
+							SetModelKey(batchPairs[xpoItem].Model, k);
+							batchPairs[xpoItem].InsertingResult.ID = k;
+							batchPairs[xpoItem].InsertedResult.ID = k;
 						}
 					};
 					w.FailedCommitTransaction += (s, e) =>
@@ -314,7 +315,7 @@ namespace DX.Data.Xpo
 					var item = w.GetObjectByKey<TXPOClass>(id);
 					if (item == null)
 					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Deleting);
+						r.Add(DataValidationResultType.Error, id, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({id}) in datastore", 0, DataValidationEventType.Deleting);
 						break;
 					}
 					var canDelete = Validator?.Deleting(id, r, item);

@@ -12,19 +12,20 @@ namespace DX.Utils.Data
 	//{
 	//	void Assign(TFrom source);
 	//}
-	public interface IDataStoreModel<TKey>
-		where TKey : IEquatable<TKey>
-	{
-		TKey ID { get; set; }
-	}
+	//public interface IDataStoreModel<TKey>
+	//	where TKey : IEquatable<TKey>
+	//{
+	//	//TKey ID { get; set; }
+	//}
 	public interface IDataStoreMapper<TKey, TModel, TDBModel>
 	{
 
 	}
 
-	public interface IDataStoreLookupModel<TKey> : IDataStoreModel<TKey>
+	public interface IDataStoreLookupModel<TKey>
 		where TKey : IEquatable<TKey>
 	{
+		TKey ID { get; set; }
 		int Order { get; set; }
 		string Name { get; set; }
 		string Code { get; set; }
@@ -33,10 +34,13 @@ namespace DX.Utils.Data
 	{
 
 	}
-
+	public interface IDataStoreModel<TKey>
+		where TKey : IEquatable<TKey>
+	{
+		TKey Id { get; set; }
+	}
 	public interface IDataStore<TKey, TModel>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
 	{
 		Type KeyType { get; }
 		Type ModelType { get; }
@@ -76,7 +80,7 @@ namespace DX.Utils.Data
 
 	public interface ILookupDataStore<TKey, TModel> : IDataStore<TKey, TModel>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
+		where TModel : class, new()
 	{
 
 		IEnumerable<IDataStoreLookupModel<TKey>> QueryByName(string name);
@@ -116,27 +120,27 @@ namespace DX.Utils.Data
 
 	public interface IDataStoreValidator<TKey, TModel>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
+		where TModel : class
 	{
 		IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults);
-		IDataValidationResults<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults);
 		IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args);
 
 	}
 	public interface IDataStoreValidator<TKey, TModel, TDBModel> : IDataStoreValidator<TKey, TModel>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TDBModel : class, IDataStoreModel<TKey>
+		where TModel : class
+		where TDBModel : class
 	{
-		IDataValidationResults<TKey> Inserted(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
-		IDataValidationResults<TKey> Updated(TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Inserted(TKey id, TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
+		IDataValidationResults<TKey> Updated(TKey id, TModel model, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 		IDataValidationResults<TKey> Deleted(TKey id, TDBModel dbModel, IDataValidationResults<TKey> validationResults);
 	}
 
 	public interface IDataMapper<TKey, TModel, TDBModel>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TDBModel : class, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TDBModel : class
 	{
 		Func<TDBModel, TModel> CreateModel { get; }
 		TDBModel Assign(TModel source, TDBModel destination);

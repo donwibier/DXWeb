@@ -1,19 +1,23 @@
-﻿using System;
+﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
-using DevExpress.Data.Filtering;
+using DX.Utils.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using DX.Utils.Data;
 
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	public partial class XpoDxBase : IDataStoreModel<string>
+	public partial class XpoDxBase
 	{
 		public XpoDxBase(Session session) : base(session) { }
 		public override void AfterConstruction() { base.AfterConstruction(); }
-		[NonPersistent()]
-		public virtual string ID { get => _Id; set => _Id = value; }
+		protected void setId(string s) => _Id = s;
+
+		[PersistentAlias(nameof(Id))]
+		public virtual string ID { get => (string)EvaluateAlias(nameof(ID)); }
+		//[NonPersistent]
+		//public virtual string ID { get => _Id; set => _Id = value; }
 
 		protected override void OnSaving()
 		{
@@ -42,50 +46,32 @@ namespace DX.Data.Xpo.Identity.Persistent
 
 			public OperandProperty _Id
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("_Id"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(_Id))); }
 			}
 
 			public OperandProperty Id
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("Id"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(Id))); }
 			}
 
 			public OperandProperty _AddStampUTC
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("_AddStampUTC"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(_AddStampUTC))); }
 			}
 
 			public OperandProperty AddStampUTC
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("AddStampUTC"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(AddStampUTC))); }
 			}
 
 			public OperandProperty _ModStampUTC
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("_ModStampUTC"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(_ModStampUTC))); }
 			}
 
 			public OperandProperty ModStampUTC
 			{
-				get
-				{
-					return new OperandProperty(GetNestedName("ModStampUTC"));
-				}
+				get { return new OperandProperty(GetNestedName(nameof(ModStampUTC))); }
 			}
 		}
 
@@ -101,6 +87,8 @@ namespace DX.Data.Xpo.Identity.Persistent
 				return _Fields;
 			}
 		}
+
+
 
 		static FieldsClass _Fields;
 		#endregion

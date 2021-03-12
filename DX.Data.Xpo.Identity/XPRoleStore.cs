@@ -53,7 +53,7 @@ namespace DX.Data.Xpo.Identity
 	public class XPRoleStore<TKey, TRole, TXPORole> : XPDataStore<TKey, TRole, TXPORole>,
     			IQueryableRoleStore<TRole, TKey>
     	where TKey : IEquatable<TKey>
-        where TRole : class, IXPRole<TKey>, new()
+        where TRole : class, IXPRole<TKey>, IRole<TKey>, new()
         where TXPORole : XPBaseObject, IXPRole<TKey>
 #endif
 	{
@@ -70,8 +70,8 @@ namespace DX.Data.Xpo.Identity
 
 
 		#region abstract implementation
-
-
+		public override TKey GetModelKey(TRole model) => model.Id;
+		public override void SetModelKey(TRole model, TKey key) => model.Id = key;
 		protected override IQueryable<TXPORole> Query(Session s)
 		{
 			var r = from n in s.Query<TXPORole>()
@@ -147,35 +147,10 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException(nameof(role));
 			}
 
-			var result = await base.DeleteAsync(role.ID);
+			var result = await base.DeleteAsync(role.Id);
 		}
 
-		//      public virtual Task CreateAsync(TRole role)
-		//{
 
-		//	base.CreateAsync(role)
-		//	return Task.FromResult(DB.Execute<object>((db, wrk) =>
-		//	{
-		//		var xpoRole = XPOCreateRole(wrk);
-		//		Assign(role, xpoRole);
-		//		return null;
-		//	}));
-		//}
-		//      public Task DeleteAsync(TRole role)
-		//{
-		//	ThrowIfDisposed();
-		//	if (role == null)
-		//	{
-		//		throw new ArgumentNullException("role");
-		//	}
-
-		//	return Task.FromResult(DB.Execute<object>((db, wrk) =>
-		//	{
-		//		base.
-		//		wrk.Delete(wrk.GetObjectByKey(XPORoleType, role.Id));
-		//		return null;
-		//	}));
-		//}
 
 		public async virtual Task<TRole> FindByIdAsync(TKey roleId)
 		{
@@ -183,13 +158,6 @@ namespace DX.Data.Xpo.Identity
 			var result = await base.GetByKeyAsync(roleId);
 
 			return result;
-			//var resultreturn base.GetByKey(roleId);
-			//return Task.FromResult(XPOExecute((db, wrk) =>
-			//{
-			//	var xpoRole = wrk.GetObjectByKey(XPORoleType, roleId);
-			//	return xpoRole == null ? null : Activator.CreateInstance(typeof(TRole), xpoRole, 0) as TRole;
-			//}));
-
 		}
 
 		public async virtual Task<TRole> FindByIdAsync(string roleId)
@@ -237,16 +205,6 @@ namespace DX.Data.Xpo.Identity
 				throw new ArgumentNullException("roleName");
 
 			var result = await base.UpdateAsync(role);
-
-			//return Task.FromResult(DB.Execute<object>((db, wrk) =>
-			//{
-			//	TXPORole r = wrk.GetObjectByKey(XPORoleType, role.Id) as TXPORole;
-			//	if (r != null)
-			//	{
-			//		Assign(role, r);
-			//	}
-			//	return null;
-			//}));
 		}
 
 
@@ -260,7 +218,7 @@ namespace DX.Data.Xpo.Identity
 		public async virtual Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			await DeleteAsync(role.ID);
+			await DeleteAsync(role.Id);
 			return IdentityResult.Success;
 		}
 

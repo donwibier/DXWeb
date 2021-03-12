@@ -12,13 +12,11 @@ namespace DX.Data.Xpo.Identity.Persistent
 	{
 		public XpoDxRole(Session session) : base(session) { }
 		public override void AfterConstruction() { base.AfterConstruction(); }
-		//#if (NETSTANDARD2_1)
-		//        public string NormalizedName
-		//        {
-		//            get { return NameUpper; }
-		//            set { _NameUpper = (value??"").ToUpperInvariant(); }
-		//        }
-		//#endif       
+
+		string IXPRole<string>.Id { get => base.Id; set => setId(value); }
+		//string IXPRole<string>.Name { get => Name; set => Name = value; }
+
+
 		protected override void OnChanged(string propertyName, object oldValue, object newValue)
 		{
 			if (propertyName == nameof(Name))
@@ -39,14 +37,14 @@ namespace DX.Data.Xpo.Identity.Persistent
 
 		protected override void OnDeleting()
 		{
-			var users = new XPCollection<XpoDxUser>(this.Session, CriteriaOperator.Parse("Roles[Id == ?]", Id), null);
+			var users = new XPCollection<XpoDxUser>(Session, CriteriaOperator.Parse("Roles[Id == ?]", Id), null);
 			foreach (var u in users)
 			{
 				Users.Remove(u);
 				if (!(Session is UnitOfWork))
 					u.Save();
 			}
-			Session.Delete(new XPCollection<XpoDxRoleClaim>(this.Session, CriteriaOperator.Parse("Role.Id == ?", Id), null));
+			Session.Delete(new XPCollection<XpoDxRoleClaim>(Session, CriteriaOperator.Parse("Role.Id == ?", Id), null));
 			//int userCount = (int)Session.Evaluate(typeof(XpoDxUser),
 			//    CriteriaOperator.Parse("Count"),
 			//    CriteriaOperator.Parse("Roles[Id == ?]", this.Id));

@@ -1,15 +1,15 @@
-﻿using System;
+﻿using DevExpress.Data.Filtering;
+using DevExpress.Xpo;
+using DX.Data.Xpo.Identity.Persistent;
+using DX.Utils;
+using DX.Utils.Data;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DevExpress.Data.Filtering;
-using DevExpress.Xpo;
-using DX.Data.Xpo.Identity.Persistent;
-using DX.Utils;
-using DX.Utils.Data;
 #if (NETSTANDARD2_1)
 using Microsoft.AspNetCore.Identity;
 #else
@@ -30,7 +30,7 @@ namespace DX.Data.Xpo.Identity
 
 	public class XPIdentityUser<TKey> : XPIdentityUser<TKey, XPIdentityUserLogin<TKey>, XPIdentityRole<TKey>, XPIdentityUserClaim<TKey>>
 		 where TKey : IEquatable<TKey>
-		 
+
 	{
 
 		public XPIdentityUser()
@@ -48,11 +48,11 @@ namespace DX.Data.Xpo.Identity
 	/// <typeparam name="TLogin"></typeparam>
 	/// <typeparam name="TRole"></typeparam>
 	/// <typeparam name="TClaim"></typeparam>
-	public class XPIdentityUser<TKey, TLogin, TRole, TClaim> : IDataStoreModel<TKey>, IXPUser<TKey>, IUser<TKey>
-		 where TKey : IEquatable<TKey>		 
+	public class XPIdentityUser<TKey, TLogin, TRole, TClaim> : IXPUser<TKey>
+		 where TKey : IEquatable<TKey>
 		 where TRole : class
 		 where TLogin : class
-		 where TClaim : class		
+		 where TClaim : class
 	{
 		public XPIdentityUser()
 		{
@@ -142,7 +142,7 @@ namespace DX.Data.Xpo.Identity
 		/// <summary>
 		///     Navigation property for user logins
 		/// </summary>
-		public virtual ICollection<TLogin> Logins { get=>_Logins; set=>_Logins = value; }
+		public virtual ICollection<TLogin> Logins { get => _Logins; set => _Logins = value; }
 
 		/// <summary>
 		///     Navigation property for user roles
@@ -160,42 +160,42 @@ namespace DX.Data.Xpo.Identity
 		public virtual IList LoginsList { get; protected set; }
 
 
-//		public override void Assign(object source, int loadingFlags)
-//		{
-//			var src = CastSource(source);
-//			if (src != null)
-//			{
-//				Id = src.Id;
-//				UserName = src.UserName;
-//				Email = src.Email;
-//				EmailConfirmed = src.EmailConfirmed;
-//				PasswordHash = src.PasswordHash;
-//				SecurityStamp = src.SecurityStamp;
-//				PhoneNumber = src.PhoneNumber;
-//				PhoneNumberConfirmed = src.PhoneNumberConfirmed;
-//				TwoFactorEnabled = src.TwoFactorEnabled;
-//				LockoutEndDateUtc = src.LockoutEndDateUtc;
-//				LockoutEnabled = src.LockoutEnabled;
-//				AccessFailedCount = src.AccessFailedCount;
-//#if (NETSTANDARD2_1)
-//                this.NormalizedName = src.NormalizedName;
-//                this.NormalizedEmail = src.NormalizedEmail;
-//#endif
+		//		public override void Assign(object source, int loadingFlags)
+		//		{
+		//			var src = CastSource(source);
+		//			if (src != null)
+		//			{
+		//				Id = src.Id;
+		//				UserName = src.UserName;
+		//				Email = src.Email;
+		//				EmailConfirmed = src.EmailConfirmed;
+		//				PasswordHash = src.PasswordHash;
+		//				SecurityStamp = src.SecurityStamp;
+		//				PhoneNumber = src.PhoneNumber;
+		//				PhoneNumberConfirmed = src.PhoneNumberConfirmed;
+		//				TwoFactorEnabled = src.TwoFactorEnabled;
+		//				LockoutEndDateUtc = src.LockoutEndDateUtc;
+		//				LockoutEnabled = src.LockoutEnabled;
+		//				AccessFailedCount = src.AccessFailedCount;
+		//#if (NETSTANDARD2_1)
+		//                this.NormalizedName = src.NormalizedName;
+		//                this.NormalizedEmail = src.NormalizedEmail;
+		//#endif
 
-//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
-//				{
-//					AssignRoles(src.RolesList);
-//				}
-//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
-//				{
-//					AssignClaims(src.ClaimsList);
-//				}
-//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
-//				{
-//					AssignLogins(src.LoginsList);
-//				}
-//			}
-//		}
+		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
+		//				{
+		//					AssignRoles(src.RolesList);
+		//				}
+		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
+		//				{
+		//					AssignClaims(src.ClaimsList);
+		//				}
+		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
+		//				{
+		//					AssignLogins(src.LoginsList);
+		//				}
+		//			}
+		//		}
 
 		public void AssignRoles(IList roles)
 		{

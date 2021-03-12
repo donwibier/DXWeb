@@ -13,7 +13,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 	{
 		public XpoDxUser(Session session) : base(session) { }
 		public override void AfterConstruction() { base.AfterConstruction(); }
-
+		string IXPUser<string>.Id { get => base.Id; set => setId(value); }
 		protected override void OnDeleting()
 		{
 			var roles = new XPCollection<XpoDxRole>(CriteriaOperator.Parse("Users[Id == ?]", Id), null);

@@ -7,19 +7,25 @@ namespace DX.Data.Xpo
 {
 	public interface IXPDataMapper<TKey, TModel, TXPOClass> : IDataMapper<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TXPOClass : class, IXPSimpleObject
 	{
-		
-		//Func<TDBModel, TModel> CreateModel { get; }
-		//TDBModel Assign(TModel source, TDBModel destination);
-		//string Map(string sourceField);
 	}
 
 	public interface IXPDataStoreValidator<TKey, TModel, TXPOClass> : IDataStoreValidator<TKey, TModel, TXPOClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TXPOClass : class, IXPSimpleObject, IDataStoreModel<TKey>
+		where TModel : class
+		where TXPOClass : class, IXPSimpleObject
 	{
+	}
+
+	public interface IXPDataStore<TKey, TModel, TXPOClass> : IDataStore<TKey, TModel>
+		where TKey : IEquatable<TKey>
+		where TModel : class, new()
+		where TXPOClass : class, IXPSimpleObject
+	{
+		XpoDatabase DB { get; }
+		IDataMapper<TKey, TModel, TXPOClass> Mapper { get; }
+		IDataStoreValidator<TKey, TModel, TXPOClass> Validator { get; }
 	}
 }

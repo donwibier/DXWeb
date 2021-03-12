@@ -1,5 +1,6 @@
 ﻿using DX.Utils;
 using DX.Utils.Data;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 #if (NETSTANDARD2_1)
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 #else
 using System.Data.Entity;
 #endif
@@ -17,8 +19,8 @@ namespace DX.Data.EF
 			DataMapper<TKey, TModel, TEFClasss>,
 			IEFDataMapper<TKey, TModel, TEFClasss>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TEFClasss : class, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TEFClasss : class, new()
 	{
 
 	}
@@ -27,72 +29,60 @@ namespace DX.Data.EF
 			DataValidator<TKey, TModel, TEFClass>,
 			IEFDataStoreValidator<TKey, TModel, TEFClass>
 		where TKey : IEquatable<TKey>
-		where TModel : IDataStoreModel<TKey>
-		where TEFClass : class, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TEFClass : class, new()
 	{
-		public override IDataValidationResult<TKey> Deleted(TKey id, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Deleted(TKey id, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
+		public override IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = id
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserted(TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserted(TKey id, TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, default, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updated(TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updated(TKey id, TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = dbModel.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 
-		public override IDataValidationResult<TKey> Updating(TModel model, IDataValidationResults<TKey> validationResults)
+		public override IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults)
 		{
-			var result = new DataValidationResult<TKey>
-			{
-				ResultType = DataValidationResultType.Success,
-				ID = model.ID
-			};
-			validationResults.Add(result);
+			var result = new DataValidationResults<TKey>(
+				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
+
+			validationResults.AddRange(result.Results);
 			return result;
 		}
 	}
@@ -102,8 +92,8 @@ namespace DX.Data.EF
 	public abstract class EFDataStore<TDBContext, TKey, TModel, TEFClass> : DataStore<TKey, TModel>
 			where TDBContext : DbContext, new()
 			where TKey : IEquatable<TKey>
-			where TModel : class, IDataStoreModel<TKey>, new()
-			where TEFClass : class, IDataStoreModel<TKey>
+			where TModel : class, new()
+			where TEFClass : class, new()
 	{
 		public EFDataStore(EFDatabase<TDBContext> db,
 			IEFDataMapper<TKey, TModel, TEFClass> mapper,
@@ -125,10 +115,10 @@ namespace DX.Data.EF
 		public Type EFType => typeof(TEFClass);
 		public Type EFDBContext => typeof(TDBContext);
 
+		public abstract TKey GetEFModelKey(TEFClass model);
 		protected virtual IQueryable<TEFClass> EFQuery(TDBContext ctx)
 		{
-			var result = from n in ctx.Set<TEFClass>()
-						 select n;
+			var result = ctx.Set<TEFClass>();
 			return result;
 		}
 
@@ -162,7 +152,7 @@ namespace DX.Data.EF
 		{
 			var result = DB.Execute((db, ctx, t) =>
 			{
-				TEFClass item = EFQuery(ctx).Where(model => model.ID.Equals(key)).FirstOrDefault();
+				TEFClass item = ctx.Set<TEFClass>().Find(key);
 				if (item != null)
 					return CreateModelInstance(item);
 				return null;
@@ -170,61 +160,148 @@ namespace DX.Data.EF
 			return result;
 		}
 
-		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
+		class InsertHelper
+		{
+			public InsertHelper(TModel model, EntityEntry<TEFClass> entry, IDataValidationResult<TKey> insertingResult, IDataValidationResult<TKey> insertedResult)
+			{
+				Model = model;
+				EFEntry = entry;
+				InsertingResult = insertingResult;
+				InsertedResult = insertedResult;
+			}
+			public TModel Model { get; private set; }
+			public EntityEntry<TEFClass> EFEntry { get; private set; }
+			public IDataValidationResult<TKey> InsertingResult { get; private set; }
+			public IDataValidationResult<TKey> InsertedResult { get; private set; }
+		}
+
+#if (!NETSTANDARD2_1)
+		class EntityEntry<T> {
+		  public T Entity { get; set;}
+		}
+#endif
+
+		protected enum StoreMode
+		{
+			Create,
+			Update,
+			Store
+		}
+
+		protected virtual IDataValidationResults<TKey> InternalStore(IEnumerable<TModel> items, StoreMode mode, bool continueOnError)
 		{
 			if (items == null)
 				throw new ArgumentNullException(nameof(items));
 
 			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
 
-			result = DB.Execute((db, ctx, tran) =>
+			result = DB.Execute((db, ctx, t) =>
 			{
 				// need to keep the xpo entities together with the model items so we can update 
 				// the id's of the models afterwards.
-				Dictionary<TEFClass, TModel> batchPairs = new Dictionary<TEFClass, TModel>();
-
+				Dictionary<TEFClass, InsertHelper> batchPairs = new Dictionary<TEFClass, InsertHelper>();
 				var r = new DataValidationResults<TKey>();
 				foreach (var item in items)
 				{
-					var canInsert = Validator?.Inserting(item, r);
-					if (canInsert.ResultType == DataValidationResultType.Error)
+					var modelKey = GetModelKey(item);
+					if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
 					{
-						tran.Rollback();
-						r.Add(canInsert);
-						break;
+						var canInsert = Validator?.Inserting(item, r);
+						if (!canInsert.Success)
+						{
+							if (!continueOnError)
+							{
+								t.Rollback();
+								break;
+							}
+						}
+						else
+						{
+							TEFClass newItem = new TEFClass();
+							newItem = Assign(item, newItem);
+
+#if (NETSTANDARD2_1)
+							EntityEntry<TEFClass> ee = ctx.Set<TEFClass>().Add(newItem);
+#else
+							EntityEntry<TEFClass> ee = new EntityEntry<TEFClass>() 
+							{
+									 Entity = ctx.Set<TEFClass>().Add(newItem)
+							};
+#endif
+
+							var hasInserted = Validator?.Inserted(GetEFModelKey(newItem), item, newItem, r);
+							if (!hasInserted.Success)
+							{
+								if (!continueOnError)
+								{
+									t.Rollback();
+									break;
+								}
+							}
+							batchPairs.Add(newItem, new InsertHelper(item, ee, canInsert.Results.FirstOrDefault(), hasInserted.Results.FirstOrDefault()));
+						}
+					}
+					else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+					{
+						var canUpdate = Validator?.Updating(modelKey, item, r);
+						if (!canUpdate.Success)
+						{
+							if (!continueOnError)
+							{
+								t.Rollback();
+								break;
+							}
+						}
+						else
+						{
+							var updatedItem = ctx.Set<TEFClass>().Find(modelKey);
+							if (updatedItem == null)
+							{
+								r.Add(
+									DataValidationResultType.Error,
+									modelKey,
+									"KeyField",
+									$"Unable to locate {typeof(TEFClass).Name}({modelKey}) in datastore",
+									0,
+									DataValidationEventType.Updating);
+								break;
+							}
+
+							Assign(item, updatedItem);
+							ctx.Entry(updatedItem).State = EntityState.Modified;
+							//ctx.Set<TEFClass>().Update(updatedItem);
+
+							var hasUpdated = Validator?.Updated(modelKey, item, updatedItem, r);
+							if (!hasUpdated.Success)
+							{
+								if (!continueOnError)
+								{
+									t.Rollback();
+									break;
+								}
+							}
+						}
 					}
 
-					TEFClass newItem = Assign(item, Activator.CreateInstance(typeof(TEFClass)) as TEFClass);
-					batchPairs.Add(newItem, item);
-					ctx.Entry(newItem).State = EntityState.Added;
-
-					var hasInserted = Validator?.Inserted(item, newItem, r);
-					if (hasInserted.ResultType == DataValidationResultType.Error)
-					{
-						tran.Rollback();
-						r.Add(hasInserted);
-						break;
-					}
 				}
 
 				try
 				{
-					//ctx.ObjectSaved += (s, e) => {
-					//	// sync the model ids with the newly generated xpo id's
-					//	var xpoItem = e.Object as TEFClass;
-					//	if (xpoItem != null && batchPairs.ContainsKey(xpoItem))
-					//	{
-					//		//var model = batchPairs[xpoItem];
-					//		batchPairs[xpoItem].ID = xpoItem.ID;
-					//	}
-					//};
 					ctx.SaveChanges();
-					tran.Commit();
+					t.Commit();
+					// sync the model ids with the newly generated EF id's
+					foreach (var p in batchPairs)
+					{
+						var key = GetEFModelKey(p.Value.EFEntry.Entity);
+						SetModelKey(p.Value.Model, key);
+						p.Value.InsertedResult.ID = key;
+						p.Value.InsertingResult.ID = key;
 
+					}
 				}
 				catch (Exception e)
 				{
-					tran.Rollback();
+					t.Rollback();
 					r.Add(new DataValidationResult<TKey>
 					{
 						ResultType = DataValidationResultType.Error,
@@ -232,8 +309,19 @@ namespace DX.Data.EF
 					});
 				}
 				return r;
-			}, true, false);
+			});
 
+			return result;
+		}
+
+
+		//=====
+		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
+		{
+			if (items == null)
+				throw new ArgumentNullException(nameof(items));
+
+			var result = InternalStore(items, StoreMode.Create, true);
 			return result;
 		}
 
@@ -242,55 +330,15 @@ namespace DX.Data.EF
 			if (items == null)
 				throw new ArgumentNullException(nameof(items));
 
-			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
-			result = DB.Execute((db, ctx, tran) =>
-			{
-				var r = new DataValidationResults<TKey>();
-				foreach (var item in items)
-				{
-					var canUpdate = Validator?.Updating(item, r);
-					if (canUpdate.ResultType == DataValidationResultType.Error)
-					{
-						tran.Rollback();
-						r.Add(canUpdate);
-						break;
-					}
+			var result = InternalStore(items, StoreMode.Update, true);
+			return result;
+		}
+		public override IDataValidationResults<TKey> Store(IEnumerable<TModel> items)
+		{
+			if (items == null)
+				throw new ArgumentNullException(nameof(items));
 
-					var updatedItem = EFQuery(ctx).Where(m => m.ID.Equals(item.ID)).FirstOrDefault();
-					if (updatedItem == null)
-					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Updating);
-						break;
-					}
-
-					Assign(item, updatedItem);
-					ctx.Entry(updatedItem).State = EntityState.Modified;
-
-					var hasUpdated = Validator?.Updated(item, updatedItem, r);
-					if (hasUpdated.ResultType == DataValidationResultType.Error)
-					{
-						tran.Rollback();
-						r.Add(hasUpdated);
-						break;
-					}
-				}
-				try
-				{
-					ctx.SaveChanges();
-					tran.Commit();
-				}
-				catch (Exception e)
-				{
-					tran.Rollback();
-					r.Add(new DataValidationResult<TKey>
-					{
-						ResultType = DataValidationResultType.Error,
-						Message = e.GetInnerException().Message
-					});
-				}
-				return r;
-			}, true, false);
-
+			var result = InternalStore(items, StoreMode.Store, true);
 			return result;
 		}
 
@@ -302,28 +350,26 @@ namespace DX.Data.EF
 				foreach (var id in ids)
 				{
 
-					var item = EFQuery(ctx).Where(m => m.ID.Equals(id)).FirstOrDefault();
+					var item = ctx.Set<TEFClass>().Find(id);
 					if (item == null)
 					{
-						r.Add(DataValidationResultType.Error, item.ID, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({item.ID}) in datastore", 0, DataValidationEventType.Deleting);
+						r.Add(DataValidationResultType.Error, id, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({id}) in datastore", 0, DataValidationEventType.Deleting);
 						break;
 					}
 					var canDelete = Validator?.Deleting(id, r, item);
-					if (canDelete.ResultType == DataValidationResultType.Error)
+					if (!canDelete.Success)
 					{
 						tran.Rollback();
-						r.Add(canDelete);
 						break;
 					}
 
-					ctx.Entry(item).State = EntityState.Deleted;
+					ctx.Set<TEFClass>().Remove(item);
 
 					//val.Deleted(id, item, r);
 					var hasDeleted = Validator?.Deleted(id, item, r);
-					if (hasDeleted.ResultType == DataValidationResultType.Error)
+					if (!hasDeleted.Success)
 					{
 						tran.Rollback();
-						r.Add(hasDeleted);
 						break; // throw new Exception(hasInserted.Message);
 					}
 				}

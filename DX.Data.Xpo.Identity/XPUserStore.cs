@@ -23,6 +23,7 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 
+#if (NETSTANDARD2_1)
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
 		 where TUser : class, IXPUser<string>, new()
 	{
@@ -31,11 +32,21 @@ namespace DX.Data.Xpo.Identity
 
 		}
 	}
-#if (NETSTANDARD2_1)
+
+
 	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim, XpoDxUserToken>
 		 where TUser : class, IXPUser<string>, new()
 		 where TXPOUser : XPBaseObject, IXPUser<string>
 #else
+	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
+		 where TUser : class, IXPUser<string>, new()
+	{
+		public XPUserStore(XpoDatabase db, XPDataMapper<string, TUser, XpoDxUser> mapper, XPDataValidator<string, TUser, XpoDxUser> validator) : base(db, mapper, validator)
+		{
+
+		}
+	}
+
 	public class XPUserStore<TUser, TXPOUser> : XPUserStore<string, TUser, TXPOUser, XpoDxRole, XpoDxUserLogin, XpoDxUserClaim>,
 		IUserStore<TUser>
 		 where TUser :  class, IXPUser<string>, new()
@@ -71,8 +82,8 @@ namespace DX.Data.Xpo.Identity
 		 IUserTwoFactorRecoveryCodeStore<TUser>
 		 where TKey : IEquatable<TKey>
 		 where TUser : class, IXPUser<TKey>, new()
-		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
-		 where TXPORole : XPBaseObject, IXPRole<TKey>, IRole<TKey>
+		 where TXPOUser : XPBaseObject, IXPUser<TKey>
+		 where TXPORole : XPBaseObject, IXPRole<TKey>
 		 where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 		 where TXPOToken : XPBaseObject, IXPUserToken<TKey>
@@ -90,9 +101,9 @@ namespace DX.Data.Xpo.Identity
 		 IUserTwoFactorStore<TUser, TKey>,
 		 IUserLockoutStore<TUser, TKey>
 		 where TKey : IEquatable<TKey>
-		 where TUser : class, IXPUser<TKey>, IUser<TKey>, new()
+		 where TUser : class, IXPUser<TKey>, new()
 		 where TXPOUser : XPBaseObject, IXPUser<TKey>, IUser<TKey>
-		 where TXPORole : XPBaseObject, IXPRole<TKey>, IRole<TKey>
+		 where TXPORole : XPBaseObject, IRole<TKey>
 		 where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
 		 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
 #endif
@@ -102,6 +113,9 @@ namespace DX.Data.Xpo.Identity
 		{
 
 		}
+
+		public override TKey GetModelKey(TUser model) => model.Id;
+		public override void SetModelKey(TUser model, TKey key) => model.Id = key;
 
 		protected override IQueryable<TXPOUser> Query(Session s)
 		{
@@ -706,18 +720,21 @@ namespace DX.Data.Xpo.Identity
 			cancellationToken.ThrowIfCancellationRequested();
 			return await GetUsersInRoleAsync(roleName);
 		}
-		public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string roleName) {
-			this.ThrowIfDisposed();
-			IList<TUser> result = await this.DB
+		public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string roleName)
+		{
+			ThrowIfDisposed();
+			IList<TUser> result = await DB
 				.ExecuteAsync(
-					(db, wrk) => {
+					(db, wrk) =>
+					{
 						var role = wrk.FindObject(
 							typeof(TXPORole),
 							CriteriaOperator.Parse("(NormalizedName == ?)", roleName)) as TXPORole;
-						var member = (XPBaseCollection)role.GetMemberValue(nameof(this.Users));
+						var member = (XPBaseCollection)role.GetMemberValue(nameof(Users));
 						List<TUser> users = new List<TUser>();
-						foreach (var item in member) {
-							TUser usr = this.Mapper.CreateModel(item as TXPOUser);
+						foreach (var item in member)
+						{
+							TUser usr = Mapper.CreateModel(item as TXPOUser);
 							users.Add(usr);
 						}
 						return users;
@@ -1361,7 +1378,7 @@ namespace DX.Data.Xpo.Identity
 				if (xpoUser != null)
 					xpoToken.SetMemberValue("User", xpoUser);
 				else
-					throw new Exception($"User '{user.UserName}' could not be found in the database");
+					throw new Exception($"User '{user.Id}' could not be found in the database");
 			}
 			return xpoToken;
 		}

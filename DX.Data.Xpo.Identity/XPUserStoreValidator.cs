@@ -11,14 +11,14 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 	public class XPUserStoreValidator<TUser, TXPOUser> : XPUserStoreValidator<string, TUser, TXPOUser>
-		where TUser : IXPUser<string>
+		where TUser : class, IXPUser<string>, new()
 		where TXPOUser : XPBaseObject, IXPUser<string>
 	{
 	}
 
 	public class XPUserStoreValidator<TKey, TUser, TXPOUser> : XPDataValidator<TKey, TUser, TXPOUser>
 		where TKey : IEquatable<TKey>
-		where TUser : IXPUser<TKey>
+		where TUser : class, IXPUser<TKey>, new()
 		where TXPOUser : XPBaseObject, IXPUser<TKey>
 	{
 		public override IDataValidationResults<TKey> Deleted(
@@ -60,6 +60,7 @@ namespace DX.Data.Xpo.Identity
 		}
 
 		public override IDataValidationResults<TKey> Inserted(
+			TKey id,
 			TUser model,
 			TXPOUser dbModel,
 			IDataValidationResults<TKey> validationResults)
@@ -68,7 +69,7 @@ namespace DX.Data.Xpo.Identity
 			result.Add(
 				new DataValidationResult<TKey>(
 					DataValidationResultType.Success,
-					dbModel.ID,
+					id,
 					string.Empty,
 					string.Empty,
 					0,
@@ -86,7 +87,7 @@ namespace DX.Data.Xpo.Identity
 			result.Add(
 				new DataValidationResult<TKey>(
 					DataValidationResultType.Success,
-					model.ID,
+					default,
 					string.Empty,
 					string.Empty,
 					0,
@@ -97,6 +98,7 @@ namespace DX.Data.Xpo.Identity
 		}
 
 		public override IDataValidationResults<TKey> Updated(
+			TKey id,
 			TUser model,
 			TXPOUser dbModel,
 			IDataValidationResults<TKey> validationResults)
@@ -105,7 +107,7 @@ namespace DX.Data.Xpo.Identity
 			result.Add(
 				new DataValidationResult<TKey>(
 					DataValidationResultType.Success,
-					dbModel.ID,
+					id,
 					string.Empty,
 					string.Empty,
 					0,
@@ -116,6 +118,7 @@ namespace DX.Data.Xpo.Identity
 		}
 
 		public override IDataValidationResults<TKey> Updating(
+			TKey id,
 			TUser model,
 			IDataValidationResults<TKey> validationResults)
 		{
@@ -123,7 +126,7 @@ namespace DX.Data.Xpo.Identity
 			result.Add(
 				new DataValidationResult<TKey>(
 					DataValidationResultType.Success,
-					model.ID,
+					id,
 					string.Empty,
 					string.Empty,
 					0,

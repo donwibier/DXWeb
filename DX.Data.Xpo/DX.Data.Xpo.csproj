@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.15</Version>
-		<FileVersion>20.1.7.15</FileVersion>
+		<Version>20.2.5.16</Version>
+		<FileVersion>20.2.5.16</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -64,7 +64,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="20.2.3" />	
+		<PackageReference Include="DevExpress.Xpo" Version="20.2.5" />	
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.2.3.12</Version>
-    <FileVersion>20.2.3.12</FileVersion>
+    <Version>20.2.5.12</Version>
+    <FileVersion>20.2.5.12</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>XPO Based storage provider for ASP.NET Identity</Description>
     <Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -58,7 +58,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="20.2.3" />
+    <PackageReference Include="DevExpress.Xpo" Version="20.2.5" />
       
   </ItemGroup>
 
