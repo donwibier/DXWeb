@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.1.7.17</Version>
-    <FileVersion>20.1.7.17</FileVersion>
+    <Version>20.1.7.18</Version>
+    <FileVersion>20.1.7.18</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  

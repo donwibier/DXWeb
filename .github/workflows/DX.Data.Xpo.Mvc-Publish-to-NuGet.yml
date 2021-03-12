@@ -1,4 +1,4 @@
-name: publish to nuget
+name: Publish DX.Data.Xpo.Mvc to nuget
 on:
   push:
     branches:
@@ -21,7 +21,7 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           # Filepath of the project to be packaged, relative to root of repository
-          PROJECT_FILE_PATH: DX.Utils/DX.Utils.csproj
+          PROJECT_FILE_PATH: DX.Data.Xpo.Mvc/DX.Data.Xpo.Mvc.csproj
           
           # NuGet package id, used for version detection & defaults to project name
           # PACKAGE_NAME: Core
