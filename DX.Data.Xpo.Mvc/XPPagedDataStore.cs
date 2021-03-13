@@ -15,8 +15,8 @@ namespace DX.Data.Xpo.Mvc
 {
 	public abstract class XPPagedDataStore<TKey, TModel, TXPOClass> : XPDataStore<TKey, TModel, TXPOClass>, IPagedDataStore
 		where TKey : IEquatable<TKey>
-		where TModel : class, IDataStoreModel<TKey>, new()
-		where TXPOClass : XPBaseObject, IDataStoreModel<TKey>
+		where TModel : class, new()
+		where TXPOClass : XPBaseObject
 	{
 		public XPPagedDataStore(XpoDatabase db,
 					IXPDataMapper<TKey, TModel, TXPOClass> mapper,
@@ -190,9 +190,10 @@ namespace DX.Data.Xpo.Mvc
 		#endregion
 
 		#region GridLookup Custom Binding Methods
-
+		public abstract Func<TXPOClass, TKey> XPModelKey { get; }
 		public virtual void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e)
 		{
+
 			var n = default(TKey);
 			if (e.KeyValues.Count() == 0)
 			{
@@ -202,7 +203,7 @@ namespace DX.Data.Xpo.Mvc
 			{
 				e.RowValues = DB.Execute((db, w) =>
 				{
-					var r = Query(w).Where(c => e.KeyValues.Contains(c.Id)).Select(CreateModelInstance);
+					var r = Query(w).Where(c => e.KeyValues.Contains(XPModelKey(c))).Select(CreateModelInstance);
 					return r.ToList();
 				});
 			}
