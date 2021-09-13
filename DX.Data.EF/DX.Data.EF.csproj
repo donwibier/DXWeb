@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.1</Version>
-		<FileVersion>20.2.3.1</FileVersion>
+		<Version>20.2.3.2</Version>
+		<FileVersion>20.2.3.2</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DataStore implementation for use with EF</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.9" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">

@@ -46,7 +46,7 @@ namespace DX.Test.Web.Blazor
 					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 					options.Lockout.MaxFailedAccessAttempts = 3;
 				})
-				.AddXpoIdentityStores<ApplicationUser, XpoApplicationUser, ApplicationRole, XpoApplicationRole>(connStrName,
+				.AddXpoIdentityStores(connStrName,
 					new ApplicationUserMapper(),
 					new ApplicationRoleMapper(),
 					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
