@@ -7,9 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: build, pack & publish
-    steps:
-      - name: Setup .NET 6 
+    steps:      
       - uses: actions/checkout@v2
+      - name: Setup .NET 6 
       - uses: actions/setup-dotnet@v1        
         with:
           dotnet-version: '6.0.x'
