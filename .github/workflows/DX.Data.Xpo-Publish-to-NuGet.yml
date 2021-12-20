@@ -8,12 +8,14 @@ jobs:
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
-      - name: Setup .NET 6 
       - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1        
+      - name: Setup .NET 6 
+        uses: actions/setup-dotnet@v1        
         with:
           dotnet-version: '6.0.x'
-          include-prerelease: true          
+          include-prerelease: true
+      - name: add dx nuget source
+        run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
       # Publish
       - name: publish on version change
         id: publish_nuget

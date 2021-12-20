@@ -14,6 +14,8 @@ jobs:
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true          
+      - name: add dx nuget source
+        run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
       - name: Install dependencies
         run: dotnet restore
       - name: Build
