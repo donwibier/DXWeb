@@ -54,7 +54,7 @@ namespace DX.Test.Web.Core
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddControllersWithViews();
+            //services.AddControllersWithViews();
             services.AddRazorPages();
         }
 

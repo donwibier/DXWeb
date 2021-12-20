@@ -1,84 +1,86 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Version>21.1.5.12</Version>
-    <FileVersion>21.1.5.12</FileVersion>
-    <Authors>Don Wibier (DevExpress)</Authors>
-    <Description>XPO Based storage provider for ASP.NET Identity</Description>
-    <Copyright>Copyright (c) 2020 Don Wibier</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Version>21.2.4.14</Version>
+		<FileVersion>21.2.4.14</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
+		<Description>XPO Based storage provider for ASP.NET Identity</Description>
+		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
-	<LangVersion>7.3</LangVersion>
-	<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
-    <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
-    <PackageReleaseNotes>
-		21.1.5.12: Upgrade to DevExpress v21.1.5
-		20.1.7.12: Fix on XpoDxRole and XpoDxUser. When Role with users is deleted, users are detached first, before role is deleted
-		20.1.7.11: Upgrade to DX v10.1.7. Fix on XPUserStore.Users and XPRoleStore.Roles, better exception raising, validation results improved, batch inserts/updates improved, support for Store (insert key = default(TKey) or update) in batch
-		20.1.3.10: Upgrade to DX v20.1.3
-		20.1.2.9-pre-20064: Upgrade to DX v20.1.2-pre-20064 and .NET preview 5
-		19.2.6.9: DI Extensionmethod now uses an options object for initialisation. (Recommended way)
-		Other refactorings done as well with this
-		19.2.6.8: Upgrade to DX v19.2.6
-		19.2.5.8: Signature-change on IDataValidator&lt;..&gt;.Deleting(..)
-		19.2.5.7: dotnet standard v2.1 for dotnet core v3.1 support + upgrade to DX v19.2.5 
-		19.2.4.6: Upgrade to DevExpress v19.2.4
-		19.1.5.6: Upgrade to DevExpress v19.1.5 and XPDataStore constructor uses interface types for mapper and validator
-		19.1.4.4: Upgrade to DevExpress v19.1.4
-		19.1.3.5: Several fixes and adjustments to get the DataMapper and Validator to work on DI for .NET Core
-		19.1.3.4: Upgrade to DevExpress v19.1.3 and fixes on DTO Mapper and Validator design patterns in the Stores
-		18.2.3.4: Upgrade to DevExpress v18.2.3
-		18.1.4.3: BREAKING CHANGE ON EXISTING DATA: Rename table XpoDxUserToken in your db to DXUserTokens !!
-		18.1.4.2: XPUserStore FindByIdAsync(TKey userId) didn't call FindByIdAsync(object userId) because of invalid cast for .NET Framework
-		18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
-		17.2.6.5: Small bug fixed in extension method to configure storage provider
-		17.2.6.4: Database Namechange on BaseClaim, UserClaim and RoleClaim
-		17.2.6.3: Upgraded to DevExpress v17.2.6
-		17.2.5.2: DI Extension methods for .NET Core 2 added and upgraded to DevExpress v17.2.5
-		17.2.4.3: Initial .NET Core v2 support
-		17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
-		17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
-		Not operational on .NET Standard 2.0 yet</PackageReleaseNotes>      
-    <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net461;net6.0</TargetFrameworks>
+		<LangVersion>7.3</LangVersion>
+		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
+		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
+		<PackageReleaseNotes>
+			21.2.4.14: .NET 6.0 and DevExpress v21.2.4 upgrade
+			21.1.5.12: Upgrade to DevExpress v21.1.5
+			20.1.7.12: Fix on XpoDxRole and XpoDxUser. When Role with users is deleted, users are detached first, before role is deleted
+			20.1.7.11: Upgrade to DX v10.1.7. Fix on XPUserStore.Users and XPRoleStore.Roles, better exception raising, validation results improved, batch inserts/updates improved, support for Store (insert key = default(TKey) or update) in batch
+			20.1.3.10: Upgrade to DX v20.1.3
+			20.1.2.9-pre-20064: Upgrade to DX v20.1.2-pre-20064 and .NET preview 5
+			19.2.6.9: DI Extensionmethod now uses an options object for initialisation. (Recommended way)
+			Other refactorings done as well with this
+			19.2.6.8: Upgrade to DX v19.2.6
+			19.2.5.8: Signature-change on IDataValidator&lt;..&gt;.Deleting(..)
+			19.2.5.7: dotnet standard v2.1 for dotnet core v3.1 support + upgrade to DX v19.2.5
+			19.2.4.6: Upgrade to DevExpress v19.2.4
+			19.1.5.6: Upgrade to DevExpress v19.1.5 and XPDataStore constructor uses interface types for mapper and validator
+			19.1.4.4: Upgrade to DevExpress v19.1.4
+			19.1.3.5: Several fixes and adjustments to get the DataMapper and Validator to work on DI for .NET Core
+			19.1.3.4: Upgrade to DevExpress v19.1.3 and fixes on DTO Mapper and Validator design patterns in the Stores
+			18.2.3.4: Upgrade to DevExpress v18.2.3
+			18.1.4.3: BREAKING CHANGE ON EXISTING DATA: Rename table XpoDxUserToken in your db to DXUserTokens !!
+			18.1.4.2: XPUserStore FindByIdAsync(TKey userId) didn't call FindByIdAsync(object userId) because of invalid cast for .NET Framework
+			18.1.4.1: Upgrade to DevExpress v18.1.4 and bug fixed on LockoutEndDateUtc.
+			17.2.6.5: Small bug fixed in extension method to configure storage provider
+			17.2.6.4: Database Namechange on BaseClaim, UserClaim and RoleClaim
+			17.2.6.3: Upgraded to DevExpress v17.2.6
+			17.2.5.2: DI Extension methods for .NET Core 2 added and upgraded to DevExpress v17.2.5
+			17.2.4.3: Initial .NET Core v2 support
+			17.2.4.2: Upgrade to DevExpress v17.2.4 and changed .NET Framework to v4.6.1
+			17.2.3.1: Initial dual mode package for .NET Framework and .NET Standard 2.0
+			Not operational on .NET Standard 2.0 yet
+		</PackageReleaseNotes>
+		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-	  <Reference Include="System.Configuration" />
-	  <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="21.1.5" />
-      
-  </ItemGroup>
-
-	<ItemGroup>    
-    <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
-    <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="System.Data.DataSetExtensions" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Configuration" />
+		<Reference Include="System.Net.Http" />
+		<Reference Include="System.Xml" />
+		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />			
-		
+		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-    <None Update="XpoDiagram.xpo.diagram">
-      <AutoGen>True</AutoGen>
-    </None>
-  </ItemGroup>
+		<PackageReference Include="DevExpress.Xpo" Version="21.2.4" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="XpoDiagram.xpo.diagram">
+			<AutoGen>True</AutoGen>
+		</None>
+	</ItemGroup>
 </Project>

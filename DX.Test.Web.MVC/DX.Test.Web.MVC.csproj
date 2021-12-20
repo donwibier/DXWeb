@@ -47,17 +47,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.Data.v20.2, Version=20.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Data.20.2.5\lib\net452\DevExpress.Data.v20.2.dll</HintPath>
+    <Reference Include="DevExpress.Data.v21.2, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Data.21.2.4\lib\net452\DevExpress.Data.v21.2.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.Data.v21.1, Version=21.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Data.21.1.5\lib\net452\DevExpress.Data.v21.1.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Xpo.v20.2, Version=20.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Xpo.20.2.5\lib\net452\DevExpress.Xpo.v20.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Xpo.v21.1, Version=21.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Xpo.21.1.5\lib\net452\DevExpress.Xpo.v21.1.dll</HintPath>
+    <Reference Include="DevExpress.Xpo.v21.2, Version=21.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <HintPath>..\packages\DevExpress.Xpo.21.2.4\lib\net452\DevExpress.Xpo.v21.2.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AI.DependencyCollector, Version=2.18.0.315, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.DependencyCollector.2.18.0\lib\net452\Microsoft.AI.DependencyCollector.dll</HintPath>

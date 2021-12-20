@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using DX.Utils.Data;
 
 namespace DX.Utils
 {
@@ -87,20 +88,20 @@ namespace DX.Utils
         //}
     }
 
+#if (!NETFRAMEWORK)
     public enum RequiredIfComparison
     {
         IsEqualTo,
         IsNotEqualTo
     }
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public sealed class RequiredIfAttribute : ValidationAttribute
     {
         private const string DefaultErrorMessageFormatString = "The {0} field is required.";
         public string OtherProperty { get; private set; }
         public RequiredIfComparison Comparison { get; private set; }
-        public Object Value { get; private set; }
-
+        public object Value { get; private set; }
         public RequiredIfAttribute(string otherProperty, RequiredIfComparison comparison, object value)
         {
             if (string.IsNullOrEmpty(otherProperty))
@@ -162,4 +163,6 @@ namespace DX.Utils
             return ValidationResult.Success;
         }
     }
+#endif
+
 }

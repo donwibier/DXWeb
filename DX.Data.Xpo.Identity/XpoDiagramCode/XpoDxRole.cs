@@ -61,7 +61,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 		//            if (src != null)
 		//            {
 		//                this.Name = src.Name;
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//                this.NormalizedName = src.NormalizedName;
 		//#endif
 		//                //if (Bits.Has(loadingFlags, DxIdentityUserFlags.FLAG_USERS))										

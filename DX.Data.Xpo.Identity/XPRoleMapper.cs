@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -18,7 +18,7 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 	public class XPRoleMapper<TKey, TRole, TXPORole/*, TXPORoleClaim*/> : XPDataMapper<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : class, IXPRole<TKey>, new()
@@ -35,7 +35,7 @@ namespace DX.Data.Xpo.Identity
 			=> (source) => new TRole
 			{
 				Id = source.Id,
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 				NormalizedName = source.NormalizedName,
 #endif
 				Name = source.Name
@@ -50,7 +50,7 @@ namespace DX.Data.Xpo.Identity
 
 			//destination.Id = source.Id;
 			destination.Name = source.Name;
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 			destination.NormalizedName = source.NormalizedName;
 #endif
 			return destination;
@@ -58,7 +58,7 @@ namespace DX.Data.Xpo.Identity
 		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>
 		{
 			{"Id", "Id"},			
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 			{"NormalizedName", "NormalizedName"},
 #endif
 			{"Name", "Name"}

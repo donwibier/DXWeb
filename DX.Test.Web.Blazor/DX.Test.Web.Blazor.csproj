@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
     <UserSecretsId>aspnet-DX.Test.Web.Blazor-639EAB9C-3DB8-44CB-9495-A3A7C62D2254</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="21.1.5" />
+    <PackageReference Include="DevExpress.Blazor" Version="21.2.4" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>
 

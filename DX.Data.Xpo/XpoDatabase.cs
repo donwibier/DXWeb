@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -50,7 +50,7 @@ namespace DX.Data.Xpo
 		public string ConnectionString { get { return options.ConnectionString; } }
 		public string DataLayerName { get { return options.Name; } }		
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		[Obsolete("Please use the new constructor with the options argument or options builder", false)]
 		public XpoDatabase(string connectionName, IConfiguration cfg) :
 					this(cfg.GetConnectionString(connectionName), connectionName)

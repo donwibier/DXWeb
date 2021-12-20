@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;

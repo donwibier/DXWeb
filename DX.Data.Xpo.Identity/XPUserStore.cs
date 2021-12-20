@@ -14,7 +14,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -23,7 +23,7 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
 		 where TUser : class, IXPUser<string>, new()
 	{
@@ -65,7 +65,7 @@ namespace DX.Data.Xpo.Identity
 
 		//}
 	}
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>, 
 		IUserLoginStore<TUser>,
 		 IUserClaimStore<TUser>,
@@ -147,7 +147,7 @@ namespace DX.Data.Xpo.Identity
 		protected static TXPORole XPOCreateRole(Session s) { return Activator.CreateInstance(typeof(TXPORole), s) as TXPORole; }
 		protected static TXPOLogin XPOCreateLogin(Session s) { return Activator.CreateInstance(typeof(TXPOLogin), s) as TXPOLogin; }
 		protected static TXPOClaim XPOCreateClaim(Session s) { return Activator.CreateInstance(typeof(TXPOClaim), s) as TXPOClaim; }
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		protected static Type XPOTokenType { get { return typeof(TXPOToken); } }
 		protected static TXPOToken XPOCreateToken(Session s) { return Activator.CreateInstance(typeof(TXPOToken), s) as TXPOToken; }
 #endif
@@ -155,7 +155,7 @@ namespace DX.Data.Xpo.Identity
 
 
 		#region IUserLoginStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public async virtual Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -392,7 +392,7 @@ namespace DX.Data.Xpo.Identity
 				foreach (var r in new XPCollection(wrk, typeof(TXPOLogin), CriteriaOperator.Parse("[User!Key] == ?", user.Id)))
 				{
 					IXPUserLogin<TKey> xpoLogin = r as IXPUserLogin<TKey>;
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 					results.Add(new UserLoginInfo(xpoLogin.LoginProvider, xpoLogin.ProviderKey, xpoLogin.LoginProvider));
 #else
 					results.Add(new UserLoginInfo(xpoLogin.LoginProvider, xpoLogin.ProviderKey));
@@ -483,7 +483,7 @@ namespace DX.Data.Xpo.Identity
 
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("NormalizedName == ?", userName));
 #else
 				var xpoUser = wrk.FindObject(XPOUserType, XpoDxUser.Fields.UserNameUpper == userName.ToUpperInvariant());
@@ -511,7 +511,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserClaimStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public async virtual Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -685,7 +685,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserRoleStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public async virtual Task AddToRoleAsync(TUser user, string roleName,
 			CancellationToken cancellationToken = default(CancellationToken))
 		{
@@ -762,7 +762,7 @@ namespace DX.Data.Xpo.Identity
 				var u = wrk.GetObjectByKey<TXPOUser>(user.Id);
 				if (u != null)
 				{
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 					var role = wrk.FindObject(typeof(TXPORole),
 						CriteriaOperator.Parse("(NormalizedName == ?) AND (NOT Users[ID == ?])", roleName, u.Id)) as TXPORole;
 #else
@@ -814,7 +814,7 @@ namespace DX.Data.Xpo.Identity
 			}
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 				var role = wrk.FindObject(typeof(TXPORole),
 						 CriteriaOperator.Parse("(NormalizedName == ?) AND (Users[ID == ?])", roleName, user.Id)) as TXPORole;
 #else
@@ -843,7 +843,7 @@ namespace DX.Data.Xpo.Identity
 				var u = wrk.FindObject(typeof(TXPOUser), CriteriaOperator.Parse("ID == ?", user.Id)) as TXPOUser;
 				if (u == null)
 					throw new InvalidOperationException($"User '{user.UserName}' was not found");
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 				var role = wrk.FindObject(typeof(TXPORole),
 						 CriteriaOperator.Parse("(NormalizedName == ?) AND (Users[ID == ?])", roleName, user.Id)) as TXPORole;
 #else
@@ -858,7 +858,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserPasswordStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -926,7 +926,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserSecurityStampStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public async virtual Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -997,7 +997,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserEmailStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public virtual Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -1109,7 +1109,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserPhoneNumberStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public virtual Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -1180,7 +1180,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserTwoFactorStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public virtual Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -1217,7 +1217,7 @@ namespace DX.Data.Xpo.Identity
 		#endregion
 
 		#region IUserLockoutStore<TUser, TKey>
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -1355,7 +1355,7 @@ namespace DX.Data.Xpo.Identity
 
 		#endregion
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 
 
 		#region IUserAuthenticationTokenStore<TUser>

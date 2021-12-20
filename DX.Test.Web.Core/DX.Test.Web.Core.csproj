@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>aspnet-DX.Test.Web.Core-AC2CE2AF-978A-4524-BC09-045837AD92AF</UserSecretsId>
   </PropertyGroup>
 
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Xpo" Version="21.1.5" />
+    <PackageReference Include="DevExpress.Xpo" Version="21.2.4" />
 	<!--<PackageReference Include="Microsoft.AspNetCore.Identity" Version="3.1.0" />-->
 	<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.9" />
 

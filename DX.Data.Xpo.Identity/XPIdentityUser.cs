@@ -10,7 +10,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -72,7 +72,7 @@ namespace DX.Data.Xpo.Identity
 		///     User name
 		/// </summary>
 		public virtual string UserName { get; set; }
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 		public virtual string NormalizedName { get; set; }
 		public virtual string NormalizedEmail { get; set; }
 #endif
@@ -177,7 +177,7 @@ namespace DX.Data.Xpo.Identity
 		//				LockoutEndDateUtc = src.LockoutEndDateUtc;
 		//				LockoutEnabled = src.LockoutEnabled;
 		//				AccessFailedCount = src.AccessFailedCount;
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//                this.NormalizedName = src.NormalizedName;
 		//                this.NormalizedEmail = src.NormalizedEmail;
 		//#endif

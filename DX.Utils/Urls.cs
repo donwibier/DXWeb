@@ -1,5 +1,5 @@
 ﻿
-#if (!NETSTANDARD2_1)
+#if (!NETSTANDARD2_1 && !NET6_0)
 
 using System;
 using System.Collections.Generic;

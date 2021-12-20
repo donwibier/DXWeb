@@ -10,21 +10,43 @@ using DX.Data.Xpo.Identity.Persistent;
 
 namespace DX.Test.Web.Core.Models
 {
-	public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	// This class will be persisted in the database by XPO
+	// It should have the same properties as the ApplicationUser
+	[MapInheritance(MapInheritanceType.ParentTable)]
+	public class XpoApplicationUser : XpoDxUser
 	{
-		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+		public XpoApplicationUser(Session session) : base(session)
 		{
-			var result = base.Assign(source, destination);
-			return result;
 		}
 
-		public override string Map(string sourceField)
+		// STEP 1: Add custom fields here
+		string functionTitle;
+		string department;
+		string companyName;
+
+		[Size(100)]
+		public string CompanyName
 		{
-			return base.Map(sourceField);
+			get => companyName;
+			set => SetPropertyValue(nameof(CompanyName), ref companyName, value);
 		}
 
-		public override Func<XpoApplicationUser, ApplicationUser> CreateModel => base.CreateModel;
-	}
+		[Size(SizeAttribute.DefaultStringMappingFieldSize)]
+		public string Department
+		{
+			get => department;
+			set => SetPropertyValue(nameof(Department), ref department, value);
+		}
+
+
+		[Size(100)]
+		public string FunctionTitle
+		{
+			get => functionTitle;
+			set => SetPropertyValue(nameof(FunctionTitle), ref functionTitle, value);
+		}
+
+    }
 
 	// Add profile data for application users by adding properties to the ApplicationUser class
 	public class ApplicationUser : XPIdentityUser
@@ -33,7 +55,54 @@ namespace DX.Test.Web.Core.Models
 		{
 
 		}
+		// STEP 2: Add custom fields here
+		public string CompanyName { get; set; }
+		public string Department { get; set; }
+		public string FunctionTitle { get; set; }
 	}
+
+
+	public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	{
+		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+		{
+			var result = base.Assign(source, destination);
+			
+			// STEP 3: Implement Mapping here
+			result.CompanyName = source.CompanyName;
+			result.Department = source.Department;
+			result.FunctionTitle = source.FunctionTitle;
+
+			return result;
+		}
+
+		public override string Map(string sourceField)
+		{
+			return base.Map(sourceField);
+		}
+
+		// STEP 4: Implement Mapping here
+		public override Func<XpoApplicationUser, ApplicationUser> CreateModel =>
+			(source) =>
+			{
+				var result = base.CreateModel(source);
+
+				result.CompanyName = source.CompanyName;
+				result.Department = source.Department;
+				result.FunctionTitle = source.FunctionTitle;
+
+				return result;
+			};
+    }
+
+	[MapInheritance(MapInheritanceType.ParentTable)]
+	public class XpoApplicationRole : XpoDxRole
+	{
+		public XpoApplicationRole(Session session) : base(session)
+		{
+		}		
+	}
+
 
 	public class ApplicationRole : XPIdentityRole
 	{
@@ -55,38 +124,8 @@ namespace DX.Test.Web.Core.Models
 			return base.Map(sourceField);
 		}
 	}
-	public class XpoApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
-	{
-		public override Func<XpoApplicationUser, ApplicationUser> CreateModel => base.CreateModel;
-		public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
-		{
-			XpoApplicationUser result = base.Assign(source, destination);
 
-			return result;
-		}
+    
 
-		public override string Map(string sourceField)
-		{
-			return base.Map(sourceField);
-		}
-	}
-
-    // This class will be persisted in the database by XPO
-    // It should have the same properties as the ApplicationUser
-    [MapInheritance(MapInheritanceType.ParentTable)]
-    public class XpoApplicationUser : XpoDxUser
-    {
-        public XpoApplicationUser(Session session) : base(session)
-        {
-        }
-    }
-
-    [MapInheritance(MapInheritanceType.ParentTable)]
-    public class XpoApplicationRole : XpoDxRole
-    {
-        public XpoApplicationRole(Session session) : base(session)
-        {
-        }
-    }
 
 }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -15,7 +15,7 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-	//#if (NETSTANDARD2_1)
+	//#if (NETSTANDARD2_1 || NETCOREAPP)
 	//	public interface IUser<TKey>
 	//		 where TKey : IEquatable<TKey>
 	//	{
@@ -35,7 +35,7 @@ namespace DX.Data.Xpo.Identity
 	//#endif
 	//public interface IXPUser<TKey, TXPOUser, TXPORole>: IXPUser<TKey, TXPOUser >
 
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 	public interface IXPUser<TKey>
 		 where TKey : IEquatable<TKey>
 	{
@@ -120,7 +120,7 @@ namespace DX.Data.Xpo.Identity
 
 		//TXPOUser User { get; set; }
 	}
-#if (NETSTANDARD2_1)
+#if (NETSTANDARD2_1 || NETCOREAPP)
 	public interface IXPRole<TKey>
 		where TKey : IEquatable<TKey>
 	{
@@ -133,12 +133,12 @@ namespace DX.Data.Xpo.Identity
 	{
 		new TKey Id { get; set; }
 #endif
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//		string NormalizedName { get; set; }
 		//#endif
 		//		IList UsersList { get; }
 		//		XPCollection<TXPOUser> Users { get; }
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//		XPCollection<TXPORoleClaim> Claims { get; }
 		//#endif
 	}

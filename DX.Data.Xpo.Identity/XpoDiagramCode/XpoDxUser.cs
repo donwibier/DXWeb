@@ -37,7 +37,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 
 			base.OnChanged(propertyName, oldValue, newValue);
 		}
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//        public string NormalizedName
 		//        {
 		//            get { return UserNameUpper; }
@@ -76,7 +76,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 		//                this.LockoutEndDateUtc = src.LockoutEndDateUtc;
 		//                this.LockoutEnabled = src.LockoutEnabled;
 		//                this.AccessFailedCount = src.AccessFailedCount;
-		//#if (NETSTANDARD2_1)
+		//#if (NETSTANDARD2_1 || NETCOREAPP)
 		//                this.NormalizedName = src.NormalizedName;
 		//                this.NormalizedEmail = src.NormalizedEmail;
 		//#endif
