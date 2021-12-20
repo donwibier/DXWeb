@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     name: build, pack & publish
     steps:
+      - name: Setup .NET 6 
       - uses: actions/checkout@v2
-      - name: Setup .NET 6
-        uses: actions/setup-dotnet@v1        
+      - uses: actions/setup-dotnet@v1        
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true          
@@ -20,7 +20,7 @@ jobs:
         run: dotnet build -- configuration Release --no-restore
       # Publish
       - name: publish on version change        
-        uses: brandedoutcast/publish-nuget@v2.5.2
+        uses: rohith/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: DX.Utils/DX.Utils.csproj
           # API key to authenticate with NuGet server
