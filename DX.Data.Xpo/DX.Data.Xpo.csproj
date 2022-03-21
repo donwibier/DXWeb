@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>21.2.6.17</Version>
-		<FileVersion>21.2.6.17</FileVersion>
+		<Version>21.2.6.18</Version>
+		<FileVersion>21.2.6.18</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
