@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>21.2.4.13</Version>
-		<FileVersion>21.2.4.13</FileVersion>
+		<Version>21.2.6.13</Version>
+		<FileVersion>21.2.6.13</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -45,9 +45,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="21.2.4" />
-		<PackageReference Include="DevExpress.Data" Version="21.2.4" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="21.2.4" />
+		<PackageReference Include="DevExpress.Xpo" Version="21.2.6" />
+		<PackageReference Include="DevExpress.Data" Version="21.2.6" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="21.2.6" />
 	</ItemGroup>
 
 	<ItemGroup>
