@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="21.2.4" />
+    <PackageReference Include="DevExpress.Blazor" Version="21.2.6" />
+	<PackageReference Include="DevExpress.Data" Version="21.2.6" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>
 
