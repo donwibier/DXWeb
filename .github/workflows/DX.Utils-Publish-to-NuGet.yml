@@ -22,7 +22,7 @@ jobs:
         run: dotnet build -- configuration Release --no-restore
       # Publish
       - name: publish on version change        
-        uses: rohith/publish-nuget@v2
+        uses: brandedoutcast/publish-nuget@v2
         with:
           PROJECT_FILE_PATH: DX.Utils/DX.Utils.csproj
           # API key to authenticate with NuGet server

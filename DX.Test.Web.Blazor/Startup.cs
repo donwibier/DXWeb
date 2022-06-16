@@ -19,6 +19,7 @@ using DX.Test.Web.Blazor.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using DX.Blazor.Identity.Server.Services;
 using DX.Blazor.Identity.Models;
+using DX.Blazor.Identity;
 
 namespace DX.Test.Web.Blazor
 {
@@ -67,7 +68,8 @@ namespace DX.Test.Web.Blazor
 			//services.AddTransient<RegisterUser>((s) => new RegisterUser());
 
 			// DX.Blazor.Identity.Server configuration
-			services.AddScoped<DX.Blazor.Identity.IAuthService<RegisterUserModel, AuthenticationModel>, Services.AuthService>();
+			
+			services.AddScoped<IAuthService<RegisterUserModel, AuthenticationModel>, Services.AuthService>();
 			services.AddScoped<DX.Blazor.Identity.Server.TokenProvider>();
 			services.AddScoped<AuthenticationStateProvider, DX.Blazor.Identity.Server.AuthStateProvider<ApplicationUser>>();
 			// ====

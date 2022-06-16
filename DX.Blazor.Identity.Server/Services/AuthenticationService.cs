@@ -29,7 +29,7 @@ namespace DX.Blazor.Identity.Server.Services
     }
 
     public class AuthenticationService<TUser, TRegistrationModel>
-         : AuthenticationService<string, TUser, TRegistrationModel, AuthenticationModel>
+         : AuthenticationService<string, TUser, TRegistrationModel, AuthenticationModel>, IAuthService<TRegistrationModel, AuthenticationModel>
          where TUser : class, IXPUser<string>, new()
          where TRegistrationModel : class, new()
     {
@@ -47,11 +47,10 @@ namespace DX.Blazor.Identity.Server.Services
         protected override string GetPassword(AuthenticationModel model) => model.Password;
         protected override bool GetRememberMe(AuthenticationModel model) => model.RememberMe;
         protected override string GetReturnUrl(AuthenticationModel model) => model.ReturnUrl;
-
     }
 
     public abstract class AuthenticationService<TKey, TUser, TRegistrationModel>
-         : AuthenticationService<TKey, TUser, TRegistrationModel, AuthenticationModel>
+         : AuthenticationService<TKey, TUser, TRegistrationModel, AuthenticationModel>, IAuthService<TRegistrationModel, AuthenticationModel>
          where TKey : IEquatable<TKey>
          where TUser : class, IXPUser<TKey>, new()
          where TRegistrationModel : class, new()
