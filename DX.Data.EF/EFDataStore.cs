@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 #else
@@ -108,6 +108,18 @@ namespace DX.Data.EF
 			Validator = validator;
 		}
 		public EFDatabase<TDBContext> DB { get; protected set; }
+		private TDBContext _EFCtx = null;
+		public TDBContext EFCtx
+        {
+			get
+            {
+				if (_EFCtx == null)
+                {
+					_EFCtx = new TDBContext();
+                }
+				return _EFCtx;
+            }
+        }
 
 		public IEFDataMapper<TKey, TModel, TEFClass> Mapper { get; protected set; }
 		public IEFDataStoreValidator<TKey, TModel, TEFClass> Validator { get; protected set; }
@@ -116,6 +128,13 @@ namespace DX.Data.EF
 		public Type EFDBContext => typeof(TDBContext);
 
 		public abstract TKey GetEFModelKey(TEFClass model);
+
+		protected virtual IQueryable<TEFClass> EFQuery()
+        {
+			return EFQuery(EFCtx);
+        }
+
+
 		protected virtual IQueryable<TEFClass> EFQuery(TDBContext ctx)
 		{
 			var result = ctx.Set<TEFClass>();
@@ -132,15 +151,7 @@ namespace DX.Data.EF
 		//	return result;
 		//}
 
-		protected override IEnumerable<TModel> Query()
-		{
-			var result = DB.Execute((db, ctx, t) =>
-			{
-				var r = EFQuery(ctx).Select(CreateModelInstance);
-				return r.ToList();
-			});
-			return result;
-		}
+		public override IQueryable<TModel> Query()=> EFQuery().Select(CreateModelInstance).AsQueryable();
 		protected virtual Func<TEFClass, TModel> CreateModelInstance => Mapper.CreateModel;
 
 		protected TEFClass Assign(TModel source, TEFClass destination)
@@ -175,7 +186,7 @@ namespace DX.Data.EF
 			public IDataValidationResult<TKey> InsertedResult { get; private set; }
 		}
 
-#if (!NETSTANDARD2_1)
+#if (!NET6_0_OR_GREATER)
 		class EntityEntry<T> {
 		  public T Entity { get; set;}
 		}
@@ -220,8 +231,9 @@ namespace DX.Data.EF
 							TEFClass newItem = new TEFClass();
 							newItem = Assign(item, newItem);
 
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 							EntityEntry<TEFClass> ee = ctx.Set<TEFClass>().Add(newItem);
+
 #else
 							EntityEntry<TEFClass> ee = new EntityEntry<TEFClass>() 
 							{
@@ -390,5 +402,14 @@ namespace DX.Data.EF
 			}, true, false);
 			return result;
 		}
-	}
+
+        protected override void DisposeManaged()
+        {
+            base.DisposeManaged();
+			if (_EFCtx != null)
+            {
+				_EFCtx.Dispose();
+            }
+        }
+    }
 }

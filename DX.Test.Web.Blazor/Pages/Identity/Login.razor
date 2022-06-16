@@ -1,0 +1,77 @@
+﻿@page "/Account/Login"
+@using Microsoft.AspNetCore.Identity
+@using DX.Test.Web.Blazor.Data
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Authentication
+
+@inject NavigationManager navigationManager
+@inject DX.Blazor.Identity.IAuthService AuthenticationService 
+
+<h1>Login</h1>
+<EditForm Model="@userModel" OnValidSubmit="@LoginAction" Context="EditFormContext">
+	<DataAnnotationsValidator />
+	@if (errors.Count() > 0) {
+		<div class="alert alert-danger" role="alert">
+			<ul>
+				@foreach(var s in errors!)
+				{
+	                <li>@s</li>
+		        }
+			</ul>
+		</div>
+	}
+	<DxFormLayout>
+		<DxFormLayoutItem Caption="Email address:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.Email"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="Password:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.Password"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem ColSpanMd="12">
+			<Template>
+				<button type="submit">Login</button>
+			</Template>
+		</DxFormLayoutItem>
+	</DxFormLayout>
+</EditForm>
+
+@code {
+	    private string redirectUrl = "";
+    private List<string> errors = new List<string>();
+
+    //IList<AuthenticationScheme>? ExternalLogins { get; set; }
+    DX.Blazor.Identity.Models.AuthenticationModel userModel { get; set; } = new DX.Blazor.Identity.Models.AuthenticationModel();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("redirectUrl", out var url))
+            redirectUrl = url;
+        else 
+            redirectUrl = "/";        
+    }
+
+    protected async Task LoginAction()
+    {
+        errors.Clear();
+        userModel.ReturnUrl = redirectUrl;
+        var result = await AuthenticationService.Login(userModel);
+        if (!result.IsAuthSuccessful)
+        {
+            errors.Add(result.ErrorMessage);            
+        }
+        else
+        {
+            navigationManager.NavigateTo("/");
+        }              
+    }
+
+}

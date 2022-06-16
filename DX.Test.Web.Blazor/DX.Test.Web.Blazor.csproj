@@ -2,17 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <UserSecretsId>aspnet-DX.Test.Web.Blazor-639EAB9C-3DB8-44CB-9495-A3A7C62D2254</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="21.2.6" />
-	<PackageReference Include="DevExpress.Data" Version="21.2.6" />
+    <PackageReference Include="DevExpress.Blazor" Version="21.2.8" />
+	<PackageReference Include="DevExpress.Data" Version="21.2.8" />
+	<PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DX.Blazor.Identity.Server\DX.Blazor.Identity.Server.csproj" />
     <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
     <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
     <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

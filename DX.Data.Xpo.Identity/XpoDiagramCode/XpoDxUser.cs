@@ -148,126 +148,126 @@ namespace DX.Data.Xpo.Identity.Persistent
 			}
 		}
 
-		#region Embedded Fields class
-		public new class FieldsClass : XpoDxBase.FieldsClass
-		{
-			public FieldsClass()
-			{
+        #region Embedded Fields class
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
+        public new class FieldsClass : XpoDxBase.FieldsClass
+        {
+            public FieldsClass()
+            {
 
-			}
+            }
 
-			public FieldsClass(string propertyName) : base(propertyName)
-			{
+            public FieldsClass(string propertyName) : base(propertyName)
+            {
 
-			}
+            }
 
-			public OperandProperty RolesList
-			{
-				get { return new OperandProperty(GetNestedName(nameof(RolesList))); }
-			}
+            public const string RolesListFieldName = "RolesList";
 
-			public OperandProperty ClaimsList
-			{
-				get { return new OperandProperty(GetNestedName(nameof(ClaimsList))); }
-			}
+            public OperandProperty RolesList => new OperandProperty(GetNestedName(RolesListFieldName));
 
-			public OperandProperty LoginsList
-			{
-				get { return new OperandProperty(GetNestedName(nameof(LoginsList))); }
-			}
+            public const string ClaimsListFieldName = "ClaimsList";
 
-			public OperandProperty Email
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Email))); }
-			}
+            public OperandProperty ClaimsList => new OperandProperty(GetNestedName(ClaimsListFieldName));
 
-			public OperandProperty EmailConfirmed
-			{
-				get { return new OperandProperty(GetNestedName(nameof(EmailConfirmed))); }
-			}
+            public const string LoginsListFieldName = "LoginsList";
 
-			public OperandProperty PasswordHash
-			{
-				get { return new OperandProperty(GetNestedName(nameof(PasswordHash))); }
-			}
+            public OperandProperty LoginsList => new OperandProperty(GetNestedName(LoginsListFieldName));
 
-			public OperandProperty SecurityStamp
-			{
-				get { return new OperandProperty(GetNestedName(nameof(SecurityStamp))); }
-			}
+            public const string EmailFieldName = "Email";
 
-			public OperandProperty PhoneNumber
-			{
-				get { return new OperandProperty(GetNestedName(nameof(PhoneNumber))); }
-			}
+            public OperandProperty Email => new OperandProperty(GetNestedName(EmailFieldName));
 
-			public OperandProperty PhoneNumberConfirmed
-			{
-				get { return new OperandProperty(GetNestedName(nameof(PhoneNumberConfirmed))); }
-			}
+            public const string EmailConfirmedFieldName = "EmailConfirmed";
 
-			public OperandProperty TwoFactorEnabled
-			{
-				get { return new OperandProperty(GetNestedName(nameof(TwoFactorEnabled))); }
-			}
+            public OperandProperty EmailConfirmed => new OperandProperty(GetNestedName(EmailConfirmedFieldName));
 
-			public OperandProperty LockoutEndDateUtc
-			{
-				get { return new OperandProperty(GetNestedName(nameof(LockoutEndDateUtc))); }
-			}
+            public const string PasswordHashFieldName = "PasswordHash";
 
-			public OperandProperty LockoutEnabled
-			{
-				get { return new OperandProperty(GetNestedName(nameof(LockoutEnabled))); }
-			}
+            public OperandProperty PasswordHash => new OperandProperty(GetNestedName(PasswordHashFieldName));
 
-			public OperandProperty AccessFailedCount
-			{
-				get { return new OperandProperty(GetNestedName(nameof(AccessFailedCount))); }
-			}
+            public const string SecurityStampFieldName = "SecurityStamp";
 
-			public OperandProperty UserName
-			{
-				get { return new OperandProperty(GetNestedName(nameof(UserName))); }
-			}
+            public OperandProperty SecurityStamp => new OperandProperty(GetNestedName(SecurityStampFieldName));
 
-			public OperandProperty _EmailUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_EmailUpper))); }
-			}
+            public const string PhoneNumberFieldName = "PhoneNumber";
 
-			public OperandProperty EmailUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(EmailUpper))); }
-			}
+            public OperandProperty PhoneNumber => new OperandProperty(GetNestedName(PhoneNumberFieldName));
 
-			public OperandProperty _UserNameUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_UserNameUpper))); }
-			}
+            public const string PhoneNumberConfirmedFieldName = "PhoneNumberConfirmed";
 
-			public OperandProperty UserNameUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(UserNameUpper))); }
-			}
+            public OperandProperty PhoneNumberConfirmed => new OperandProperty(GetNestedName(PhoneNumberConfirmedFieldName));
 
-			public OperandProperty Roles
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Roles))); }
-			}
+            public const string TwoFactorEnabledFieldName = "TwoFactorEnabled";
 
-			public OperandProperty Logins
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Logins))); }
-			}
+            public OperandProperty TwoFactorEnabled => new OperandProperty(GetNestedName(TwoFactorEnabledFieldName));
 
-			public OperandProperty Claims
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Claims))); }
-			}
-		}
+            public const string LockoutEndDateUtcFieldName = "LockoutEndDateUtc";
 
-		public new static FieldsClass Fields
+            public OperandProperty LockoutEndDateUtc => new OperandProperty(GetNestedName(LockoutEndDateUtcFieldName));
+
+            public const string LockoutEnabledFieldName = "LockoutEnabled";
+
+            public OperandProperty LockoutEnabled => new OperandProperty(GetNestedName(LockoutEnabledFieldName));
+
+            public const string AccessFailedCountFieldName = "AccessFailedCount";
+
+            public OperandProperty AccessFailedCount => new OperandProperty(GetNestedName(AccessFailedCountFieldName));
+
+            public const string UserNameFieldName = "UserName";
+
+            public OperandProperty UserName => new OperandProperty(GetNestedName(UserNameFieldName));
+
+            public const string _EmailUpperFieldName = "_EmailUpper";
+
+            public OperandProperty _EmailUpper => new OperandProperty(GetNestedName(_EmailUpperFieldName));
+
+            public const string EmailUpperFieldName = "EmailUpper";
+
+            public OperandProperty EmailUpper => new OperandProperty(GetNestedName(EmailUpperFieldName));
+
+            public const string _UserNameUpperFieldName = "_UserNameUpper";
+
+            public OperandProperty _UserNameUpper => new OperandProperty(GetNestedName(_UserNameUpperFieldName));
+
+            public const string UserNameUpperFieldName = "UserNameUpper";
+
+            public OperandProperty UserNameUpper => new OperandProperty(GetNestedName(UserNameUpperFieldName));
+
+            public const string NormalizedEmailFieldName = "NormalizedEmail";
+
+            public OperandProperty NormalizedEmail => new OperandProperty(GetNestedName(NormalizedEmailFieldName));
+
+            public const string NormalizedNameFieldName = "NormalizedName";
+
+            public OperandProperty NormalizedName => new OperandProperty(GetNestedName(NormalizedNameFieldName));
+
+            public const string RefreshTokenFieldName = "RefreshToken";
+
+            public OperandProperty RefreshToken => new OperandProperty(GetNestedName(RefreshTokenFieldName));
+
+            public const string RefreshTokenExpiryTimeFieldName = "RefreshTokenExpiryTime";
+
+            public OperandProperty RefreshTokenExpiryTime => new OperandProperty(GetNestedName(RefreshTokenExpiryTimeFieldName));
+
+            public const string RolesFieldName = "Roles";
+
+            public OperandProperty Roles => new OperandProperty(GetNestedName(RolesFieldName));
+
+            public const string LoginsFieldName = "Logins";
+
+            public OperandProperty Logins => new OperandProperty(GetNestedName(LoginsFieldName));
+
+            public const string TokensFieldName = "Tokens";
+
+            public OperandProperty Tokens => new OperandProperty(GetNestedName(TokensFieldName));
+
+            public const string ClaimsFieldName = "Claims";
+
+            public OperandProperty Claims => new OperandProperty(GetNestedName(ClaimsFieldName));
+        }
+
+        public new static FieldsClass Fields
 		{
 			get
 			{

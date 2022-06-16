@@ -115,14 +115,14 @@ namespace DX.Data.Xpo.Mvc
 			if (CacheTryGetCount(e.FilterExpression, out rowCount))
 				e.DataRowCount = rowCount;
 			else
-				e.DataRowCount = DB.Execute((db, w) => Query(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());
+				e.DataRowCount = DB.Execute((db, w) => XPQuery(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());
 		}
 
 		public virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				var r = Query(w)
+				var r = XPQuery(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					/*.UniqueValuesForField(PrepareProperty(e.FieldName)) */
 					.UniqueValuesForField(PrepareProperty(e.FieldName)) as IQueryable<TXPOClass>;
@@ -136,7 +136,7 @@ namespace DX.Data.Xpo.Mvc
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				var r = Query(w)
+				var r = XPQuery(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.GetGroupInfo(PrepareProperty(e.FieldName), e.SortOrder);
@@ -149,7 +149,7 @@ namespace DX.Data.Xpo.Mvc
 		{
 			var result = DB.Execute((db, w) =>
 			{
-				var items = Query(w)
+				var items = XPQuery(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.ApplySorting(PrepareSorting(e.State.SortedColumns))
@@ -167,7 +167,7 @@ namespace DX.Data.Xpo.Mvc
 			var result = DB.Execute((db, w) =>
 			{
 
-				var query = Query(w)
+				var query = XPQuery(w)
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList));
 
@@ -203,7 +203,7 @@ namespace DX.Data.Xpo.Mvc
 			{
 				e.RowValues = DB.Execute((db, w) =>
 				{
-					var r = Query(w).Where(c => e.KeyValues.Contains(XPModelKey(c))).Select(CreateModelInstance);
+					var r = XPQuery(w).Where(c => e.KeyValues.Contains(XPModelKey(c))).Select(CreateModelInstance);
 					return r.ToList();
 				});
 			}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 #else
@@ -16,7 +16,7 @@ namespace DX.Data.EF
 		where TEFContext: DbContext, new()
 	{
 		public virtual void Execute(
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 			Action<EFDatabase<TEFContext>, TEFContext, IDbContextTransaction> work,
 #else
 			Action<EFDatabase<TEFContext>, TEFContext, DbContextTransaction> work, 
@@ -28,7 +28,11 @@ namespace DX.Data.EF
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					work(this, ctx, dbTransaction);
+#if (NET6_0_OR_GREATER)
+					if (transactional && commit)
+#else
 					if (transactional && commit && ctx.ChangeTracker.HasChanges())
+#endif				
 					{
 						ctx.SaveChanges();
 						dbTransaction.Commit();
@@ -38,7 +42,7 @@ namespace DX.Data.EF
 		}
 
 		public T Execute<T>(
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 			Func<EFDatabase<TEFContext>, TEFContext, IDbContextTransaction, T> work,
 #else
 			Func<EFDatabase<TEFContext>, TEFContext, DbContextTransaction, T> work, 
@@ -51,8 +55,12 @@ namespace DX.Data.EF
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					result = work(this, ctx, dbTransaction);
+#if (NET6_0_OR_GREATER)
+					if (transactional && commit)
+#else
 					if (transactional && commit && ctx.ChangeTracker.HasChanges())
-					{						
+#endif
+					{
 						ctx.SaveChanges();
 						dbTransaction.Commit();
 					}
@@ -62,7 +70,7 @@ namespace DX.Data.EF
 		}
 
 		public async virtual Task<T> ExecuteAsync<T>(
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 			Func<EFDatabase<TEFContext>, TEFContext, IDbContextTransaction, T> work,
 #else
 			Func<EFDatabase<TEFContext>, TEFContext, DbContextTransaction, T> work, 
@@ -73,7 +81,7 @@ namespace DX.Data.EF
 		}
 
 		public async virtual Task ExecuteAsync(
-#if (NETSTANDARD2_1)
+#if (NET6_0_OR_GREATER)
 			Action<EFDatabase<TEFContext>, TEFContext, IDbContextTransaction> work,
 #else
 			Action<EFDatabase<TEFContext>, TEFContext, DbContextTransaction> work, 

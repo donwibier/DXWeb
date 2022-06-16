@@ -3,10 +3,6 @@ using DX.Utils.Data;
 using System;
 using System.Linq;
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
-#else
-using Microsoft.AspNet.Identity;
-#endif
 
 namespace DX.Data.Xpo.Identity
 {
@@ -37,6 +33,8 @@ namespace DX.Data.Xpo.Identity
 #if (NETSTANDARD2_1 || NETCOREAPP)
 			NormalizedName = source.NormalizedName,
 			NormalizedEmail = source.NormalizedEmail,
+			RefreshToken = source.RefreshToken,
+			RefreshTokenExpiryTime = source.RefreshTokenExpiryTime,
 #endif
 			AccessFailedCount = source.AccessFailedCount
 		};
@@ -55,9 +53,12 @@ namespace DX.Data.Xpo.Identity
 			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
 			destination.LockoutEnabled = source.LockoutEnabled;
 			destination.AccessFailedCount = source.AccessFailedCount;
+
 #if (NETSTANDARD2_1 || NETCOREAPP)
 			destination.NormalizedName = source.NormalizedName;
 			destination.NormalizedEmail = source.NormalizedEmail;
+			destination.RefreshToken = source.RefreshToken;
+			destination.RefreshTokenExpiryTime = source.RefreshTokenExpiryTime;
 #endif
 			if (destination is IAssignable)
 				(destination as IAssignable).Assign(source);

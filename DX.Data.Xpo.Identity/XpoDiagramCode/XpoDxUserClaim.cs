@@ -3,6 +3,8 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -16,6 +18,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             this.User = null;
             base.OnDeleting();
         }
+
         //public override void Assign(object source, int loadingFlags)
         //{
         //    base.Assign(source, loadingFlags);
@@ -26,7 +29,7 @@ namespace DX.Data.Xpo.Identity.Persistent
         //    }
         //}
 
-        // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:17 AM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
         public new class FieldsClass : XpoDxBaseClaim.FieldsClass
         {
             public FieldsClass()
@@ -39,21 +42,13 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             }
 
-            public XpoDxUser.FieldsClass User
-            {
-                get
-                {
-                    return new XpoDxUser.FieldsClass(GetNestedName("User"));
-                }
-            }
+            public const string UserFieldName = "User";
 
-            public OperandProperty UserId
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("UserId"));
-                }
-            }
+            public XpoDxUser.FieldsClass User => new XpoDxUser.FieldsClass(GetNestedName(UserFieldName));
+
+            public const string UserIdFieldName = "UserId";
+
+            public OperandProperty UserId => new OperandProperty(GetNestedName(UserIdFieldName));
         }
 
         public new static FieldsClass Fields

@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace DX.Test.Web.Blazor.Data
 {
-	public class RegisterUser
+	public class RegisterUserModel
 	{
-		
-		public RegisterUser()
-		{
-			
-		}
-
+		public RegisterUserModel() { }
 		[Required()]
 		[EmailAddress()]
 		public string EmailAddress { get; set; }
@@ -23,15 +18,19 @@ namespace DX.Test.Web.Blazor.Data
 		public string Password { get; set; }
 		[Compare("Password", ErrorMessage ="Passwords must match")]
 		public string PasswordConfirm { get; set; }
+	
+		[Required()]
+		public DateTime BirthDate { get; set; }
+		public string Street { get; set; }
+		public string HouseNo { get; set; }
+		public string HouseNoSuffix { get; set; }
+		public string ZipCode { get; set; }
+		public string City { get; set; }
+		public string State { get; set; }
+		public string Country { get; set; }
+
+		public string ReturnUrl { get; set; }
+
 	}
-	public class UserLogin
-	{		
-		public UserLogin()
-		{
-			
-		}
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public bool Remember { get; set; }
-	}
+
 }

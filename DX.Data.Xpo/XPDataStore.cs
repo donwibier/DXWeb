@@ -83,6 +83,7 @@ namespace DX.Data.Xpo
 		where TModel : class, new()
 		where TXPOClass : XPBaseObject
 	{
+		private UnitOfWork unitOfWork = null;
 		public XPDataStore(XpoDatabase db, IXPDataMapper<TKey, TModel, TXPOClass> mapper, IXPDataStoreValidator<TKey, TModel, TXPOClass> validator = null)
 		{
 			if (db == null)
@@ -100,23 +101,29 @@ namespace DX.Data.Xpo
 
 		public Type XpoType => typeof(TXPOClass);
 
-
-		protected virtual IQueryable<TXPOClass> Query(Session s)
+		protected UnitOfWork UnitOfWork
+		{
+			get
+			{
+				if (unitOfWork == null)
+					unitOfWork = DB.GetUnitOfWork();
+				return unitOfWork;
+			}
+		}
+		protected virtual IQueryable<TXPOClass> XPQuery()
+        {
+			return XPQuery(UnitOfWork);
+        }
+		protected virtual IQueryable<TXPOClass> XPQuery(Session s)
 		{
 			var result = from n in s.Query<TXPOClass>()
 						 select n;
 			return result;
 		}
-		protected override IEnumerable<TModel> Query()
-		{
-			var result = DB.Execute((db, w) =>
-			{
-				var r = Query(w).Select(CreateModelInstance);
-				return r.ToList();
-			});
-			return result;
-		}
-		protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
+
+        public override IQueryable<TModel> Query() => XPQuery().Select(CreateModelInstance).AsQueryable();
+
+        protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
 
 		protected TXPOClass Assign(TModel source, TXPOClass destination)
 		{
@@ -350,5 +357,16 @@ namespace DX.Data.Xpo
 			});
 			return result;
 		}
-	}
+
+        protected override void DisposeManaged()
+        {
+            base.DisposeManaged();
+			if (unitOfWork != null)
+            {
+				unitOfWork.Dispose();
+            }
+        }
+    }
+
+	
 }

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -73,46 +74,50 @@ namespace DX.Data.Xpo.Identity.Persistent
 			get { return Users; }
 		}
 
-		#region Embedded Fields class
-		public new class FieldsClass : XpoDxBase.FieldsClass
-		{
-			public FieldsClass()
-			{
+        #region Embedded Fields class
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
+        public new class FieldsClass : XpoDxBase.FieldsClass
+        {
+            public FieldsClass()
+            {
 
-			}
+            }
 
-			public FieldsClass(string propertyName) : base(propertyName)
-			{
+            public FieldsClass(string propertyName) : base(propertyName)
+            {
 
-			}
+            }
 
-			public OperandProperty UsersList
-			{
-				get { return new OperandProperty(GetNestedName(nameof(UsersList))); }
-			}
+            public const string NameFieldName = "Name";
 
-			public OperandProperty Name
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Name))); }
-			}
+            public OperandProperty Name => new OperandProperty(GetNestedName(NameFieldName));
 
-			public OperandProperty _NameUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_NameUpper))); }
-			}
+            public const string _NameUpperFieldName = "_NameUpper";
 
-			public OperandProperty NameUpper
-			{
-				get { return new OperandProperty(GetNestedName(nameof(NameUpper))); }
-			}
+            public OperandProperty _NameUpper => new OperandProperty(GetNestedName(_NameUpperFieldName));
 
-			public OperandProperty Users
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Users))); }
-			}
-		}
+            public const string NameUpperFieldName = "NameUpper";
 
-		public new static FieldsClass Fields
+            public OperandProperty NameUpper => new OperandProperty(GetNestedName(NameUpperFieldName));
+
+            public const string NormalizedNameFieldName = "NormalizedName";
+
+            public OperandProperty NormalizedName => new OperandProperty(GetNestedName(NormalizedNameFieldName));
+
+            public const string UsersFieldName = "Users";
+
+            public OperandProperty Users => new OperandProperty(GetNestedName(UsersFieldName));
+
+            public const string ClaimsFieldName = "Claims";
+
+            public OperandProperty Claims => new OperandProperty(GetNestedName(ClaimsFieldName));
+
+            public const string UsersListFieldName = "UsersList";
+
+            public OperandProperty UsersList => new OperandProperty(GetNestedName(UsersListFieldName));
+        }
+
+        public new static FieldsClass Fields
 		{
 			get
 			{

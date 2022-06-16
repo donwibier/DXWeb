@@ -3,6 +3,8 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -33,6 +35,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             User = null;
             base.OnDeleting();
         }
+
         //public override void Assign(object source, int loadingFlags)
         //{
         //    base.Assign(source, loadingFlags);
@@ -44,9 +47,7 @@ namespace DX.Data.Xpo.Identity.Persistent
         //        this.User = Session.FindObject(typeof(XpoDxUser), XpoDxUser.Fields.Id == src.UserId) as XpoDxUser;
 
         //    }
-        //}
-
-        #region Embedded Fields class
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
         public new class FieldsClass : XpoDxBase.FieldsClass
         {
             public FieldsClass()
@@ -59,37 +60,21 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             }
 
-            public OperandProperty LoginProvider
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("LoginProvider"));
-                }
-            }
+            public const string UserIdFieldName = "UserId";
 
-            public OperandProperty ProviderKey
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("ProviderKey"));
-                }
-            }
+            public OperandProperty UserId => new OperandProperty(GetNestedName(UserIdFieldName));
 
-            public XpoDxUser.FieldsClass User
-            {
-                get
-                {
-                    return new XpoDxUser.FieldsClass(GetNestedName("User"));
-                }
-            }
+            public const string LoginProviderFieldName = "LoginProvider";
 
-            public OperandProperty UserId
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("UserId"));
-                }
-            }
+            public OperandProperty LoginProvider => new OperandProperty(GetNestedName(LoginProviderFieldName));
+
+            public const string ProviderKeyFieldName = "ProviderKey";
+
+            public OperandProperty ProviderKey => new OperandProperty(GetNestedName(ProviderKeyFieldName));
+
+            public const string UserFieldName = "User";
+
+            public XpoDxUser.FieldsClass User => new XpoDxUser.FieldsClass(GetNestedName(UserFieldName));
         }
 
         public new static FieldsClass Fields
@@ -107,7 +92,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         static FieldsClass _Fields;
 
-        #endregion
+        
     }
 
 }

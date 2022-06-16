@@ -1,6 +1,7 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
+
 using DX.Utils;
 using DX.Utils.Data;
 using System;
@@ -10,10 +11,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 #if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
-#else
-using Microsoft.AspNet.Identity;
 #endif
 
 
@@ -126,6 +126,9 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public virtual int AccessFailedCount { get; set; }
 
+		public virtual string RefreshToken { get; set; }
+		public DateTime? RefreshTokenExpiryTime { get; set; }
+
 		private ICollection<TRole> _Roles = new List<TRole>();
 		/// <summary>
 		///     Navigation property for user roles
@@ -159,43 +162,6 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public virtual IList LoginsList { get; protected set; }
 
-
-		//		public override void Assign(object source, int loadingFlags)
-		//		{
-		//			var src = CastSource(source);
-		//			if (src != null)
-		//			{
-		//				Id = src.Id;
-		//				UserName = src.UserName;
-		//				Email = src.Email;
-		//				EmailConfirmed = src.EmailConfirmed;
-		//				PasswordHash = src.PasswordHash;
-		//				SecurityStamp = src.SecurityStamp;
-		//				PhoneNumber = src.PhoneNumber;
-		//				PhoneNumberConfirmed = src.PhoneNumberConfirmed;
-		//				TwoFactorEnabled = src.TwoFactorEnabled;
-		//				LockoutEndDateUtc = src.LockoutEndDateUtc;
-		//				LockoutEnabled = src.LockoutEnabled;
-		//				AccessFailedCount = src.AccessFailedCount;
-		//#if (NETSTANDARD2_1 || NETCOREAPP)
-		//                this.NormalizedName = src.NormalizedName;
-		//                this.NormalizedEmail = src.NormalizedEmail;
-		//#endif
-
-		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_ROLES))
-		//				{
-		//					AssignRoles(src.RolesList);
-		//				}
-		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_CLAIMS))
-		//				{
-		//					AssignClaims(src.ClaimsList);
-		//				}
-		//				if (loadingFlags.BitHas(DxIdentityUserFlags.FLAG_LOGINS))
-		//				{
-		//					AssignLogins(src.LoginsList);
-		//				}
-		//			}
-		//		}
 
 		public void AssignRoles(IList roles)
 		{

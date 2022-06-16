@@ -10,11 +10,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-#if (NETSTANDARD2_1 || NETCOREAPP)
-using Microsoft.AspNetCore.Identity;
-#else
-using Microsoft.AspNet.Identity;
-#endif
+
 
 namespace DX.Data.Xpo.Identity
 {

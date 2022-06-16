@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -12,18 +13,7 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxBaseClaim(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-
-        //public override void Assign(object source, int loadingFlags)
-        //{
-        //    base.Assign(source, loadingFlags);
-        //    IDxBaseClaim<string> src = source as IDxBaseClaim<string>;
-        //    if (src != null)
-        //    {
-        //        this.ClaimType = src.ClaimType;
-        //        this.ClaimValue = src.ClaimValue;
-        //    }
-        //}
-
+       
         public virtual void InitializeFromClaim(Claim other)
         {
             this.ClaimType = other.Type;
@@ -35,7 +25,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             return new Claim(this.ClaimType, this.ClaimValue);
         }
 
-        // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:16 AM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/16/2022 10:34 AM
         public new class FieldsClass : XpoDxBase.FieldsClass
         {
             public FieldsClass()
@@ -48,21 +38,13 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             }
 
-            public OperandProperty ClaimType
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("ClaimType"));
-                }
-            }
+            public const string ClaimTypeFieldName = "ClaimType";
 
-            public OperandProperty ClaimValue
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("ClaimValue"));
-                }
-            }
+            public OperandProperty ClaimType => new OperandProperty(GetNestedName(ClaimTypeFieldName));
+
+            public const string ClaimValueFieldName = "ClaimValue";
+
+            public OperandProperty ClaimValue => new OperandProperty(GetNestedName(ClaimValueFieldName));
         }
 
         public new static FieldsClass Fields

@@ -21,7 +21,7 @@ namespace DX.Utils.Data
 			var result = await Task.FromResult(GetByKey(key));
 			return result;
 		}
-		protected abstract IEnumerable<TModel> Query();
+		public abstract IQueryable<TModel> Query();
 
 		//public async virtual Task<IEnumerable<TModel>> QueryAsync()
 		//{
@@ -154,6 +154,9 @@ namespace DX.Utils.Data
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
 
+		protected virtual void DisposeManaged() { }
+		protected virtual void  DisposedUnManaged() { }
+
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposedValue)
@@ -161,11 +164,13 @@ namespace DX.Utils.Data
 				if (disposing)
 				{
 					// TODO: dispose managed state (managed objects).
+					DisposeManaged();
 
 				}
 
 				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
 				// TODO: set large fields to null.
+				DisposedUnManaged();
 
 				disposedValue = true;
 			}

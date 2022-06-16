@@ -3,6 +3,9 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+
+
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -15,8 +18,9 @@ namespace DX.Data.Xpo.Identity.Persistent
 		{
 			get { return (string)(EvaluateAlias("UserId")); }
 		}
-		// Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/8/2018 3:43 AM
-		public new class FieldsClass : XpoDxBase.FieldsClass
+
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
+        public new class FieldsClass : XpoDxBase.FieldsClass
         {
             public FieldsClass()
             {
@@ -27,11 +31,26 @@ namespace DX.Data.Xpo.Identity.Persistent
             {
 
             }
-            public XpoDxUser.FieldsClass User { get { return new XpoDxUser.FieldsClass(GetNestedName("User")); } }
-            public OperandProperty LoginProvider { get { return new OperandProperty(GetNestedName("LoginProvider")); } }
-            public OperandProperty Name { get { return new OperandProperty(GetNestedName("Name")); } }
-            public OperandProperty Value { get { return new OperandProperty(GetNestedName("Value")); } }
-            public OperandProperty UserId { get { return new OperandProperty(GetNestedName("UserId")); } }
+
+            public const string UserIdFieldName = "UserId";
+
+            public OperandProperty UserId => new OperandProperty(GetNestedName(UserIdFieldName));
+
+            public const string UserFieldName = "User";
+
+            public XpoDxUser.FieldsClass User => new XpoDxUser.FieldsClass(GetNestedName(UserFieldName));
+
+            public const string LoginProviderFieldName = "LoginProvider";
+
+            public OperandProperty LoginProvider => new OperandProperty(GetNestedName(LoginProviderFieldName));
+
+            public const string NameFieldName = "Name";
+
+            public OperandProperty Name => new OperandProperty(GetNestedName(NameFieldName));
+
+            public const string ValueFieldName = "Value";
+
+            public OperandProperty Value => new OperandProperty(GetNestedName(ValueFieldName));
         }
 
         public new static FieldsClass Fields

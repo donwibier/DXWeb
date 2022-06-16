@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 #if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
@@ -72,23 +73,14 @@ namespace DX.Data.Xpo.Identity
 		#region abstract implementation
 		public override TKey GetModelKey(TRole model) => model.Id;
 		public override void SetModelKey(TRole model, TKey key) => model.Id = key;
-		protected override IQueryable<TXPORole> Query(Session s)
+		protected override IQueryable<TXPORole> XPQuery(Session s)
 		{
 			var r = from n in s.Query<TXPORole>()
 					select n;
 			return r;
 
 		}
-		protected override IEnumerable<TRole> Query()
-		{
-			var results = DB.Execute((db, w) =>
-			{
-				var r = Query(w).Select(CreateModelInstance);
-				return r.ToList();
-			});
-
-			return results;
-		}
+        public override IQueryable<TRole> Query() => XPQuery().Select(CreateModelInstance).AsQueryable();
 
 		#endregion
 
@@ -135,7 +127,7 @@ namespace DX.Data.Xpo.Identity
 			if (role == null)
 			{
 				throw new ArgumentNullException(nameof(role));
-			}
+			}			
 			var result = await base.CreateAsync(role);
 		}
 

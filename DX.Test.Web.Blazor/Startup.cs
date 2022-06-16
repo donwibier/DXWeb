@@ -17,6 +17,8 @@ using Microsoft.Extensions.Hosting;
 using DX.Test.Web.Blazor.Areas.Identity;
 using DX.Test.Web.Blazor.Data;
 using Microsoft.AspNetCore.Components.Authorization;
+using DX.Blazor.Identity.Server.Services;
+using DX.Blazor.Identity.Models;
 
 namespace DX.Test.Web.Blazor
 {
@@ -38,6 +40,7 @@ namespace DX.Test.Web.Blazor
 			services.AddXpoDatabase((o) => {
 				o.Name = connStrName;
 				o.ConnectionString = Configuration.GetConnectionString(connStrName);
+				o.UpdateSchema = DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema;
 			});			
 
 			services
@@ -46,6 +49,7 @@ namespace DX.Test.Web.Blazor
 					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 					options.Lockout.MaxFailedAccessAttempts = 3;
 				})
+				.AddDefaultTokenProviders() // <===== Add this for blazor login pages
 				.AddXpoIdentityStores(connStrName,
 					new ApplicationUserMapper(),
 					new ApplicationRoleMapper(),
@@ -55,10 +59,18 @@ namespace DX.Test.Web.Blazor
 
 			services.AddRazorPages();
 			services.AddServerSideBlazor();
-			services.AddScoped<AuthenticationStateProvider, RevalidatingAuthenticationStateProvider<ApplicationUser>>();
+			services.AddHttpClient(); // <===== Add this for blazor login pages
+			
 			services.AddSingleton<WeatherForecastService>();
-			services.AddTransient<RegisterUser>();
+			
+			//services.AddTransient<RegisterUser>();
 			//services.AddTransient<RegisterUser>((s) => new RegisterUser());
+
+			// DX.Blazor.Identity.Server configuration
+			services.AddScoped<DX.Blazor.Identity.IAuthService<RegisterUserModel, AuthenticationModel>, Services.AuthService>();
+			services.AddScoped<DX.Blazor.Identity.Server.TokenProvider>();
+			services.AddScoped<AuthenticationStateProvider, DX.Blazor.Identity.Server.AuthStateProvider<ApplicationUser>>();
+			// ====
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

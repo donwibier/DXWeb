@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.2</Version>
-		<FileVersion>20.2.3.2</FileVersion>
+		<Version>20.2.3.3</Version>
+		<FileVersion>20.2.3.3</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DataStore implementation for use with EF</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
-		<LangVersion>7.3</LangVersion>
+		<TargetFrameworks>net461;net6.0</TargetFrameworks>
+		<LangVersion>8.0</LangVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
 	</PropertyGroup>
@@ -18,9 +18,9 @@
 	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+	<!--<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
-	</ItemGroup>
+	</ItemGroup>-->
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />

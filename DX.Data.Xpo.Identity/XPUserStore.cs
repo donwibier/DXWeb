@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 #if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
@@ -117,24 +118,21 @@ namespace DX.Data.Xpo.Identity
 		public override TKey GetModelKey(TUser model) => model.Id;
 		public override void SetModelKey(TUser model, TKey key) => model.Id = key;
 
-		protected override IQueryable<TXPOUser> Query(Session s)
+		protected override IQueryable<TXPOUser> XPQuery()
+		{
+			var r = XPQuery(UnitOfWork);
+			return r;
+
+		}
+
+		protected override IQueryable<TXPOUser> XPQuery(Session s )
 		{
 			var r = from n in s.Query<TXPOUser>()
 					select n;
 			return r;
 
 		}
-		protected override IEnumerable<TUser> Query()
-		{
-			var results = DB.Execute((db, w) =>
-			{
-				var r = Query(w).Select(CreateModelInstance);
-				return r.ToList();
-			});
-
-			return results;
-			;
-		}
+		public override IQueryable<TUser> Query() => XPQuery().Select(CreateModelInstance).AsQueryable();
 
 
 		#region Generic Helper methods and members
@@ -483,16 +481,26 @@ namespace DX.Data.Xpo.Identity
 
 			var result = await DB.ExecuteAsync((db, wrk) =>
 			{
+				try
+				{
 #if (NETSTANDARD2_1 || NETCOREAPP)
-				var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("NormalizedName == ?", userName));
+
+					var xpoUser = wrk.FindObject(XPOUserType, CriteriaOperator.Parse("NormalizedName == ?", userName));
 #else
 				var xpoUser = wrk.FindObject(XPOUserType, XpoDxUser.Fields.UserNameUpper == userName.ToUpperInvariant());
 #endif
-				if (xpoUser != null)
-				{
-					TUser r = Mapper.CreateModel(xpoUser as TXPOUser);
-					return r;
+					if (xpoUser != null)
+					{
+						TUser r = Mapper.CreateModel(xpoUser as TXPOUser);
+						return r;
+					}
 				}
+				catch(Exception ex)
+                {
+					string s = ex.Message;
+
+                }
+				
 				return null;
 			});
 			return result;

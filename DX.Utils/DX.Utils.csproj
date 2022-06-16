@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.1.7.19</Version>
-    <FileVersion>20.1.7.19</FileVersion>
+    <Version>20.1.8.19</Version>
+    <FileVersion>20.1.8.19</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		20.1.8.19: Small fix
 		20.1.7.19: .NET 6.0 upgrade
 		20.1.7.17: IDataStoreModel&lt;TKey&gt; not needed anymore on Models and DBModels. No ID property needed.
 		20.1.7.16: Validation results include eventType (inserting, Inserted etc), Exception helper class for results, smaller fixes

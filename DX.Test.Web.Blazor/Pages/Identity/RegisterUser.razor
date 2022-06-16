@@ -1,59 +1,124 @@
-﻿@page "/user/register"
-@using Microsoft.AspNetCore.Identity
-@using DX.Test.Web.Blazor.Data
-@using System.ComponentModel.DataAnnotations;
-@inject UserManager<ApplicationUser> UserManager
-@*@inject RegisterUser UserModel*@ 
+﻿@page "/Account/Register"
 
+@inject NavigationManager navigationManager
+@inject IAuthService<RegisterUserModel, AuthenticationModel> AuthenticationService 
 
 
 <h1>Register</h1>
-<EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" Context="EditFormContext">
+
+<EditForm Model="@userModel" OnValidSubmit="@HandleValidSubmit" Context="RegisterForm">
 	<DataAnnotationsValidator />
-	<DxFormLayout>
+	@if (errors.Count() > 0) {
+		<div class="alert alert-danger" role="alert">
+			<ul>
+				@foreach(var s in errors!)
+				{
+	                <li>@s</li>
+		        }
+			</ul>
+		</div>
+	}
+	<DxFormLayout >
 		<DxFormLayoutItem Caption="Email address:" ColSpanMd="12">
 			<Template>
 				<DxTextBox @bind-Text="@userModel.EmailAddress"></DxTextBox>
 			</Template>
 		</DxFormLayoutItem>
 
-		<DxFormLayoutItem Caption="Password:" ColSpanMd="12">
+		<DxFormLayoutItem Caption="Password:" ColSpanMd="6">
 			<Template>
-				<DxTextBox @bind-Text="@userModel.Password"></DxTextBox>
+				<DxTextBox @bind-Text="@userModel.Password" Password="true"></DxTextBox>
 			</Template>
 		</DxFormLayoutItem>
 
-		<DxFormLayoutItem Caption="Confirm Password:" ColSpanMd="12">
+		<DxFormLayoutItem Caption="Confirm Password:" ColSpanMd="6">
 			<Template>
-				<DxTextBox @bind-Text="@userModel.PasswordConfirm"></DxTextBox>
+				<DxTextBox @bind-Text="@userModel.PasswordConfirm" Password="true"></DxTextBox>
 			</Template>
 		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="Birthdate:" ColSpanMd="6">
+			<Template>
+				<DxDateEdit @bind-Date="@userModel.BirthDate"></DxDateEdit>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem BeginRow="true" Caption="Street:" ColSpanMd="8">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.Street"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="No:" ColSpanMd="2">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.HouseNo"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem Caption="Suf.:" ColSpanMd="2">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.HouseNoSuffix"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
+		<DxFormLayoutItem BeginRow="true" Caption="Zipcode:" ColSpanMd="4">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.ZipCode"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+		<DxFormLayoutItem Caption="City:" ColSpanMd="4">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.City"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+		<DxFormLayoutItem Caption="State:" ColSpanMd="4">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.State"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+		<DxFormLayoutItem BeginRow="true" Caption="Country:" ColSpanMd="12">
+			<Template>
+				<DxTextBox @bind-Text="@userModel.Country"></DxTextBox>
+			</Template>
+		</DxFormLayoutItem>
+
 
 		<DxFormLayoutItem ColSpanMd="12">
 			<Template>
-				<button type="submit">Register</button>
+				 <DxButton RenderStyle="@ButtonRenderStyle.Primary" SubmitFormOnClick="true" Text="Register"
+                                RenderStyleMode="@ButtonRenderStyleMode.Contained" />
 			</Template>
 		</DxFormLayoutItem>
 	</DxFormLayout>
 </EditForm>
 
 @code {
-	public class RegisterUserModel
-	{
-		[Required()]
-		[EmailAddress()]
-		public string EmailAddress { get; set; }
-		//[RegularExpression("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,20}$", ErrorMessage = "Your password is not secure enough")]
-		[Required()]		
-		public string Password { get; set; }
-		[Compare("Password", ErrorMessage ="Passwords must match")]
-		public string PasswordConfirm { get; set; }
-	}
-	private RegisterUserModel userModel = new RegisterUserModel();	
+	private string redirectUrl = "";
+	private List<string> errors = new List<string>();
+	private RegisterUserModel userModel = new DX.Test.Web.Blazor.Data.RegisterUserModel();	
 
-	private void HandleValidSubmit()
+	    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("redirectUrl", out var url))
+            redirectUrl = url;
+        else
+            redirectUrl = "/";
+    }
+
+	private async Task HandleValidSubmit()
 	{
+		
 		Console.WriteLine("OnValidSubmit");
+		userModel.ReturnUrl = redirectUrl;
+        var result = await AuthenticationService.RegisterUser(userModel);
+        if (!result.IsSuccessfulRegistration)
+            errors.AddRange(result.Errors);
+        else
+            navigationManager.NavigateTo(redirectUrl);
+
 	}
 	private void HandleInvalidSubmit()
 	{

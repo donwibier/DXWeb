@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>        
+	  <Version>21.2.8.1</Version>
+	  <FileVersion>21.2.8.1</FileVersion>
+	  <Authors>Don Wibier (DevExpress)</Authors>
+	  <Description>Package with Interface for DX.Data.XPO.Identity ASP.NET Identity</Description>
+	  <Copyright>Copyright (c) 2022 Don Wibier</Copyright>
+	  <!--<TargetFramework>net6.0</TargetFramework>-->
+	  <TargetFrameworks>net461;netstandard2.1;net6.0</TargetFrameworks>
+  </PropertyGroup>
+	<PropertyGroup>
+		<PackageReleaseNotes>
+		21.2.8.19: Interfaces from DX.Data.Xpo.Identity in separate package for Blazor WASM Identity Support		
+	</PackageReleaseNotes>
+	<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!--<TargetFrameworks>netstandard2.1;net461;net6.0</TargetFrameworks>-->
+		<LangVersion>7.3</LangVersion>
+		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</PackageProjectUrl>
+		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
+		<PackageReleaseNotes>
+			21.2.7.1: Initial release
+		</PackageReleaseNotes>
+		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+	</ItemGroup>
+
+</Project>

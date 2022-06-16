@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 
+
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
@@ -18,6 +19,7 @@ namespace DX.Data.Xpo.Identity.Persistent
             this.Role = null;
             base.OnDeleting();
         }
+
         //public override void Assign(object source, int loadingFlags)
         //{
         //    base.Assign(source, loadingFlags);
@@ -29,7 +31,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         //}
 
-        // Created/Updated: DESKTOP-KN2LOTV\don on DESKTOP-KN2LOTV at 2/9/2018 2:16 AM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
         public new class FieldsClass : XpoDxBaseClaim.FieldsClass
         {
             public FieldsClass()
@@ -42,21 +44,13 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             }
 
-            public XpoDxRole.FieldsClass Role
-            {
-                get
-                {
-                    return new XpoDxRole.FieldsClass(GetNestedName("Role"));
-                }
-            }
+            public const string RoleFieldName = "Role";
 
-            public OperandProperty RoleId
-            {
-                get
-                {
-                    return new OperandProperty(GetNestedName("RoleId"));
-                }
-            }
+            public XpoDxRole.FieldsClass Role => new XpoDxRole.FieldsClass(GetNestedName(RoleFieldName));
+
+            public const string RoleIdFieldName = "RoleId";
+
+            public OperandProperty RoleId => new OperandProperty(GetNestedName(RoleIdFieldName));
         }
 
         public new static FieldsClass Fields

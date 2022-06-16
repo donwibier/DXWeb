@@ -3,10 +3,6 @@ using DX.Utils.Data;
 using System;
 using System.Linq;
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
-#else
-using Microsoft.AspNet.Identity;
-#endif
 
 namespace DX.Data.Xpo.Identity
 {

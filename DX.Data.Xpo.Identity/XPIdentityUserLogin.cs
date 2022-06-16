@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
+
 namespace DX.Data.Xpo.Identity
 {
 	/// <summary>
@@ -14,16 +15,7 @@ namespace DX.Data.Xpo.Identity
 	/// </summary>
 	public class XPIdentityUserLogin : XPIdentityUserLogin<string>
 	{
-		//public XPIdentityUserLogin(XpoDxUserLogin source)
-		//: base(source)
-		//{
-
-		//}
-		//public XPIdentityUserLogin(XpoDxUserLogin source, int loadingFlags)
-		//: base(source, loadingFlags)
-		//{
-
-		//}
+		
 		public XPIdentityUserLogin() : base()
 		{
 		}

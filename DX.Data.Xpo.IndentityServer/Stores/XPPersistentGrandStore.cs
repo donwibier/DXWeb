@@ -4,8 +4,6 @@ using DevExpress.Xpo.DB;
 using DX.Data.Xpo.Identity.Persistent;
 using DX.Data.Xpo.IndentityServer.XPModels;
 using DX.Utils.Data;
-using IdentityServer4.Models;
-using IdentityServer4.Stores;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,6 +11,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+//using IdentityServer4.Models;
+//using IdentityServer4.Stores;
 
 namespace DX.Data.Xpo.IdentityServer.Stores
 {
