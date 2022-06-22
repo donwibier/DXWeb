@@ -42,6 +42,30 @@ public void ConfigureServices(IServiceCollection services)
 					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
 					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())				
                 .AddDefaultTokenProviders();
+				
+		// token config
+		builder.Services.AddScoped<ITokenService<string, ApplicationUser>, TokenService<string, ApplicationUser> >();
+
+		var jwtSettings = builder.Configuration.GetSection("JWTSettings");
+		builder.Services.AddAuthentication(opt =>
+		{
+			opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		}).AddJwtBearer(options =>
+		{
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+
+			ValidIssuer = jwtSettings["validIssuer"],
+			ValidAudience = jwtSettings["validAudience"],
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["securityKey"]))
+			};
+		});
+
 
             // Add other services ...
             services.AddTransient<IEmailSender, EmailSender>();
