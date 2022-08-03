@@ -15,7 +15,7 @@ namespace DX.Utils.Data
 		public virtual Type ModelType => typeof(TModel);
 
 		public abstract TModel GetByKey(TKey key);
-
+	
 		public async virtual Task<TModel> GetByKeyAsync(TKey key)
 		{
 			var result = await Task.FromResult(GetByKey(key));

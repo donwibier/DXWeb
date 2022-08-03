@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace DX.Blazor.Identity.Server.Services
 {
     public class AuthenticationService<TUser>
-         : AuthenticationService<TUser, RegistrationModel>
+         : AuthenticationService<TUser, RegistrationModel>, IAuthService
          where TUser : class, IXPUser<string>, new()
     {
         public AuthenticationService(UserManager<TUser> userManager, 

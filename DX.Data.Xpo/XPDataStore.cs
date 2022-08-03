@@ -258,8 +258,10 @@ namespace DX.Data.Xpo
 						{
 							TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
 							SetModelKey(batchPairs[xpoItem].Model, k);
-							batchPairs[xpoItem].InsertingResult.ID = k;
-							batchPairs[xpoItem].InsertedResult.ID = k;
+							if (batchPairs[xpoItem].InsertingResult != null)
+								batchPairs[xpoItem].InsertingResult.ID = k;
+							if (batchPairs[xpoItem].InsertedResult != null) 
+								batchPairs[xpoItem].InsertedResult.ID = k;
 						}
 					};
 					w.FailedCommitTransaction += (s, e) =>

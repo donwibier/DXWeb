@@ -9,7 +9,8 @@ namespace DX.Utils.Data
 	{
 		Success = 1,
 		Warning = 2,
-		Error = 3
+		Info = 3,
+		Error = 4
 	}
 	public enum DataValidationEventType
 	{

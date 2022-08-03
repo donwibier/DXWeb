@@ -131,10 +131,10 @@ namespace DX.Blazor.Identity.Server.Controllers
             var dataProtector = _dataProtectionProvider.CreateProtector("Login");
             var data = dataProtector.Unprotect(token);
             var parts = data.Split('|');
-            var redirectUrl = parts[3];
+            var returnUrl = parts[3];
             {
-                if (string.IsNullOrWhiteSpace(redirectUrl))
-                    redirectUrl = "/";
+                if (string.IsNullOrWhiteSpace(returnUrl))
+                    returnUrl = "/";
             }
             var identityUser = await _userManager.FindByIdAsync(parts[0]);
             if (identityUser == null)
@@ -163,8 +163,8 @@ namespace DX.Blazor.Identity.Server.Controllers
                 //    navigationManager.NavigateTo(redirectUrl);
                 //}
 
-                if (!string.IsNullOrEmpty(redirectUrl))
-                    return Redirect(redirectUrl);
+                if (!string.IsNullOrEmpty(returnUrl))
+                    return Redirect(returnUrl);
                 else
                     return Ok(new AuthResponseModel { IsAuthSuccessful = true });
             }

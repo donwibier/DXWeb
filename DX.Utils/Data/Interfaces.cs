@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DX.Utils.Data
@@ -50,8 +51,9 @@ namespace DX.Utils.Data
 
 		//IDataStoreValidator<TKey, TModel> GetValidator();
 
-		//IEnumerable<TModel> Query();
+		IQueryable<TModel> Query();
 		//Task<IEnumerable<TModel>> QueryAsync();
+		TKey GetModelKey(TModel model);
 		TModel GetByKey(TKey key);
 
 		IDataValidationResults<TKey> Create(IEnumerable<TModel> items);

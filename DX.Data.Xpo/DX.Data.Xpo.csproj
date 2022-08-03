@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>21.2.8.19</Version>
-		<FileVersion>21.2.8.19</FileVersion>
+		<Version>22.1.4.19</Version>
+		<FileVersion>22.1.4.19</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			22.1.4.19: Upgrade to DX v22.1.4
 			21.2.8.19: IQuery Users properly implemented, DX Upgrade v21.2.8 and preparations for Blazor Identity Support
 			21.2.4.17: .NET 6.0 and DevExpress v21.2.3 upgrade
 			21.1.5.16: Upgrade to DX v21.1.5
@@ -73,7 +74,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="21.2.8" />	
+		<PackageReference Include="DevExpress.Xpo" Version="22.1.4" />	
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

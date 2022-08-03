@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <Version>21.2.8.15</Version>
-	  <FileVersion>21.2.8.15</FileVersion>
+	  <Version>22.1.4.19</Version>
+	  <FileVersion>22.1.4.19</FileVersion>
 	  <Authors>Don Wibier (DevExpress)</Authors>
 	  <Description>Identity helper and configuration for Blazor WASM token based authorization</Description>
 	  <Copyright>Copyright (c) 2022 Don Wibier</Copyright>
@@ -12,6 +12,7 @@
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
 			21.2.8.18: New helper package for DX.Blazor.Identity with everything for Blazor WASM to easily implement Identity with XPO on Blazor
 		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
@@ -22,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.6" />
-	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.19.0" />
-	  <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.4" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.7" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.7" />
 	  <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
 	  <PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.1.0" />
 	  

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DX.Blazor.Identity.Wasm.Services
 {
-    public class AuthenticationService : AuthenticationService<RegistrationModel>        
+    public class AuthenticationService : AuthenticationService<RegistrationModel>, IAuthService        
     {
         public AuthenticationService(HttpClient client, AuthenticationStateProvider authStateProvider, 
             ILocalStorageService localStorage) 
@@ -21,7 +21,7 @@ namespace DX.Blazor.Identity.Wasm.Services
         }
     }
 
-    public class AuthenticationService<TRegistrationModel> : AuthenticationService<TRegistrationModel, AuthenticationModel>
+    public class AuthenticationService<TRegistrationModel> : AuthenticationService<TRegistrationModel, AuthenticationModel>, IAuthService<TRegistrationModel>
         where TRegistrationModel : class, new()
     {
         public AuthenticationService(HttpClient client, AuthenticationStateProvider authStateProvider, 
