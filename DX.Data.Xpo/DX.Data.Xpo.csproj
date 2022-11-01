@@ -1,20 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>22.1.4.19</Version>
-		<FileVersion>22.1.4.19</FileVersion>
+		<Version>22.1.4.21</Version>
+		<FileVersion>22.1.4.21</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net461;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net46;net6.0</TargetFrameworks>
 		<LangVersion>7.3</LangVersion>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
 		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			22.1.4.21: Bug fixed when saving the object. 
+						Model class needs to be refreshed after a commit. Otherwise XPO OnSaving changes don't come back into model.
+						Since we don't want to change the Mapper signatures and keep the Model reference in tact, this is done through 
+						CACHED reflection except for Collection and Array properties.
+			22.1.4.20: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 			22.1.4.19: Upgrade to DX v22.1.4
 			21.2.8.19: IQuery Users properly implemented, DX Upgrade v21.2.8 and preparations for Blazor Identity Support
 			21.2.4.17: .NET 6.0 and DevExpress v21.2.3 upgrade
@@ -47,7 +52,7 @@
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<Reference Include="System" />
 		<Reference Include="System.Configuration" />
 		<Reference Include="System.Core" />

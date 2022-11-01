@@ -1,8 +1,11 @@
 ﻿using DevExpress.Xpo;
+using DX.Utils;
 using DX.Utils.Data;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace DX.Data.Xpo
@@ -125,9 +128,16 @@ namespace DX.Data.Xpo
 
         protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
 
-		protected TXPOClass Assign(TModel source, TXPOClass destination)
+		protected virtual TXPOClass Assign(TModel source, TXPOClass destination)
 		{
-			return Mapper.Assign(source, destination);
+			try
+			{
+				return Mapper.Assign(source, destination);
+			}
+			catch(Exception err)
+            {
+				throw;
+            }
 		}
 
 		public override TModel GetByKey(TKey key)
@@ -262,6 +272,14 @@ namespace DX.Data.Xpo
 								batchPairs[xpoItem].InsertingResult.ID = k;
 							if (batchPairs[xpoItem].InsertedResult != null) 
 								batchPairs[xpoItem].InsertedResult.ID = k;
+
+                            // INFO: We need to map back the XPO Item into the model.							
+                            // If not, properties set in the OnSaving events are not set back into the model.
+							// Since we don't want to change the mapper signature, for now this is the only way to keep
+							// the reference to the original Model in tact.
+                            var updatedModel = Mapper.CreateModel(xpoItem);
+							foreach(var p in GetModelPropInfo(updatedModel.GetType()))								
+									p.SetValue(batchPairs[xpoItem].Model, p.GetValue(updatedModel));
 						}
 					};
 					w.FailedCommitTransaction += (s, e) =>
@@ -286,8 +304,34 @@ namespace DX.Data.Xpo
 			return result;
 		}
 
+		#region Reflection caching
 
-		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
+		// PropertyInfo cache for streaming back properties to original model
+		static readonly ConcurrentDictionary<Type, PropertyInfo[]> modelPropInfo =
+            new ConcurrentDictionary<Type, PropertyInfo[]>();
+        static readonly BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+        static Action CleanCache => () =>
+        {
+            if (modelPropInfo.Count > 1000)
+            {
+                while (modelPropInfo.Count > 1000)
+                    if (!modelPropInfo.TryRemove(modelPropInfo.Keys.Last(), out PropertyInfo[] r))
+                        return; // break if can't be removed
+            }
+        };
+
+        static PropertyInfo[] GetModelPropInfo(Type objectType)
+        {
+            PropertyInfo[] props = modelPropInfo.GetOrAdd(objectType, 
+				(key) => objectType.GetProperties(flags)
+							.Where(p=>p.CanWrite && !p.IsCollectionProperty()).ToArray());
+            Task.Run(CleanCache);
+            return props;
+        }
+
+        #endregion
+
+        public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
 		{
 			if (items == null)
 				throw new ArgumentNullException(nameof(items));

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>22.1.4.16</Version>
-		<FileVersion>22.1.4.16</FileVersion>
+		<Version>22.1.4.17</Version>
+		<FileVersion>22.1.4.17</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -9,13 +9,14 @@
 
 	<PropertyGroup>
 		<!--<TargetFramework>net6.0</TargetFramework>-->
-		<TargetFrameworks>net461;netstandard2.1;net6.0</TargetFrameworks>
+		<TargetFrameworks>net46;netstandard2.1;net6.0</TargetFrameworks>
 		<LangVersion>7.3</LangVersion>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</PackageProjectUrl>
 		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			22.1.4.17: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 			22.1.4.16: Upgrade to DevExpress v22.1.4
 			21.2.8.19: IQuery Users properly implemented, DX Upgrade v21.2.8 and preparations for Blazor Identity Support
 			21.2.4.14: .NET 6.0 and DevExpress v21.2.4 upgrade
@@ -50,7 +51,7 @@
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
 		<Reference Include="System.Xml.Linq" />

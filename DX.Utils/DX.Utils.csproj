@@ -1,20 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.1.8.20</Version>
-    <FileVersion>20.1.8.20</FileVersion>
+    <Version>20.1.8.22</Version>
+    <FileVersion>20.1.8.22</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net461;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net46;net6.0</TargetFrameworks>
 	<LangVersion>7.3</LangVersion>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
     <!--<PackageIcon>favicon.ico</PackageIcon>-->	
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		20.1.8.22: IsCollectionProperty extension method added to fix bug in DX.Data.Xpo
+		20.1.8.21: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 		20.1.8.20: Fix
 		20.1.8.19: Small fix
 		20.1.7.19: .NET 6.0 upgrade
@@ -34,7 +36,7 @@
 		1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
 		Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net46'">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />

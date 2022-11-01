@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -376,7 +377,7 @@ namespace DX.Utils
 
         public static string HtmlColor(System.Drawing.Color AColor)
         {
-            string s = String.Format("#{0:X2}{1:X2}{2:X2}", AColor.R, AColor.G, AColor.B);
+            string s = string.Format("#{0:X2}{1:X2}{2:X2}", AColor.R, AColor.G, AColor.B);
             return s;
         }
 
@@ -434,7 +435,43 @@ namespace DX.Utils
                 strSuffix = "bytes";
             }
 
-            return String.Format("{0}{1:#,##0} {2}", ((neg) ? "-" : ""), intSize, strSuffix);
+            return $"{(((neg) ? "-" : ""))}{intSize:#,##0} {strSuffix}";
         }
+
+        public static string RemoveDiacritics(string s)
+        {
+            string normalizedString = s.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    stringBuilder.Append(c);
+            }
+
+            return stringBuilder.ToString();
+        }
+        public static string MakeSEOSafe(string value, string spaceReplacement = "-")
+        {
+            string str = RemoveDiacritics(value);
+            str = RegExLibrary.SEOSafe.Replace(str, "");
+            str = RegExLibrary.SEOReplaceSpaces.Replace(str, spaceReplacement);
+            str = RegExLibrary.SEOReplacePlusses.Replace(str, spaceReplacement);
+            return str;
+        }
+        public static string MakeFileNameSEOSafe(string fileName)
+        {
+            if (String.IsNullOrEmpty(fileName))
+                return fileName;
+
+            string file = MakeSEOSafe(Path.GetFileNameWithoutExtension(fileName));
+            string ext = MakeSEOSafe(Path.GetExtension(fileName));
+            if (String.IsNullOrEmpty(ext))
+                return fileName;
+
+            return String.Format("{0}.{1}", file, ext);
+        }
+
     }
 }

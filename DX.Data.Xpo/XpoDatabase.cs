@@ -252,7 +252,10 @@ namespace DX.Data.Xpo
 			}
 
 			XPDictionary dataDictionary = new ReflectionDictionary();
-			IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(options.ConnectionString), createOption);
+			//Register custom functions etc.
+            CriteriaOperator.RegisterCustomFunction(new GeoHaversineFunction());
+			//=====
+            IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(options.ConnectionString), createOption);
 
 			// Initialize the XPO dictionary
 			dataDictionary.GetDataStoreSchema(GetDataTypes(options.Name));

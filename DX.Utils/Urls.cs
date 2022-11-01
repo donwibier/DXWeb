@@ -1,17 +1,16 @@
-﻿
-#if (!NETSTANDARD2_1 && !NET6_0)
+﻿#if (INC_URLS)
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Hosting;
+
 
 namespace DX.Utils
 {
-    public class Urls
-    {
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Gets the fully qualified domainname of the application root like
@@ -261,5 +260,9 @@ namespace DX.Utils
         }
 
     }
+
 }
+
 #endif
+
+

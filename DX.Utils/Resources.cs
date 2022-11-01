@@ -3,7 +3,7 @@
 //
 // summary:	Implements the resources class
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#if (!NETSTANDARD2_1 && !NETCOREAPP)
+#if (INC_URLS && INC_RESOURCES)
 
 using System;
 using System.Collections.Generic;

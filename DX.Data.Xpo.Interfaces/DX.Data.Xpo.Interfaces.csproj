@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>        
-	  <Version>21.2.8.1</Version>
-	  <FileVersion>21.2.8.1</FileVersion>
+	  <Version>21.2.8.2</Version>
+	  <FileVersion>21.2.8.2</FileVersion>
 	  <Authors>Don Wibier (DevExpress)</Authors>
 	  <Description>Package with Interface for DX.Data.XPO.Identity ASP.NET Identity</Description>
 	  <Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	  <!--<TargetFramework>net6.0</TargetFramework>-->
-	  <TargetFrameworks>net461;netstandard2.1;net6.0</TargetFrameworks>
+	  <TargetFrameworks>net46;netstandard2.1;net6.0</TargetFrameworks>
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
-		21.2.8.19: Interfaces from DX.Data.Xpo.Identity in separate package for Blazor WASM Identity Support		
-	</PackageReleaseNotes>
+			21.2.8.20: Upgrade from .NET Framework to 4.6.1 to 4.6.2
+			21.2.8.19: Interfaces from DX.Data.Xpo.Identity in separate package for Blazor WASM Identity Support
+		</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
 
@@ -32,7 +33,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
 		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
 	</ItemGroup>
 
