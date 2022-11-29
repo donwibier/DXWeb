@@ -88,13 +88,9 @@ namespace DX.Data.Xpo
 	{
 		private UnitOfWork unitOfWork = null;
 		public XPDataStore(XpoDatabase db, IXPDataMapper<TKey, TModel, TXPOClass> mapper, IXPDataStoreValidator<TKey, TModel, TXPOClass> validator = null)
-		{
-			if (db == null)
-				throw new ArgumentNullException(nameof(db));
-			if (mapper == null)
-				throw new ArgumentNullException(nameof(mapper));
-			DB = db;
-			Mapper = mapper;
+		{			
+			DB = db ?? throw new ArgumentNullException(nameof(db)); 
+			Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			Validator = validator;
 		}
 		public XpoDatabase DB { get; protected set; }
@@ -134,7 +130,7 @@ namespace DX.Data.Xpo
 			{
 				return Mapper.Assign(source, destination);
 			}
-			catch(Exception err)
+			catch
             {
 				throw;
             }
@@ -263,23 +259,22 @@ namespace DX.Data.Xpo
 					w.ObjectSaved += (s, e) =>
 					{
 						// sync the model ids with the newly generated xpo id's
-						var xpoItem = e.Object as TXPOClass;
-						if (xpoItem != null && batchPairs.ContainsKey(xpoItem))
+						if (e.Object is TXPOClass xpoItem && batchPairs.ContainsKey(xpoItem))
 						{
 							TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
 							SetModelKey(batchPairs[xpoItem].Model, k);
 							if (batchPairs[xpoItem].InsertingResult != null)
 								batchPairs[xpoItem].InsertingResult.ID = k;
-							if (batchPairs[xpoItem].InsertedResult != null) 
+							if (batchPairs[xpoItem].InsertedResult != null)
 								batchPairs[xpoItem].InsertedResult.ID = k;
 
-                            // INFO: We need to map back the XPO Item into the model.							
-                            // If not, properties set in the OnSaving events are not set back into the model.
+							// INFO: We need to map back the XPO Item into the model.							
+							// If not, properties set in the OnSaving events are not set back into the model.
 							// Since we don't want to change the mapper signature, for now this is the only way to keep
 							// the reference to the original Model in tact.
-                            var updatedModel = Mapper.CreateModel(xpoItem);
-							foreach(var p in GetModelPropInfo(updatedModel.GetType()))								
-									p.SetValue(batchPairs[xpoItem].Model, p.GetValue(updatedModel));
+							var updatedModel = Mapper.CreateModel(xpoItem);
+							foreach (var p in GetModelPropInfo(updatedModel.GetType()))
+								p.SetValue(batchPairs[xpoItem].Model, p.GetValue(updatedModel));
 						}
 					};
 					w.FailedCommitTransaction += (s, e) =>
@@ -407,10 +402,7 @@ namespace DX.Data.Xpo
         protected override void DisposeManaged()
         {
             base.DisposeManaged();
-			if (unitOfWork != null)
-            {
-				unitOfWork.Dispose();
-            }
+			unitOfWork?.Dispose();
         }
     }
 

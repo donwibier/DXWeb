@@ -30,7 +30,7 @@ namespace DX.Blazor.Identity.Wasm.Services
 
         public SigningCredentials GetSigningCredentials()
         {
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey").Value);
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey")?.Value??string.Empty);
             var secret = new SymmetricSecurityKey(key);
 
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
@@ -82,7 +82,7 @@ namespace DX.Blazor.Identity.Wasm.Services
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey").Value)),
+                    Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey")?.Value??string.Empty)),
                 ValidateLifetime = false,
                 ValidIssuer = _jwtSettings.GetSection("validIssuer").Value,
                 ValidAudience = _jwtSettings.GetSection("validAudience").Value,

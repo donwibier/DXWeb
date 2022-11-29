@@ -104,7 +104,7 @@ namespace DX.Blazor.Identity.Server.Services
 
         public async Task<AuthResponseModel> Login(TAuthenticationModel userForAuthentication)
         {
-            var identityUser = await userManager.FindByEmailAsync(GetEmail(userForAuthentication));
+            var identityUser = (await userManager.FindByEmailAsync(GetEmail(userForAuthentication))) ?? default!;
 
             if (await userManager.CheckPasswordAsync(identityUser, GetPassword(userForAuthentication)) == true)
             {

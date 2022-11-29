@@ -20,7 +20,7 @@ namespace DX.Blazor.Identity.Server.Services
 
         public string GetToken()
         {
-            return contextAccessor.HttpContext.GetTokenAsync("access_token").GetAwaiter().GetResult();
+            return contextAccessor.HttpContext?.GetTokenAsync("access_token").GetAwaiter().GetResult() ?? string.Empty;
         }
 
         //public string GetCurrentUserName()

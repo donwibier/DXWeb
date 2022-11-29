@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <UserSecretsId>aspnet-DX.Test.Web.Blazor-639EAB9C-3DB8-44CB-9495-A3A7C62D2254</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="22.1.4" />
-	<PackageReference Include="DevExpress.Data" Version="22.1.4" />
-	<PackageReference Include="System.Data.SQLite.Core" Version="1.0.116" />
+    <PackageReference Include="DevExpress.Blazor" Version="22.1.6" />
+	<PackageReference Include="DevExpress.Data" Version="22.1.6" />
+	<PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>
 

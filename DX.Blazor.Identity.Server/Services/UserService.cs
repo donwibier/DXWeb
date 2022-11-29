@@ -22,12 +22,12 @@ namespace DX.Blazor.Identity.Server.Services
 
         public string GetCurrentUserId()
         {
-            return contextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid).Value;
+            return contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)!.Value ?? string.Empty;
         }
 
         public string GetCurrentUserName()
         {
-            return contextAccessor.HttpContext.User.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
+            return contextAccessor.HttpContext?.User.Claims.Single(x => x.Type == ClaimTypes.Name).Value ?? string.Empty;
         }
     }
 }

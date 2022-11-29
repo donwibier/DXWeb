@@ -1,4 +1,4 @@
-﻿#if (INC_URLS)
+﻿
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,10 @@ using System.Web;
 
 namespace DX.Utils
 {
-
-
+    public class Tst
+    {
+    }
+#if (INC_URLS)
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Gets the fully qualified domainname of the application root like
@@ -260,9 +262,9 @@ namespace DX.Utils
         }
 
     }
-
+#endif
 }
 
-#endif
+
 
 

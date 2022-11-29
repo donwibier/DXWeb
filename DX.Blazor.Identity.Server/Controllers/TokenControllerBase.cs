@@ -36,7 +36,7 @@ namespace DX.Blazor.Identity.Wasm.Controllers
             }
 
             var principal = _tokenService.GetPrincipalFromExpiredToken(tokenModel.Token);
-            var username = principal?.Identity?.Name;
+            var username = principal?.Identity?.Name ?? string.Empty;
 
             var user = await _userManager.FindByEmailAsync(username);
             if (user == null || user.RefreshToken != tokenModel.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
