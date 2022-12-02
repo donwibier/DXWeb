@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
@@ -12,10 +12,9 @@
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	</PropertyGroup>
 	<PropertyGroup>
-		<PackageReleaseNotes>
-			22.1.4.20: Upgraded several packages
-			22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
-			21.2.8.18: New package (with Server and WASM packages) to easily implement Identity with XPO on Blazor Server and WASM
+		<PackageReleaseNotes>v22.1.4.20: Upgraded several packages
+v22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
+v21.2.8.18: New package (with Server and WASM packages) to easily implement Identity with XPO on Blazor Server and WASM
 		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
