@@ -4,17 +4,19 @@ on:
     branches:
       - master # Default release branch
 jobs:
-  publish:
+  build:
     name: build, pack & publish
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet: [ '6.0.x', '7.0.x']
     steps:      
       - uses: actions/checkout@v3
-      - name: Setup .NET 6 
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET 6      
+        uses: actions/setup-dotnet@v3        
         with:
-          dotnet-version: '6.0.x'
-          dotnet-quality: 'preview'          
-          - name: add dx nuget source
+          dotnet-version: ${{ matrix.dotnet }} 
+          dotnet-quality: 'preview'
         
       - name: add dx nuget source
         run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
