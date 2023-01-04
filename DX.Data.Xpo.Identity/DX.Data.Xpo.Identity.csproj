@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>22.1.6.17</Version>
-		<FileVersion>22.1.6.17</FileVersion>
+		<Version>22.2.3.17</Version>
+		<FileVersion>22.2.3.17</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -16,6 +16,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			22.2.3.22: Upgraded to DX v22.2.3
 			22.1.6.22: Upgraded several packages incl DX v22.1.6
 			22.1.4.17: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 			22.1.4.16: Upgrade to DevExpress v22.1.4
@@ -75,7 +76,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="22.1.6" />
+		<PackageReference Include="DevExpress.Xpo" Version="22.2.3" />
 
 	</ItemGroup>
 

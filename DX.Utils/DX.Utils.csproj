@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.1.8.23</Version>
-    <FileVersion>20.1.8.23</FileVersion>
+    <Version>20.1.8.24</Version>
+    <FileVersion>20.1.8.24</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		20.1.8.24: static class renamed in Strings.cs
 		20.1.8.22: IsCollectionProperty extension method added to fix bug in DX.Data.Xpo
 		20.1.8.21: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 		20.1.8.20: Fix

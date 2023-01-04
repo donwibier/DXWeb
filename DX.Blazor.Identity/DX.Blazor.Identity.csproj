@@ -5,23 +5,25 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>22.1.4.20</Version>
-		<FileVersion>22.1.4.20</FileVersion>
+		<Version>22.1.4.21</Version>
+		<FileVersion>22.1.4.21</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	</PropertyGroup>
 	<PropertyGroup>
-		<PackageReleaseNotes>v22.1.4.20: Upgraded several packages
-v22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
-v21.2.8.18: New package (with Server and WASM packages) to easily implement Identity with XPO on Blazor Server and WASM
+		<PackageReleaseNotes>
+			v22.1.4.21: Small fix on refresh token
+			v22.1.4.20: Upgraded several packages
+			v22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
+			v21.2.8.18: New package (with Server and WASM packages) to easily implement Identity with XPO on Blazor Server and WASM
 		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.0" />
-	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.0" />
+	  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.1" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.1" />
 	</ItemGroup>
 	
 	<!--<ItemGroup>

@@ -20,12 +20,13 @@ namespace DX.Blazor.Identity.Server.Controllers
     public class AuthenticationControllerBase<TUser> : AuthenticationControllerBase<string, TUser, RegistrationModel>
         where TUser : class, IXPUser<string>, new()
     {
-        public AuthenticationControllerBase(UserManager<TUser> userManager, 
-            SignInManager<TUser> signInManager, 
+        public AuthenticationControllerBase(UserManager<TUser> userManager,
+			ITokenService<string, TUser> tokenService,
+			SignInManager<TUser> signInManager, 
             IDataProtectionProvider dataProtectionProvider, 
             ILogger<AuthenticationControllerBase<string, TUser, RegistrationModel>> logger, 
             IConfiguration configuration) 
-            : base(userManager, signInManager, dataProtectionProvider, logger, configuration)
+            : base(userManager, tokenService, signInManager, dataProtectionProvider, logger, configuration)
         {
 
         }
@@ -43,11 +44,12 @@ namespace DX.Blazor.Identity.Server.Controllers
         where TRegistrationModel : class, new()
     {
         public AuthenticationControllerBase(UserManager<TUser> userManager, 
+            ITokenService<string, TUser> tokenService,
             SignInManager<TUser> signInManager, 
             IDataProtectionProvider dataProtectionProvider, 
             ILogger<AuthenticationControllerBase<string, TUser, TRegistrationModel>> logger, 
             IConfiguration configuration) 
-            : base(userManager, signInManager, dataProtectionProvider, logger, configuration)
+            : base(userManager, tokenService, signInManager, dataProtectionProvider, logger, configuration)
         {
 
         }
@@ -60,7 +62,8 @@ namespace DX.Blazor.Identity.Server.Controllers
         where TRegistrationModel: class, new()
     {
         private readonly UserManager<TUser> _userManager;
-        private readonly IConfiguration _configuration;
+		readonly ITokenService<TKey, TUser> _tokenService;
+		private readonly IConfiguration _configuration;
         private readonly IConfigurationSection _jwtSettings;
 
         private readonly IDataProtectionProvider _dataProtectionProvider;
@@ -68,13 +71,15 @@ namespace DX.Blazor.Identity.Server.Controllers
         readonly ILogger<AuthenticationControllerBase<TKey, TUser, TRegistrationModel>> _logger;
 
 
-        public AuthenticationControllerBase(UserManager<TUser> userManager,
-            SignInManager<TUser> signInManager,
+        public AuthenticationControllerBase(UserManager<TUser> userManager, 
+            ITokenService<TKey, TUser> tokenService,
+			SignInManager<TUser> signInManager,
             IDataProtectionProvider dataProtectionProvider,
             ILogger<AuthenticationControllerBase<TKey, TUser, TRegistrationModel>> logger,
             IConfiguration configuration)
         {
-            _logger = logger;
+			_tokenService = tokenService;
+			_logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _dataProtectionProvider = dataProtectionProvider;
@@ -118,11 +123,16 @@ namespace DX.Blazor.Identity.Server.Controllers
                 return Unauthorized(new AuthResponseModel { ErrorMessage = "Invalid Authentication" });
 
             var signingCredentials = GetSigningCredentials();
-            var claims = await GetClaims(user);
-            var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
-            var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            var claims = await _tokenService.GetClaims(user);
+            var tokenOptions = _tokenService.GenerateTokenOptions(signingCredentials, claims);
+            var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);			
 
-            return Ok(new AuthResponseModel { IsAuthSuccessful = true, Token = token });
+			user.RefreshToken = _tokenService.GenerateRefreshToken();
+			user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+
+            await _userManager.UpdateAsync(user);
+
+			return Ok(new AuthResponseModel { IsAuthSuccessful = true, Token = token, RefreshToken = user.RefreshToken });
         }
         [HttpGet("Login")]
         [AllowAnonymous]
@@ -197,35 +207,35 @@ namespace DX.Blazor.Identity.Server.Controllers
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
 
-        protected virtual async Task<List<Claim>> GetClaims(TUser user)
-        {
-            //ClaimsIdentity
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Email)
-            };
-            //claims.AddRange(await AssignClaims(user));
+        //protected virtual async Task<List<Claim>> GetClaims(TUser user)
+        //{
+        //    //ClaimsIdentity
+        //    var claims = new List<Claim>
+        //    {
+        //        new Claim(ClaimTypes.Name, user.Email)
+        //    };
+        //    //claims.AddRange(await AssignClaims(user));
 
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+        //    var roles = await _userManager.GetRolesAsync(user);
+        //    foreach (var role in roles)
+        //    {
+        //        claims.Add(new Claim(ClaimTypes.Role, role));
+        //    }
 
-            return claims;
-        }        
+        //    return claims;
+        //}        
 
-        private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
-        {
-            var tokenOptions = new JwtSecurityToken(
-                issuer: _jwtSettings.GetSection("validIssuer").Value,
-                audience: _jwtSettings.GetSection("validAudience").Value,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings.GetSection("expiryInMinutes").Value)),
-                signingCredentials: signingCredentials);
+        //private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
+        //{
+        //    var tokenOptions = new JwtSecurityToken(
+        //        issuer: _jwtSettings.GetSection("validIssuer").Value,
+        //        audience: _jwtSettings.GetSection("validAudience").Value,
+        //        claims: claims,
+        //        expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings.GetSection("expiryInMinutes").Value)),
+        //        signingCredentials: signingCredentials);
 
-            return tokenOptions;
-        }
+        //    return tokenOptions;
+        //}
 
     }
 }

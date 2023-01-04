@@ -196,7 +196,7 @@ namespace DX.Utils
         /// <returns>   . </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public static string StringJoin(string separator, params object[] args)
+        public static string Join(string separator, params object[] args)
         {
             List<object> list = new List<object>();
             foreach (object o in args)
@@ -210,7 +210,7 @@ namespace DX.Utils
 
         public static string CssAppend(params object[] classes)
         {
-            return StringJoin(" ", classes);
+            return Join(" ", classes);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////

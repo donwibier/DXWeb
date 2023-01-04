@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>22.1.6.22</Version>
-		<FileVersion>22.1.6.22</FileVersion>
+		<Version>22.2.3.22</Version>
+		<FileVersion>22.2.3.22</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			22.2.3.22: Upgraded to DX v22.2.3
 			22.1.6.22: Upgraded several packages incl DX v22.1.6
 			22.1.4.21: Bug fixed when saving the object.
 			Model class needs to be refreshed after a commit. Otherwise XPO OnSaving changes don't come back into model.
@@ -87,7 +88,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="22.1.6" />	
+		<PackageReference Include="DevExpress.Xpo" Version="22.2.3" />	
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />

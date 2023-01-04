@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using DX.Blazor.Identity.Models;
+using DX.Blazor.Identity;
 
 namespace DX.Test.Web.Blazor.Controllers
 {
@@ -13,7 +14,10 @@ namespace DX.Test.Web.Blazor.Controllers
     [Route("api/accounts")]
     public class AuthenticationController : AuthenticationControllerBase<ApplicationUser, RegisterUserModel>
     {
-        public AuthenticationController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IDataProtectionProvider dataProtectionProvider, ILogger<AuthenticationControllerBase<string, ApplicationUser, RegisterUserModel>> logger, IConfiguration configuration) : base(userManager, signInManager, dataProtectionProvider, logger, configuration)
+        public AuthenticationController(UserManager<ApplicationUser> userManager, 
+                ITokenService<string, ApplicationUser> tokenService,
+                SignInManager<ApplicationUser> signInManager, IDataProtectionProvider dataProtectionProvider, ILogger<AuthenticationControllerBase<string, ApplicationUser, RegisterUserModel>> logger, IConfiguration configuration) 
+            : base(userManager, tokenService, signInManager, dataProtectionProvider, logger, configuration)
         {
 
         }
