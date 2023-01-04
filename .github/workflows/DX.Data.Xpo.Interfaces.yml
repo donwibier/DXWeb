@@ -18,11 +18,13 @@ jobs:
       with:
         dotnet-version: '6.0.x'
         dotnet-quality: 'preview'
+    - name: add dx nuget source
+      run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}      
+      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

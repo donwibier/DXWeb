@@ -16,12 +16,14 @@ jobs:
             6.0.x
             7.0.x
           dotnet-quality: 'preview'
-      # Publish
-      - name: publish on version change
-        id: publish_nuget
-        uses: brandedoutcast/publish-nuget@v2
-        with:
-          # Filepath of the project to be packaged, relative to root of repository
-          PROJECT_FILE_PATH: DX.Blazor.Identity.Server/DX.Blazor.Identity.Server.csproj
-          # API key to authenticate with NuGet server
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+      - name: add dx nuget source
+        run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Publish
+        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
+
