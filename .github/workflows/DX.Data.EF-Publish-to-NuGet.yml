@@ -13,10 +13,9 @@ jobs:
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: | 
-            '6.0.x'
-            '7.0.x'
-          include-prerelease: true          
-
+            6.0.x
+            7.0.x
+          dotnet-quality: 'preview'
       # Publish
       - name: publish on version change
         id: publish_nuget
