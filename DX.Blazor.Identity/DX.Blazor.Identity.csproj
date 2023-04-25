@@ -5,8 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>22.1.4.21</Version>
-		<FileVersion>22.1.4.21</FileVersion>
+		<Version>22.1.4.22</Version>
+		<FileVersion>22.1.4.22</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
@@ -22,8 +22,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.1" />
-	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.1" />
+	  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.29.0" />
+	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.29.0" />
 	</ItemGroup>
 	
 	<!--<ItemGroup>

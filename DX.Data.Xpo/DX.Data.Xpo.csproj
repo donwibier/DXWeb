@@ -88,7 +88,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="22.2.3" />	
+		<PackageReference Include="DevExpress.Xpo" Version="22.2.5" />	
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
