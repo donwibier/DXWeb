@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>22.1.4.21</Version>
-		<FileVersion>22.1.4.21</FileVersion>
+		<Version>23.2.3.22</Version>
+		<FileVersion>23.2.3.22</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor Server based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			23.2.3.23: Upgraded to .NET 8 and DX v23.2
 			22.1.4.20: Upgraded several packages
 			22.1.4.19: Upgraded several packages incl DevExpress v21.1.4
 			21.2.8.18: New helper package for DX.Blazor.Identity with everything for Blazor Server and WebAPI for Blazor WASM package to easily implement Identity with XPO on Blazor
@@ -30,10 +31,15 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.13" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.13" />
 	</ItemGroup>
-	
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Blazor.Identity\DX.Blazor.Identity.csproj" />
 	</ItemGroup>

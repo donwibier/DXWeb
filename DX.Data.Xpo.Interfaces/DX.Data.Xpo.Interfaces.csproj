@@ -7,7 +7,7 @@
 	  <Description>Package with Interface for DX.Data.XPO.Identity ASP.NET Identity</Description>
 	  <Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	  <!--<TargetFramework>net6.0</TargetFramework>-->
-	  <TargetFrameworks>net46;netstandard2.1;net6.0</TargetFrameworks>
+	  <TargetFrameworks>net46;netstandard2.1;net6.0;net7.0</TargetFrameworks>
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>

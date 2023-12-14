@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.6</Version>
-		<FileVersion>20.2.3.6</FileVersion>
+		<Version>20.2.3.7</Version>
+		<FileVersion>20.2.3.7</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DataStore implementation for use with EF</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>net462;net6.0</TargetFrameworks>
+		<TargetFrameworks>net462;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
@@ -27,7 +27,11 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">

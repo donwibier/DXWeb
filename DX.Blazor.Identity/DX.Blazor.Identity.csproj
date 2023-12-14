@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>22.1.4.22</Version>
-		<FileVersion>22.1.4.22</FileVersion>
+		<Version>23.2.3.23</Version>
+		<FileVersion>23.2.3.23</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	</PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			v23.2.3.23: Upgraded to .NET 8 and DX v23.2
 			v22.1.4.21: Small fix on refresh token
 			v22.1.4.20: Upgraded several packages
 			v22.1.4.19: Upgraded several packages incl DevExpress v21.1.4

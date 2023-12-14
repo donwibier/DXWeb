@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 #if (NETSTANDARD2_1 || NETCOREAPP)
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
+//using Microsoft.AspNetCore.Builder;
 #endif
 
 namespace DX.Data.Xpo

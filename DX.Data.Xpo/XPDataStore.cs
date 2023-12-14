@@ -184,8 +184,8 @@ namespace DX.Data.Xpo
 				foreach (var item in items)
 				{
 					var modelKey = GetModelKey(item);
-					if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
-					{
+                    if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                    {
 						var canInsert = Validator?.Inserting(item, r);
 						if (!canInsert.Success)
 						{
