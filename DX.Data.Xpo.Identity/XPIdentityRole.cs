@@ -22,16 +22,9 @@ namespace DX.Data.Xpo.Identity
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TUserRole"></typeparam>
-#if (NETSTANDARD2_1||NETCOREAPP)
-	//public abstract class XPIdentityRole<TKey, TXPORole, TXPORoleClaim, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken> : IDataStoreModel<TKey>, IRole<TKey>
+#if (NETCOREAPP)	
 	public abstract class XPIdentityRole<TKey> : IXPRole<TKey>
-		where TKey : IEquatable<TKey>
-		//where TXPORole : XPBaseObject, IXPRole<TKey, TXPORole, TXPORoleClaim, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken>
-		//where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey, TXPORole, TXPORoleClaim, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken>
-		//where TXPOUser : XPBaseObject, IXPUser<TKey, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken, TXPORole, TXPORoleClaim>
-		//where TXPOUserClaim : XPBaseObject, IXPUserClaim<TKey, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken, TXPORole, TXPORoleClaim>
-		//where TXPOUserLogin : XPBaseObject, IXPUserLogin<TKey, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken, TXPORole, TXPORoleClaim>
-		//where TXPOUserToken : XPBaseObject, IXPUserToken<TKey, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken, TXPORole, TXPORoleClaim>
+		where TKey : IEquatable<TKey>		
 	{
 		private IList _UserList = default;
 #else
@@ -57,13 +50,8 @@ namespace DX.Data.Xpo.Identity
 		/// </summary>
 		public string Name { get; set; }
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
-		public string NormalizedName { get; set; }
-
-		//public virtual Type XPORoleClaimType
-		//{
-		//    get { return typeof(TXPORoleClaim); }
-		//}
+#if (NETCOREAPP)
+		public string NormalizedName { get; set; }		
 #endif
 	}
 }

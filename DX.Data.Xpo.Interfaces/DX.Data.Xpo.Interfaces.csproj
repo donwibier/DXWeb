@@ -1,33 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>        
-	  <Version>21.2.8.2</Version>
-	  <FileVersion>21.2.8.2</FileVersion>
+	  <Version>21.2.8.4</Version>
+	  <FileVersion>21.2.8.4</FileVersion>
 	  <Authors>Don Wibier (DevExpress)</Authors>
 	  <Description>Package with Interface for DX.Data.XPO.Identity ASP.NET Identity</Description>
 	  <Copyright>Copyright (c) 2022 Don Wibier</Copyright>
-	  <!--<TargetFramework>net6.0</TargetFramework>-->
-	  <TargetFrameworks>net46;netstandard2.1;net6.0;net7.0</TargetFrameworks>
+	  <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</PackageProjectUrl>
+	  <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
+	  <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	  <TargetFrameworks>net46;net6.0;net7.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			21.2.8.4: .NET 8 support and dropped .NETStandard
 			21.2.8.20: Upgrade from .NET Framework to 4.6.1 to 4.6.2
 			21.2.8.19: Interfaces from DX.Data.Xpo.Identity in separate package for Blazor WASM Identity Support
 		</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<!--<TargetFrameworks>netstandard2.1;net461;net6.0</TargetFrameworks>-->
-		<LangVersion>7.3</LangVersion>
-		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</PackageProjectUrl>
-		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
-		<PackageReleaseNotes>
-			21.2.7.1: Initial release
-		</PackageReleaseNotes>
-		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

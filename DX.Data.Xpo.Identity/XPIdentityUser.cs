@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #endif
 
@@ -72,7 +72,7 @@ namespace DX.Data.Xpo.Identity
 		///     User name
 		/// </summary>
 		public virtual string UserName { get; set; }
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 		public virtual string NormalizedName { get; set; }
 		public virtual string NormalizedEmail { get; set; }
 #endif

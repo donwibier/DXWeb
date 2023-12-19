@@ -14,8 +14,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -24,7 +23,7 @@ using Microsoft.AspNet.Identity;
 namespace DX.Data.Xpo.Identity
 {
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
 		 where TUser : class, IXPUser<string>, new()
 	{
@@ -66,7 +65,7 @@ namespace DX.Data.Xpo.Identity
 
 		//}
 	}
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 	public class XPUserStore<TKey, TUser, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> : XPDataStore<TKey, TUser, TXPOUser>, // XpoStore<TXPOUser, TKey>, 
 		IUserLoginStore<TUser>,
 		 IUserClaimStore<TUser>,
@@ -1363,7 +1362,7 @@ namespace DX.Data.Xpo.Identity
 
 		#endregion
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 
 
 		#region IUserAuthenticationTokenStore<TUser>

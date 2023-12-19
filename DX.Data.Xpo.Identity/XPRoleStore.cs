@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -20,7 +20,7 @@ using Microsoft.AspNet.Identity;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 	public class XPRoleStore<TRole, TXPORole> : XPRoleStore<string, TRole, TXPORole, XpoDxRoleClaim>
 		where TRole : class, IXPRole<string>, new()
 		where TXPORole : XPBaseObject, IXPRole<string>
@@ -43,7 +43,7 @@ namespace DX.Data.Xpo.Identity
 		//}
 	}
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 	public class XPRoleStore<TKey, TRole, TXPORole, TXPORoleClaim> : XPDataStore<TKey, TRole, TXPORole>,
 				IQueryableRoleStore<TRole>, IRoleClaimStore<TRole>
 		where TKey : IEquatable<TKey>

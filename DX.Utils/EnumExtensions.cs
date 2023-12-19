@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace DX.Utils
 {
-#if (NETSTANDARD2_1 || NET6_0 || NET7_0)
+#if (NETSTANDARD2_1 || NET6_0_OR_GREATER)
     public static class EnumExtensions
     {
         /*

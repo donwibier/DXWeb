@@ -30,7 +30,7 @@ namespace DX.Data.Xpo.Identity
 			TwoFactorEnabled = source.TwoFactorEnabled,
 			LockoutEndDateUtc = source.LockoutEndDateUtc,
 			LockoutEnabled = source.LockoutEnabled,
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 			NormalizedName = source.NormalizedName,
 			NormalizedEmail = source.NormalizedEmail,
 			RefreshToken = source.RefreshToken,
@@ -54,7 +54,7 @@ namespace DX.Data.Xpo.Identity
 			destination.LockoutEnabled = source.LockoutEnabled;
 			destination.AccessFailedCount = source.AccessFailedCount;
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 			destination.NormalizedName = source.NormalizedName;
 			destination.NormalizedEmail = source.NormalizedEmail;
 			destination.RefreshToken = source.RefreshToken;

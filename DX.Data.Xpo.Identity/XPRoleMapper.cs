@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 	public class XPRoleMapper<TKey, TRole, TXPORole/*, TXPORoleClaim*/> : XPDataMapper<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : class, IXPRole<TKey>, new()
@@ -31,7 +31,7 @@ namespace DX.Data.Xpo.Identity
 			=> (source) => new TRole
 			{
 				Id = source.Id,
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 				NormalizedName = source.NormalizedName,
 #endif
 				Name = source.Name
@@ -46,7 +46,7 @@ namespace DX.Data.Xpo.Identity
 
 			//destination.Id = source.Id;
 			destination.Name = source.Name;
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 			destination.NormalizedName = source.NormalizedName;
 #endif
 			return destination;
@@ -54,7 +54,7 @@ namespace DX.Data.Xpo.Identity
 		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>
 		{
 			{"Id", "Id"},			
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 			{"NormalizedName", "NormalizedName"},
 #endif
 			{"Name", "Name"}
