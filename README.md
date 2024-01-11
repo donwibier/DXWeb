@@ -9,16 +9,34 @@ This package contains several helper classes for working with:
 * Conversion helpers
 * Logging helpers
 * Url manipulations
+
+#### DX.Data
 * DataStore<TKey, TModel> base class to work with DataSets ->
-  DTO's  including Mapper and Validator classes to support LINQ and CRUD operations.
+  Abstract DTO Mapping, FluentValidator validation and ApiDataStore for BlazorWASM with CRUD support.
 
 #### DX.Data.Xpo
-This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern incl. XPMapper and XPValidator classes
+This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern **no mapping implementation**
+
+#### DX.Data.Xpo.AutoMapper
+This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern by using AutoMapper
+
+#### DX.Data.Xpo.AutoMapper
+This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern by using Mapster
 
 #### DX.Data.Xpo.Identity
-This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines.
+This package contains an XPO based *abstract* storage mechanism for use with MS Identity to support a small dozen different DB engines.
 
-Quick config on .NET Core:
+#### DX.Data.Xpo.Identity.AutoMapper
+This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines with AutMapper DTO handling.
+
+#### DX.Data.Xpo.Identity.Mapster
+This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines with Mapster DTO handling.
+
+#### Note
+From v23.2.3.31, you will need to include either **DX.Data.Xpo.Identity.AutoMapper**  or **DX.Data.Xpo.Identity.Mapster** (**NOT BOTH**), depending on the DTO Mapper you're already (or planning) using! 
+
+
+Quick config on .NET:
 ```cs
 public void ConfigureServices(IServiceCollection services)
         {
@@ -31,16 +49,22 @@ public void ConfigureServices(IServiceCollection services)
 
             //Initialize identity to use XPO
             services
-                .AddIdentity<ApplicationUser, ApplicationRole>(options => {
+                .AddIdentity<ApplicationUser>(options => {
                     options.Lockout.AllowedForNewUsers = true;
                     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                     options.Lockout.MaxFailedAccessAttempts = 3;					
-                })	
-                .AddXpoIdentityStores<ApplicationUser, XpoApplicationUser, ApplicationRole, XpoApplicationRole>(connStrName,
+                })
+                /***** OLD OBSOLETE CONFIG < 23.2.3.31 
+                .AddXpoIdentityStores<ApplicationUser, XpoApplicationUser>(connStrName,
 					new ApplicationUserMapper(), 
 					new ApplicationRoleMapper(),
 					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
-					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())				
+					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())
+		*/
+		// When using AutoMapper
+                .AddXpoAutoMapperIdentityStores<ApplicationUser/*, XpoApplicationUser*/>(connStrName)
+		// When using Mapster
+                .AddXpoMapsterIdentityStores<ApplicationUser/*, XpoApplicationUser*/>(connStrName)
                 .AddDefaultTokenProviders();
 				
 		// token config
