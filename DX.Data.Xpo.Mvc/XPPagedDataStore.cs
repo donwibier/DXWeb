@@ -4,11 +4,13 @@ using DevExpress.Web.Mvc;
 using DevExpress.Xpo;
 using DX.Data.Xpo;
 using DX.Data.Xpo.Mvc.Utils;
-using DX.Utils.Data;
+using FluentValidation;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 
 namespace DX.Data.Xpo.Mvc
@@ -18,13 +20,13 @@ namespace DX.Data.Xpo.Mvc
 		where TModel : class, new()
 		where TXPOClass : XPBaseObject
 	{
-		public XPPagedDataStore(XpoDatabase db,
-					IXPDataMapper<TKey, TModel, TXPOClass> mapper,
-					IXPDataStoreValidator<TKey, TModel, TXPOClass> validator)
-			: base(db, mapper, validator)
-		{
+		//public XPPagedDataStore(IDataLayer dataLayer, FluentValidation.V
+		//			/*IXPDataMapper<TKey, TModel, TXPOClass> mapper,
+		//			IXPDataStoreValidator<TKey, TModel, TXPOClass> validator*/)
+		//	: base(dataLayer, validator)
+		//{
 
-		}
+		//}
 
 
 		#region Preparations for advanced gridview paging and sorting
@@ -32,8 +34,13 @@ namespace DX.Data.Xpo.Mvc
 		static Regex regexFilter = new Regex("\\[.*?\\]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 		static Regex regexBrackets = new Regex("[\\[\\]]", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-		//protected abstract Dictionary<string, string> PropertyMap { get; }
-		protected virtual string PrepareProperty(string dtoProperty/*, Dictionary<string, string> map = null*/)
+        public XPPagedDataStore(IDataLayer dataLayer, IValidator<TXPOClass> validator) : base(dataLayer, validator)
+        {
+
+        }
+
+        //protected abstract Dictionary<string, string> PropertyMap { get; }
+        protected virtual string PrepareProperty(string dtoProperty/*, Dictionary<string, string> map = null*/)
 		{
 			if (String.IsNullOrEmpty(dtoProperty))
 				return dtoProperty;
@@ -41,7 +48,7 @@ namespace DX.Data.Xpo.Mvc
 			//map = map ?? PropertyMap;
 			var key = regexBrackets.Replace(dtoProperty, string.Empty);
 			//return map.ContainsKey(key) ? regexBrackets.Replace(map[key], "") : key;
-			return regexBrackets.Replace(Mapper.Map(key), string.Empty);
+			return regexBrackets.Replace(KeyField, string.Empty);
 		}
 
 		protected virtual string PrepareFilterExpression(string filterExpression/*, Dictionary<string, string> propertyMap = null*/)
@@ -109,65 +116,65 @@ namespace DX.Data.Xpo.Mvc
 		#endregion
 
 		#region GridView CustomBinding Methods
-		public virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)
+		public async virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e)
 		{
 			int rowCount;
 			if (CacheTryGetCount(e.FilterExpression, out rowCount))
 				e.DataRowCount = rowCount;
 			else
-				e.DataRowCount = DB.Execute((db, w) => XPQuery(w).ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count());
+				e.DataRowCount = await TransactionalExecAsync<int>((db, w) => Task.FromResult(Query().ApplyFilter(PrepareFilterExpression(e.FilterExpression)).Count()));
 		}
 
-		public virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
+		public async virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e)
 		{
-			var result = DB.Execute((db, w) =>
+			var result = await TransactionalExecAsync<IEnumerable<TXPOClass>>(async (db, w) =>
 			{
-				var r = XPQuery(w)
+				var r = Query()
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					/*.UniqueValuesForField(PrepareProperty(e.FieldName)) */
 					.UniqueValuesForField(PrepareProperty(e.FieldName)) as IQueryable<TXPOClass>;
 
-				return (from n in r select n).ToList();
-				//return r;
+				return await r.ToListAsync();				
 			});
 			e.Data = result;
 		}
-		public virtual void GetGridViewGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e)
+		public async virtual void GetGridViewGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e)
 		{
-			var result = DB.Execute((db, w) =>
-			{
-				var r = XPQuery(w)
+			var result = await TransactionalExecAsync<IEnumerable<GridViewGroupInfo>>((db, w) =>
+			{				
+				var r = Query()
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.GetGroupInfo(PrepareProperty(e.FieldName), e.SortOrder);
-				return r.ToList();
+
+				return Task.FromResult(r);
 			});
 			e.Data = result;
 		}
 
-		public virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)
+		public async virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)
 		{
-			var result = DB.Execute((db, w) =>
+			var result = await TransactionalExecAsync(async (db, w) =>
 			{
-				var items = XPQuery(w)
+				var items = Query()
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList))
 					.ApplySorting(PrepareSorting(e.State.SortedColumns))
 					.Skip(e.StartDataRowIndex)
 					.Take(e.DataRowCount);
 
-				var r = ((IQueryable<TXPOClass>)items).Select(CreateModelInstance);
-				return r.ToList();
+				//var r = ((IQueryable<TXPOClass>)items).Select(CreateModelInstance);								
+				return Task.FromResult(items);
 			});
-			e.Data = result;
+			e.Data = (result as IEnumerable);
 		}
 
-		public virtual void GetGridViewSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e)
+		public async virtual void GetGridViewSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e)
 		{
-			var result = DB.Execute((db, w) =>
+			var result = await TransactionalExecAsync<object[]>((db, w) =>
 			{
 
-				var query = XPQuery(w)
+				var query = Query()
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
 					.ApplyFilter(PrepareGroupInfoList(e.GroupInfoList));
 
@@ -182,7 +189,7 @@ namespace DX.Data.Xpo.Mvc
 					CacheSaveCount(e.FilterExpression, count);
 				}
 
-				return summaryValues;
+				return Task.FromResult(summaryValues);
 			});
 			e.Data = result;
 		}
@@ -190,8 +197,8 @@ namespace DX.Data.Xpo.Mvc
 		#endregion
 
 		#region GridLookup Custom Binding Methods
-		public abstract Func<TXPOClass, TKey> XPModelKey { get; }
-		public virtual void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e)
+		//public abstract Func<TXPOClass, TKey> XPModelKey { get; }
+		public async virtual void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e)
 		{
 
 			var n = default(TKey);
@@ -201,10 +208,10 @@ namespace DX.Data.Xpo.Mvc
 			}
 			else
 			{
-				e.RowValues = DB.Execute((db, w) =>
+				e.RowValues = await TransactionalExecAsync(async (db, w) =>
 				{
-					var r = XPQuery(w).Where(c => e.KeyValues.Contains(XPModelKey(c))).Select(CreateModelInstance);
-					return r.ToList();
+					var r = Query().Where(c => e.KeyValues.Contains(ModelKey(c)));
+					return await r.ToListAsync();
 				});
 			}
 		}

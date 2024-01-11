@@ -1,9 +1,7 @@
-﻿using DevExpress.Data.Filtering;
-using DevExpress.Xpo;
+﻿using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
-using DX.Data.Xpo.Identity.Persistent;
 using DX.Utils;
-using DX.Utils.Data;
+using DX.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,15 +11,240 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-
-#if (NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
-#else
-using Microsoft.AspNet.Identity;
-#endif
 
 namespace DX.Data.Xpo.Identity
 {
+
+	public class XPUserStore<TKey, TUser, TRole, 
+								TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
+								TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
+			UserStoreBase<TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>
+        where TKey : IEquatable<TKey>
+        where TUser : IdentityUser<TKey>
+        where TRole : IdentityRole<TKey>
+        where TUserClaim : IdentityUserClaim<TKey>, new()
+        where TUserRole : IdentityUserRole<TKey>, new()
+        where TUserLogin : IdentityUserLogin<TKey>, new()
+		where TUserToken : IdentityUserToken<TKey>, new()
+        where TRoleClaim : IdentityRoleClaim<TKey>, new()
+        where TXPOUser : XPBaseObject, IXPUser<TKey>
+        where TXPORole : XPBaseObject, IXPRole<TKey>
+        where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
+        where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
+        where TXPOToken : XPBaseObject, IXPUserToken<TKey>
+    {
+        readonly IQueryableUserStore<TKey, TUser, TUserRole, TUserToken> _UserStore;
+        readonly IQueryableRoleStore<TKey, TRole> _RoleStore;
+        readonly IQueryableUserClaimStore<TKey, TUserClaim> _ClaimStore;
+        readonly IQueryableUserLoginStore<TKey, TUserLogin> _LoginStore;
+        readonly IQueryableUserTokenStore<TKey, TUserToken> _TokenStore;
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="describer">The <see cref="Microsoft.AspNetCore.Identity.IdentityErrorDescriber"/> used to describe store errors.</param>
+        public XPUserStore(IQueryableUserStore<TKey, TUser, TUserRole, TUserToken> userStore, IQueryableRoleStore<TKey, TRole> roleStore,
+					 IQueryableUserClaimStore<TKey, TUserClaim> userClaimStore,
+					 IQueryableUserLoginStore<TKey, TUserLogin> userLoginStore, IQueryableUserTokenStore<TKey, TUserToken> userTokenStore,
+            IdentityErrorDescriber? describer = null) : base(describer ?? new IdentityErrorDescriber())
+        {
+			_TokenStore = userTokenStore;
+			_LoginStore = userLoginStore;
+			_ClaimStore = userClaimStore;
+			_RoleStore = roleStore;
+			_UserStore = userStore;
+
+		}
+
+        protected void ThrowIfNull(object? obj)
+        {
+#if (!NETCOREAPP)
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+#else
+            ArgumentNullException.ThrowIfNull(obj);
+#endif
+        }
+		
+        public override IQueryable<TUser> Users => _UserStore.Query();
+
+        public async override Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
+        {            
+            await _UserStore.AddClaimsAsync(user, claims, cancellationToken);
+        }
+
+        public override async Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default)
+        {            
+			await _UserStore.AddLoginAsync(user, login, cancellationToken);
+        }
+
+        public override async Task AddToRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        {
+			await _UserStore.AddToRoleAsync(user, normalizedRoleName, cancellationToken);
+        }
+
+        public async override Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+            var r = await _UserStore.CreateAsync(user);
+			//TODO: Check appropriate error
+			return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
+        }
+
+        public async override Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+            //TODO: Check appropriate error
+            var r = await _UserStore.DeleteAsync(user);
+            return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
+        }
+
+        public async override Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.FindByEmailAsync(normalizedEmail);			
+        }
+
+        public async override Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.FindByIdAsync(userId);
+        }
+
+        public async override Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.FindByUserNameAsync(normalizedUserName);			
+        }
+
+        public async override Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default)
+        {			
+			return await _ClaimStore.GetUserClaimsAsync(user.Id);
+		}
+
+        public async override Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+			return await _LoginStore.GetLoginsAsync(user.Id);			
+		}
+
+        public override async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.GetRolesAsync(user, cancellationToken);
+        }
+
+        public override async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.GetUsersForClaimAsync(claim, cancellationToken);
+        }
+
+        public override async Task<IList<TUser>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken = default)
+        {
+			return await _UserStore.GetUsersInRoleAsync(normalizedRoleName, cancellationToken);
+        }
+
+        public override async Task<bool> IsInRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        {
+            return await _UserStore.IsInRoleAsync(user, normalizedRoleName, cancellationToken);
+        }
+
+        public async override Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
+        {
+			await _UserStore.RemoveClaimsAsync(user, claims, cancellationToken);
+        }
+
+        public override async Task RemoveFromRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        {
+			await _UserStore.RemoveFromRoleAsync(user, normalizedRoleName, cancellationToken);
+        }
+
+        public async override Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+        {
+			await _UserStore.RemoveLoginAsync(user, loginProvider, providerKey, cancellationToken);
+        }
+
+        public async override Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default)
+        {
+			await _UserStore.ReplaceClaimAsync(user, claim, newClaim, cancellationToken);
+        }
+
+        public async override Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+
+            user.ConcurrencyStamp = Guid.NewGuid().ToString();
+
+			var r = await _UserStore.UpdateAsync(user);
+			//TODO Do something with result
+            return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
+			//try
+            //{
+            //    await SaveChanges(cancellationToken);
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    return IdentityResult.Failed(ErrorDescriber.ConcurrencyFailure());
+            //}
+        }
+
+        protected async override Task AddUserTokenAsync(TUserToken token)
+        {			
+			await _TokenStore.CreateAsync(token);
+        }
+
+        protected async override Task<TRole?> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        {
+			return await _RoleStore.FindByNameAsync(normalizedRoleName);
+        }
+
+        protected async override Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken = default)
+        {
+			return await _TokenStore.FindTokenAsync(user.Id, loginProvider, name, cancellationToken);
+        }
+
+        protected override Task<TUser?> FindUserAsync(TKey userId, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(userId);
+
+            var result = _UserStore.GetByKey(userId);
+			return Task.FromResult(result)!;
+        }
+
+        protected async override Task<TUserLogin?> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+        {
+			return await _LoginStore.FindUserLoginAsync(userId, loginProvider, providerKey, cancellationToken);				
+        }
+
+        protected async override Task<TUserLogin?> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+        {
+			return await _LoginStore.FindUserLoginAsync(loginProvider, providerKey, cancellationToken);
+        }
+
+		protected async override Task<TUserRole?> FindUserRoleAsync(TKey userId, TKey roleId, CancellationToken cancellationToken = default)
+		{
+			return await FindUserRoleAsync(userId, roleId, cancellationToken);
+		}
+
+		protected async override Task RemoveUserTokenAsync(TUserToken token)
+        {
+			await _UserStore.RemoveUserTokenAsync(token);
+        }
+    }
+
+
+
+
+
+#if (crap)
+
+
+
+
 
 #if (NETCOREAPP)
 	public class XPUserStore<TUser> : XPUserStore<TUser, XpoDxUser>
@@ -148,7 +371,7 @@ namespace DX.Data.Xpo.Identity
 		protected static Type XPOTokenType { get { return typeof(TXPOToken); } }
 		protected static TXPOToken XPOCreateToken(Session s) { return Activator.CreateInstance(typeof(TXPOToken), s) as TXPOToken; }
 #endif
-		#endregion
+#endregion
 
 
 		#region IUserLoginStore<TUser, TKey>
@@ -1514,4 +1737,5 @@ namespace DX.Data.Xpo.Identity
 #endif
 
 	}
+#endif
 }

@@ -3,6 +3,7 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace DX.Data.Xpo.Identity.Persistent
@@ -36,6 +37,14 @@ namespace DX.Data.Xpo.Identity.Persistent
             base.OnDeleting();
         }
 
+        public void InitializeUserLogin(XPBaseObject user, UserLoginInfo login)
+        {
+            User = user as XpoDxUser;    
+            LoginProvider = login.LoginProvider;
+            ProviderKey = login.ProviderKey;
+            ProviderDisplayName = login.ProviderDisplayName;
+        }
+
         //public override void Assign(object source, int loadingFlags)
         //{
         //    base.Assign(source, loadingFlags);
@@ -47,7 +56,7 @@ namespace DX.Data.Xpo.Identity.Persistent
         //        this.User = Session.FindObject(typeof(XpoDxUser), XpoDxUser.Fields.Id == src.UserId) as XpoDxUser;
 
         //    }
-        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 5-1-2024 16:50
         public new class FieldsClass : XpoDxBase.FieldsClass
         {
             public FieldsClass()
@@ -75,6 +84,10 @@ namespace DX.Data.Xpo.Identity.Persistent
             public const string UserFieldName = "User";
 
             public XpoDxUser.FieldsClass User => new XpoDxUser.FieldsClass(GetNestedName(UserFieldName));
+
+            public const string ProviderDisplayNameFieldName = "ProviderDisplayName";
+
+            public OperandProperty ProviderDisplayName => new OperandProperty(GetNestedName(ProviderDisplayNameFieldName));
         }
 
         public new static FieldsClass Fields

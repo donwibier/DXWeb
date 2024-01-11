@@ -15,7 +15,7 @@ namespace DX.Blazor.Identity.Server.Services
 {
     public class AuthenticationService<TUser>
          : AuthenticationService<TUser, RegistrationModel>, IAuthService
-         where TUser : class, IXPUser<string>, new()
+         where TUser : IdentityUser<string>, IIdentityRefreshToken, new()
     {
         public AuthenticationService(UserManager<TUser> userManager, 
             IDataProtectionProvider dataProtectionProvider,
@@ -30,7 +30,7 @@ namespace DX.Blazor.Identity.Server.Services
 
     public class AuthenticationService<TUser, TRegistrationModel>
          : AuthenticationService<string, TUser, TRegistrationModel, AuthenticationModel>, IAuthService<TRegistrationModel, AuthenticationModel>
-         where TUser : class, IXPUser<string>, new()
+         where TUser : IdentityUser<string>, IIdentityRefreshToken, new()
          where TRegistrationModel : class, new()
     {
         public AuthenticationService(UserManager<TUser> userManager, 
@@ -52,7 +52,7 @@ namespace DX.Blazor.Identity.Server.Services
     public abstract class AuthenticationService<TKey, TUser, TRegistrationModel>
          : AuthenticationService<TKey, TUser, TRegistrationModel, AuthenticationModel>, IAuthService<TRegistrationModel, AuthenticationModel>
          where TKey : IEquatable<TKey>
-         where TUser : class, IXPUser<TKey>, new()
+         where TUser : IdentityUser<TKey>, IIdentityRefreshToken, new()
          where TRegistrationModel : class, new()
     {
         public AuthenticationService(UserManager<TUser> userManager, 
@@ -71,7 +71,7 @@ namespace DX.Blazor.Identity.Server.Services
     public abstract class AuthenticationService<TKey, TUser, TRegistrationModel, TAuthenticationModel> 
             : IAuthService<TRegistrationModel, TAuthenticationModel>
         where TKey : IEquatable<TKey>
-        where TUser: class, IXPUser<TKey>, new()
+        where TUser: IdentityUser<TKey>, IIdentityRefreshToken, new()
         where TRegistrationModel : class, new()
         where TAuthenticationModel : class, new()
     {

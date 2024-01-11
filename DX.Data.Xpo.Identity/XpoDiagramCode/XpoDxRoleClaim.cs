@@ -20,6 +20,12 @@ namespace DX.Data.Xpo.Identity.Persistent
             base.OnDeleting();
         }
 
+        public void InitializeRoleClaim(XPBaseObject role, Claim claim)
+        {
+            SetPropertyValue(nameof(Role), role);
+            base.InitializeFromClaim(claim);
+        }
+
         //public override void Assign(object source, int loadingFlags)
         //{
         //    base.Assign(source, loadingFlags);
@@ -31,7 +37,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         //}
 
-        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6-1-2024 11:34
         public new class FieldsClass : XpoDxBaseClaim.FieldsClass
         {
             public FieldsClass()

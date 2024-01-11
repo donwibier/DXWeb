@@ -1,4 +1,5 @@
 ﻿using DX.Data.Xpo.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,7 +13,7 @@ namespace DX.Blazor.Identity
 {
     public interface ITokenService<TKey, TUser>
         where TKey: IEquatable<TKey>
-        where TUser: class, IXPUser<TKey>, new()
+        where TUser: IdentityUser<TKey>, IIdentityRefreshToken
     {
         SigningCredentials GetSigningCredentials();
         Task<List<Claim>> GetClaims(TUser user);

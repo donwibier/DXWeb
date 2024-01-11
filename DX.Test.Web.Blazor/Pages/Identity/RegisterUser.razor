@@ -1,7 +1,8 @@
 ﻿@page "/Account/Register"
+@using DX.Test.Web.Blazor.Data
 
 @inject NavigationManager navigationManager
-@inject IAuthService<RegisterUserModel, AuthenticationModel> AuthenticationService 
+@inject IAuthService<RegisterUserModel> AuthenticationService 
 
 
 <h1>Register</h1>
@@ -21,7 +22,7 @@
 	<DxFormLayout >
 		<DxFormLayoutItem Caption="Email address:" ColSpanMd="12">
 			<Template>
-				<DxTextBox @bind-Text="@userModel.EmailAddress"></DxTextBox>
+				<DxTextBox @bind-Text="@userModel.Email"></DxTextBox>
 			</Template>
 		</DxFormLayoutItem>
 
@@ -95,7 +96,7 @@
 @code {
 	private string redirectUrl = "";
 	private List<string> errors = new List<string>();
-	private RegisterUserModel userModel = new DX.Test.Web.Blazor.Data.RegisterUserModel();	
+	private RegisterUserModel userModel = new RegisterUserModel();	
 
 	    protected async override Task OnInitializedAsync()
     {

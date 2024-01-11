@@ -15,7 +15,7 @@ namespace DX.Blazor.Identity.Wasm.Services
 {
     public class TokenService<TKey, TUser> : ITokenService<TKey, TUser>
         where TKey : IEquatable<TKey>
-        where TUser : class, IXPUser<TKey>, new()
+        where TUser : IdentityUser<TKey>, IIdentityRefreshToken, new()
     {
         private readonly IConfiguration _configuration;
         private readonly IConfigurationSection _jwtSettings;
@@ -40,7 +40,7 @@ namespace DX.Blazor.Identity.Wasm.Services
         {
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Email)
+            new Claim(ClaimTypes.Name, user.Email!)
         };
 
             var roles = await _userManager.GetRolesAsync(user);

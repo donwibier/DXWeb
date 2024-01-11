@@ -1,26 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>20.2.3.7</Version>
-		<FileVersion>20.2.3.7</FileVersion>
+		<Version>23.2.3.31</Version>
+		<FileVersion>23.2.3.31</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
-		<Description>DataStore implementation for use with EF</Description>
+		<Description>Abstract DX.Data.IDataStore implementation for use with EF with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>net462;net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
+		<PackageReleaseNotes>
+			23.2.3.30: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
+			BREAKING CHANGES:
+				Data base classes moved to DX.Data package
+				DX.Data package refactored to use FluentValidation with simplyfied validation logic
+
+			23.2.3.23: Upgraded to .NET8 and DX v23.2.3 Dropped support for .NETStandard!
+		</PackageReleaseNotes>
+		
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
+		<ProjectReference Include="..\DX.Data\DX.Data.csproj" />
+		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
 	</ItemGroup>
-
-	<!--<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
-	</ItemGroup>-->
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.16" />
@@ -34,9 +40,12 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="11.8.1" />
+	</ItemGroup>
 
 </Project>

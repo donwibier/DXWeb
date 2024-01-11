@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>20.1.8.26</Version>
-    <FileVersion>20.1.8.26</FileVersion>
+    <Version>23.2.3.31</Version>
+    <FileVersion>23.2.3.31</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
@@ -15,6 +15,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		23.2.3.31: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
+					BREAKING CHANGES:
+						Data classes moved to DX.Data package
+						DX.Data package refactored to use FluentValidation with simplyfied validation logic
 		20.1.8.25: Upgrade to .NET 8
 		20.1.8.24: static class renamed in Strings.cs
 		20.1.8.22: IsCollectionProperty extension method added to fix bug in DX.Data.Xpo

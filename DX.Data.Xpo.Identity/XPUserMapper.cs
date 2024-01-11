@@ -1,17 +1,18 @@
 ﻿using DevExpress.Xpo;
-using DX.Utils.Data;
+
 using System;
 using System.Linq;
 
 
 namespace DX.Data.Xpo.Identity
 {
+	[Obsolete("For legacy reasons only. Use DX.Data.AutoMapper or DX.Data.Mapster descendants")]
 	public class XPUserMapper<TUser, TXPOUser> : XPUserMapper<string, TUser, TXPOUser>
 	 where TUser : class, IXPUser<string>, new()
 	 where TXPOUser : XPBaseObject, IXPUser<string>
 	{
 	}
-
+	[Obsolete("For legacy reasons only. Use DX.Data.AutoMapper or DX.Data.Mapster descendants")]
 	public class XPUserMapper<TKey, TUser, TXPOUser> : XPDataMapper<TKey, TUser, TXPOUser>
 		 where TKey : IEquatable<TKey>
 		 where TUser : class, IXPUser<TKey>, new()
@@ -30,13 +31,12 @@ namespace DX.Data.Xpo.Identity
 			TwoFactorEnabled = source.TwoFactorEnabled,
 			LockoutEndDateUtc = source.LockoutEndDateUtc,
 			LockoutEnabled = source.LockoutEnabled,
-#if (NETCOREAPP)
-			NormalizedName = source.NormalizedName,
+			NormalizedUserName = source.NormalizedUserName,
 			NormalizedEmail = source.NormalizedEmail,
 			RefreshToken = source.RefreshToken,
 			RefreshTokenExpiryTime = source.RefreshTokenExpiryTime,
-#endif
 			AccessFailedCount = source.AccessFailedCount
+			
 		};
 
 		public override TXPOUser Assign(TUser source, TXPOUser destination)
@@ -53,15 +53,12 @@ namespace DX.Data.Xpo.Identity
 			destination.LockoutEndDateUtc = source.LockoutEndDateUtc;
 			destination.LockoutEnabled = source.LockoutEnabled;
 			destination.AccessFailedCount = source.AccessFailedCount;
-
-#if (NETCOREAPP)
-			destination.NormalizedName = source.NormalizedName;
+			destination.NormalizedUserName = source.NormalizedUserName;
 			destination.NormalizedEmail = source.NormalizedEmail;
 			destination.RefreshToken = source.RefreshToken;
 			destination.RefreshTokenExpiryTime = source.RefreshTokenExpiryTime;
-#endif
 			if (destination is IAssignable)
-				(destination as IAssignable).Assign(source);
+				((IAssignable)destination)!.Assign(source);
 
 			return destination;
 		}

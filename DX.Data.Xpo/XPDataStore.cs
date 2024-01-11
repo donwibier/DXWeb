@@ -1,410 +1,352 @@
-﻿using DevExpress.Xpo;
+﻿using DevExpress.Entity.Model.Metadata;
+using DevExpress.Xpo;
 using DX.Utils;
-using DX.Utils.Data;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DX.Data;
+using FluentValidation;
+using FluentValidation.Results;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using DevExpress.Data.Filtering;
+using System.Threading;
 
 namespace DX.Data.Xpo
 {
-	public abstract class XPDataMapper<TKey, TModel, TXPOClass> : DataMapper<TKey, TModel, TXPOClass>,
-																  IXPDataMapper<TKey, TModel, TXPOClass>
-		where TKey : IEquatable<TKey>
-		where TModel : class, new()
-		where TXPOClass : class, IXPSimpleObject
-	{
-
-	}
 
 
-	public abstract class XPDataValidator<TKey, TModel, TXPOClass> : DataValidator<TKey, TModel, TXPOClass>,
-															IXPDataStoreValidator<TKey, TModel, TXPOClass>
-		where TKey : IEquatable<TKey>
-		where TModel : class, new()
-		where TXPOClass : class, IXPSimpleObject
-	{
-		public override IDataValidationResults<TKey> Deleted(TKey id, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
+    public abstract class XPDataStore<TKey, TModel, TDBModel> : IQueryableDataStore<TKey, TModel>, IDisposable
+        where TKey : IEquatable<TKey>
+        where TModel : class, new()
+        where TDBModel : class, IXPSimpleObject
+    {
+        public const string CtxMode = "datamode";
+        public const string CtxStore = "datastore";
 
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Inserted(TKey id, TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, default, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Updated(TKey id, TModel model, TXPOClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-	}
-
-	public abstract class XPDataStore<TKey, TModel, TXPOClass> : DataStore<TKey, TModel>, IXPDataStore<TKey, TModel, TXPOClass>
-		where TKey : IEquatable<TKey>
-		where TModel : class, new()
-		where TXPOClass : XPBaseObject
-	{
-		private UnitOfWork unitOfWork = null;
-		public XPDataStore(XpoDatabase db, IXPDataMapper<TKey, TModel, TXPOClass> mapper, IXPDataStoreValidator<TKey, TModel, TXPOClass> validator = null)
-		{			
-			DB = db ?? throw new ArgumentNullException(nameof(db)); 
-			Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-			Validator = validator;
-		}
-		public XpoDatabase DB { get; protected set; }
-
-		public IDataMapper<TKey, TModel, TXPOClass> Mapper { get; protected set; }
-		public IDataStoreValidator<TKey, TModel, TXPOClass> Validator { get; protected set; }
-
-		public Type XpoType => typeof(TXPOClass);
-
-		protected UnitOfWork UnitOfWork
-		{
-			get
-			{
-				if (unitOfWork == null)
-					unitOfWork = DB.GetUnitOfWork();
-				return unitOfWork;
-			}
-		}
-		protected virtual IQueryable<TXPOClass> XPQuery()
+        public XPDataStore(IDataLayer dataLayer, IValidator<TDBModel> validator)
         {
-			return XPQuery(UnitOfWork);
+            
+            DataLayer = dataLayer;
+            Validator = validator;
         }
-		protected virtual IQueryable<TXPOClass> XPQuery(Session s)
-		{
-			var result = from n in s.Query<TXPOClass>()
-						 select n;
-			return result;
-		}
 
-        public override IQueryable<TModel> Query() => XPQuery().Select(CreateModelInstance).AsQueryable();
+        //public XPDataStore(string connectionName, IValidator<TDBModel> validator)
+        //{
+            
+        //}
+        
 
-        protected virtual Func<TXPOClass, TModel> CreateModelInstance => Mapper.CreateModel;
-
-		protected virtual TXPOClass Assign(TModel source, TXPOClass destination)
-		{
-			try
-			{
-				return Mapper.Assign(source, destination);
-			}
-			catch
+        private UnitOfWork _uow = default!;
+        private bool _disposed;
+        protected bool IsUOWDisposed { get => _uow == default; }
+        protected UnitOfWork UnitOfWork
+        {
+            get
             {
-				throw;
-            }
-		}
+                if (_uow == default)
+                    _uow = GetNewUnitOfWork();
 
-		public override TModel GetByKey(TKey key)
-		{
-			var result = DB.Execute((db, w) =>
+                return _uow;
+            }
+        }
+        protected UnitOfWork GetNewUnitOfWork()
+        {
+            var result = new UnitOfWork(DataLayer);
+			result.Disposed += UoW_Disposed;
+            return result;
+        }
+
+		private void UoW_Disposed(object? sender, EventArgs e) => _uow = default!;
+
+		public IDataLayer DataLayer { get; }
+        public IValidator<TDBModel> Validator { get; }
+        public virtual bool PaginateViaPrimaryKey { get => false; }
+
+        public TModel CreateModel() => (Activator.CreateInstance(typeof(TModel)) as TModel)!;
+        protected virtual TDBModel XPOGetByKey(TKey key, Session session) => session.GetObjectByKey<TDBModel>(key);
+
+        protected virtual IQueryable<TDBModel> DBQuery(Session uow) => uow.Query<TDBModel>();
+        
+        public virtual IQueryable<TModel> Query() => Query<TModel>();
+
+		public abstract IQueryable<T> Query<T>() where T : class, new();
+
+        public abstract TModel GetByKey(TKey key);
+        
+        protected virtual TDBModel ToDBModel(TModel source, TDBModel target) => MapTo(source, target);
+        protected virtual TModel ToModel(TDBModel source, TModel target) => MapTo(source, target);
+        protected abstract TDestination MapTo<TSource, TDestination>(TSource source, TDestination target)
+            where TSource : class
+            where TDestination : class;
+
+		protected async Task<List<TModel>> FindAsync(CriteriaOperator filter)
+		{            
+			ThrowIfDisposed();
+			ThrowIfNull(filter);
+
+			var result = await TransactionalExecAsync(async (s, w) =>
 			{
-				TXPOClass item = w.GetObjectByKey<TXPOClass>(key);
-				if (item != null)
-					return CreateModelInstance(item);
-				return null;
+                await Task.Delay(0);
+				var r = new XPCollection<TDBModel>(w, filter);                
+				return r.Select(u => ToModel(u, new TModel())).ToList();
 			});
 			return result;
 		}
 
 
-		class InsertHelper
-		{
-			public InsertHelper(TModel model, IDataValidationResult<TKey> insertingResult, IDataValidationResult<TKey> insertedResult)
-			{
-				Model = model;
-				InsertingResult = insertingResult;
-				InsertedResult = insertedResult;
-			}
-			public TModel Model { get; private set; }
-			public IDataValidationResult<TKey> InsertingResult { get; private set; }
-			public IDataValidationResult<TKey> InsertedResult { get; private set; }
-		}
-		protected enum StoreMode
-		{
-			Create,
-			Update,
-			Store
-		}
+		protected async virtual Task<T> TransactionalExecAsync<T>(
+            Func<XPDataStore<TKey, TModel, TDBModel>, Session, Task<T>> work,
+            bool transactional = true, bool autoCommit = true)
+        {
+            T result = default!;
+            using (var wrk = transactional ? new UnitOfWork(DataLayer) : new Session(DataLayer))
+            {
+                if (transactional)
+                    wrk.BeginTransaction();
 
-		protected virtual IDataValidationResults<TKey> InternalStore(IEnumerable<TModel> items, StoreMode mode, bool continueOnError)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
+                result = await work(this, wrk);
 
-			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
+                if (autoCommit && transactional)
+                    await wrk.CommitTransactionAsync();
+            }
+            return result;
+        }
+        protected async virtual Task TransactionalExecAsync<T>(
+            Func<XPDataStore<TKey, TModel, TDBModel>, Session, Task> work,
+            bool transactional = true, bool autoCommit = true)
+        {
+            using (var wrk = transactional ? new UnitOfWork(DataLayer) : new Session(DataLayer))
+            {
+                if (transactional)
+                    wrk.BeginTransaction();
 
-			result = DB.Execute((db, w) =>
-			{
-				// need to keep the xpo entities together with the model items so we can update 
-				// the id's of the models afterwards.
-				Dictionary<TXPOClass, InsertHelper> batchPairs = new Dictionary<TXPOClass, InsertHelper>();
-				var r = new DataValidationResults<TKey>();
-				foreach (var item in items)
-				{
-					var modelKey = GetModelKey(item);
-                    if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                await work(this, wrk);
+
+                if (autoCommit && transactional)
+                    await wrk.CommitTransactionAsync();
+            }
+        }
+        public abstract string KeyField { get; }
+
+        public abstract void SetModelKey(TModel model, TKey key);
+        public abstract TKey ModelKey(TModel model);
+        protected abstract TKey DBModelKey(TDBModel model);
+
+        protected async virtual Task<ValidationResult> ValidateDBModelAsync(TDBModel item,
+        DataMode mode,
+            XPDataStore<TKey, TModel, TDBModel> store)
+        {            
+            var validationContext = new ValidationContext<TDBModel>(item);
+            validationContext.RootContextData[CtxMode] = mode;
+            validationContext.RootContextData[CtxStore] = store;
+
+            var result = await Validator.ValidateAsync(validationContext);
+            return result;
+        }
+
+        class InsertHelper
+        {
+            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey> insertedResult)
+            {
+                Model = model;
+                InsertingResult = insertingResult;
+                InsertedResult = insertedResult;
+            }
+            public TModel Model { get; private set; }
+            public ValidationResult InsertingResult { get; private set; }
+            public IDataResult<TKey> InsertedResult { get; private set; }
+        }
+
+        protected enum StoreMode { Create, Update, Store }
+        protected TKey EmptyKeyValue => default!;
+
+        protected async virtual Task<IDataResult<TKey>> StoreAsync(StoreMode mode, params TModel[] items)
+        {
+            ThrowIfNull(items);
+
+            var result = await TransactionalExecAsync(
+                async (s, wrk) =>
+                {
+                    // need to keep the xpo entities together with the model items so we can update 
+                    // the id's of the models afterwards.
+                    Dictionary<TDBModel, InsertHelper> batchPairs = new Dictionary<TDBModel, InsertHelper>();
+                    try
                     {
-						var canInsert = Validator?.Inserting(item, r);
-						if (!canInsert.Success)
-						{
-							if (!continueOnError)
-							{
-								w.RollbackTransaction();
-								break;
-							}
-						}
-						else
-						{
-							TXPOClass newItem = Activator.CreateInstance(typeof(TXPOClass), new object[] { w }) as TXPOClass;
-							newItem = Assign(item, newItem);
-							newItem.Save();
-							var hasInserted = Validator?.Inserted((TKey)w.GetKeyValue(newItem), item, newItem, r);
-							if (!hasInserted.Success)
-							{
-								if (!continueOnError)
-								{
-									w.RollbackTransaction();
-									break;
-								}
-							}
-							batchPairs.Add(newItem, new InsertHelper(item, canInsert.Results.FirstOrDefault(), hasInserted.Results.FirstOrDefault()));
-						}
-					}
-					else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
-					{
-						var canUpdate = Validator?.Updating(modelKey, item, r);
-						if (!canUpdate.Success)
-						{
-							if (!continueOnError)
-							{
-								w.RollbackTransaction();
-								break;
-							}
-						}
-						else
-						{
-							var updatedItem = w.GetObjectByKey<TXPOClass>(modelKey);
-							if (updatedItem == null)
-							{
-								r.Add(
-									DataValidationResultType.Error,
-									modelKey,
-									"KeyField",
-									$"Unable to locate {typeof(TXPOClass).Name}({modelKey}) in datastore",
-									0,
-									DataValidationEventType.Updating);
-								break;
-							}
+                        ValidationResult validationResult = default!;
+                        DataMode dataMode = DataMode.Create;
+                        foreach (var item in items)
+                        {
+                            var modelKey = ModelKey(item);
+                            TDBModel dbItem = null!;
+                            if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                            {
+                                dataMode = DataMode.Create;
+                                dbItem = (Activator.CreateInstance(typeof(TDBModel), wrk) as TDBModel)!;
+                                batchPairs.Add(dbItem, new InsertHelper(item, validationResult, new DataResult<TKey>()));
+                            }
+                            else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+                            {
+                                dataMode = DataMode.Update;
+                                dbItem = XPOGetByKey(modelKey, wrk)!;
+                                if (dbItem == null)
+                                    throw new ValidationException($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
+                            }
+                            //Mapper.Map(item, dbItem);
+                            ToDBModel(item, dbItem);
+                            validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
+                            if (!validationResult.IsValid)
+                                throw new ValidationException(validationResult.Errors);
+                            await wrk.SaveAsync(dbItem);
+                        }
 
-							Assign(item, updatedItem);
 
-							var hasUpdated = Validator?.Updated(modelKey, item, updatedItem, r);
-							if (!hasUpdated.Success)
-							{
-								if (!continueOnError)
-								{
-									w.RollbackTransaction();
-									break;
-								}
-							}
-						}
-					}
-
-				}
-
-				try
-				{
-					w.ObjectSaved += (s, e) =>
-					{
-						// sync the model ids with the newly generated xpo id's
-						if (e.Object is TXPOClass xpoItem && batchPairs.ContainsKey(xpoItem))
-						{
-							TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
-							SetModelKey(batchPairs[xpoItem].Model, k);
-							if (batchPairs[xpoItem].InsertingResult != null)
-								batchPairs[xpoItem].InsertingResult.ID = k;
-							if (batchPairs[xpoItem].InsertedResult != null)
-								batchPairs[xpoItem].InsertedResult.ID = k;
-
-							// INFO: We need to map back the XPO Item into the model.							
-							// If not, properties set in the OnSaving events are not set back into the model.
-							// Since we don't want to change the mapper signature, for now this is the only way to keep
-							// the reference to the original Model in tact.
-							var updatedModel = Mapper.CreateModel(xpoItem);
-							foreach (var p in GetModelPropInfo(updatedModel.GetType()))
-								p.SetValue(batchPairs[xpoItem].Model, p.GetValue(updatedModel));
-						}
-					};
-					w.FailedCommitTransaction += (s, e) =>
-					{
-						r.Add(new DataValidationResult<TKey>
-						{
-							ResultType = DataValidationResultType.Error,
-							Message = e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message
-						});
-
-						e.Handled = true;
-					};
-					w.CommitTransaction();
-				}
-				catch
-				{
-					w.RollbackTransaction();
-				}
-				return r;
-			});
-
-			return result;
-		}
-
-		#region Reflection caching
-
-		// PropertyInfo cache for streaming back properties to original model
-		static readonly ConcurrentDictionary<Type, PropertyInfo[]> modelPropInfo =
-            new ConcurrentDictionary<Type, PropertyInfo[]>();
-        static readonly BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
-        static Action CleanCache => () =>
-        {
-            if (modelPropInfo.Count > 1000)
-            {
-                while (modelPropInfo.Count > 1000)
-                    if (!modelPropInfo.TryRemove(modelPropInfo.Keys.Last(), out PropertyInfo[] r))
-                        return; // break if can't be removed
-            }
-        };
-
-        static PropertyInfo[] GetModelPropInfo(Type objectType)
-        {
-            PropertyInfo[] props = modelPropInfo.GetOrAdd(objectType, 
-				(key) => objectType.GetProperties(flags)
-							.Where(p=>p.CanWrite && !p.IsCollectionProperty()).ToArray());
-            Task.Run(CleanCache);
-            return props;
+                        wrk.ObjectSaved += (s, e) =>
+                        {
+                            // sync the model ids with the newly generated xpo id's
+                            if (e.Object is TDBModel xpoItem && batchPairs.ContainsKey(xpoItem))
+                            {
+                                TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
+                                SetModelKey(batchPairs[xpoItem].Model, k);
+                                if (batchPairs[xpoItem].InsertedResult != null)
+                                    batchPairs[xpoItem].InsertedResult.Key = k;
+                                // INFO: We need to map back the XPO Item into the model.							
+                                ToModel(xpoItem, batchPairs[xpoItem].Model);                                
+                            }
+                        };
+                        ValidationException commitFailure = null!;
+                        wrk.FailedCommitTransaction += (s, e) =>
+                        {
+                            commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
+                            e.Handled = true;
+                        };
+                        await wrk.CommitTransactionAsync();
+                        if (commitFailure != null)
+                            return new DataResult<TKey> { Success = false, Mode = dataMode, Exception = commitFailure };
+                        else
+                            return new DataResult<TKey> { Success = true, Mode = dataMode };
+                    }
+                    catch (Exception err)
+                    {
+                        wrk.RollbackTransaction();
+                        return new DataResult<TKey>(DataMode.Create, nameof(TDBModel), err);
+                    }
+                },
+                true, false);
+            return result;
         }
 
-        #endregion
-
-        public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Create, true);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Update(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Update, true);
-			return result;
-		}
-		public override IDataValidationResults<TKey> Store(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Store, true);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids)
-		{
-			var result = DB.Execute((db, w) =>
-			{
-				var r = new DataValidationResults<TKey>();
-				foreach (var id in ids)
-				{
-
-					var item = w.GetObjectByKey<TXPOClass>(id);
-					if (item == null)
-					{
-						r.Add(DataValidationResultType.Error, id, "KeyField", $"Unable to locate {typeof(TXPOClass).Name}({id}) in datastore", 0, DataValidationEventType.Deleting);
-						break;
-					}
-					var canDelete = Validator?.Deleting(id, r, item);
-					if (!canDelete.Success)
-					{
-						w.RollbackTransaction();
-						break;
-					}
-
-					item.Delete();
-					//val.Deleted(id, item, r);
-					var hasDeleted = Validator?.Deleted(id, item, r);
-					if (!hasDeleted.Success)
-					{
-						w.RollbackTransaction();
-						break; // throw new Exception(hasInserted.Message);
-					}
-				}
-				try
-				{
-					w.CommitTransaction();
-				}
-				catch (Exception e)
-				{
-					r.Add(new DataValidationResult<TKey>
-					{
-						ResultType = DataValidationResultType.Error,
-						Message = e.InnerException != null ? e.InnerException.Message : e.Message
-					});
-				}
-				return r;
-			});
-			return result;
-		}
-
-        protected override void DisposeManaged()
+        public async virtual Task<IDataResult<TKey>> StoreAsync(params TModel[] items)
         {
-            base.DisposeManaged();
-			unitOfWork?.Dispose();
+            ThrowIfNull(items);
+            return await StoreAsync(StoreMode.Store, items);
+
+        }
+
+        public async virtual Task<IDataResult<TKey>> CreateAsync(params TModel[] items)
+        {
+            ThrowIfNull(items);
+            return await StoreAsync(StoreMode.Create, items);
+        }
+
+        public async virtual Task<IDataResult<TKey>> UpdateAsync(params TModel[] items)
+        {
+            ThrowIfNull(items);
+            return await StoreAsync(StoreMode.Update, items);
+        }
+        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TModel[] items)
+        {
+            ThrowIfNull(items);
+            return await DeleteAsync(items.Select(i => ModelKey(i)).ToArray());
+        }
+
+        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TKey[] ids)
+        {
+            ThrowIfNull(ids);
+
+            var result = await TransactionalExecAsync(async (s, wrk) =>
+            {
+                try
+                {
+                    foreach (var id in ids)
+                    {
+                        var dbModel = XPOGetByKey(id, wrk);
+                        if (dbModel != null)
+                        {
+                            var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
+                            if (!validationResult.IsValid)
+                                throw new ValidationException(validationResult.Errors);
+
+                            await wrk.DeleteAsync(dbModel);
+                        }
+                    }
+                    ValidationException commitFailure = null!;
+                    wrk.FailedCommitTransaction += (s, e) =>
+                    {
+                        commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
+                        e.Handled = true;
+                    };
+
+                    await wrk.CommitTransactionAsync();
+                    if (commitFailure != null)
+                        return new DataResult<TKey> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
+                    else
+                        return new DataResult<TKey> { Success = true, Mode = DataMode.Delete };
+                }
+                catch (ValidationException err)
+                {
+                    wrk.RollbackTransaction();
+                    return new DataResult<TKey>(DataMode.Delete, nameof(TDBModel), err);
+                }
+            }, true, false);
+            return result;
+        }
+
+        protected void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        protected void ThrowIfNull(object? obj)
+        {
+#if (!NETCOREAPP)
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+#else
+            ArgumentNullException.ThrowIfNull (obj);
+#endif
+        }
+
+        protected void ThrowIfNullOrEmpty(string? value, string? name = null)
+        {
+            if (value == null || string.IsNullOrEmpty(value.Trim()))
+                throw new ArgumentNullException(name ?? nameof(value));
+        }
+
+		protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                    if (_uow != default)
+                        _uow.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 
-	
 }

@@ -43,6 +43,13 @@ namespace DX.Data.Xpo.Identity.Persistent
 			get { return _NormalizedName; }
 			set { SetPropertyValue<string>("NormalizedName", ref _NormalizedName, value); }
 		}
+		string _ConcurrencyStamp;
+		[Size(60)]
+		public string ConcurrencyStamp
+		{
+			get { return _ConcurrencyStamp; }
+			set { SetPropertyValue<string>("ConcurrencyStamp", ref _ConcurrencyStamp, value); }
+		}
 		[Association(@"XpoDxUsersRoles")]
 		public XPCollection<XpoDxUser> Users { get { return GetCollection<XpoDxUser>("Users"); } }
 		[Association(@"XpoDxRoleClaimReferencesXpoDxRole"), Aggregated]

@@ -16,31 +16,38 @@ using System.Reflection;
 namespace DX.Data.Xpo.Identity.Persistent
 {
 
-	[Persistent(@"DXUserLogins")]
-	public partial class XpoDxUserLogin : XpoDxBase
-	{
-		string _LoginProvider;
-		[Indexed(@"User", Name = @"IdxUserLogin", Unique = true)]
-		[Size(150)]
-		public string LoginProvider
-		{
-			get { return _LoginProvider; }
-			set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
-		}
-		string _ProviderKey;
-		[Size(150)]
-		public string ProviderKey
-		{
-			get { return _ProviderKey; }
-			set { SetPropertyValue<string>("ProviderKey", ref _ProviderKey, value); }
-		}
-		XpoDxUser _User;
-		[Association(@"XpoDxUserLogins")]
-		public XpoDxUser User
-		{
-			get { return _User; }
-			set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
-		}
-	}
+    [Persistent(@"DXUserLogins")]
+    public partial class XpoDxUserLogin : XpoDxBase
+    {
+        string _LoginProvider;
+        [Indexed(@"User", Name = @"IdxUserLogin", Unique = true)]
+        [Size(150)]
+        public string LoginProvider
+        {
+            get { return _LoginProvider; }
+            set { SetPropertyValue<string>("LoginProvider", ref _LoginProvider, value); }
+        }
+        string _ProviderKey;
+        [Size(150)]
+        public string ProviderKey
+        {
+            get { return _ProviderKey; }
+            set { SetPropertyValue<string>("ProviderKey", ref _ProviderKey, value); }
+        }
+        XpoDxUser _User;
+        [Association(@"XpoDxUserLogins")]
+        public XpoDxUser User
+        {
+            get { return _User; }
+            set { SetPropertyValue<XpoDxUser>("User", ref _User, value); }
+        }
+        string _ProviderDisplayName;
+        [Size(75)]
+        public string ProviderDisplayName
+        {
+            get { return _ProviderDisplayName; }
+            set { SetPropertyValue<string>("ProviderDisplayName", ref _ProviderDisplayName, value); }
+        }
+    }
 
 }

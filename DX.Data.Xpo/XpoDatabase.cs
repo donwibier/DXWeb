@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 //using Microsoft.AspNetCore.Builder;
@@ -50,7 +50,7 @@ namespace DX.Data.Xpo
 		public string ConnectionString { get { return options.ConnectionString; } }
 		public string DataLayerName { get { return options.Name; } }		
 
-#if (NETSTANDARD2_1 || NETCOREAPP)
+#if (NETCOREAPP)
 		[Obsolete("Please use the new constructor with the options argument or options builder", false)]
 		public XpoDatabase(string connectionName, IConfiguration cfg) :
 					this(cfg.GetConnectionString(connectionName), connectionName)
@@ -136,7 +136,16 @@ namespace DX.Data.Xpo
 			return GetUnitOfWork(DataLayerName);
 		}
 
-		public virtual void Execute(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
+		public virtual IDataLayer GetDataLayer(string dataLayerName)
+		{
+			if (dataLayers.TryGetValue(options.Name, out IDataLayer result))
+			{
+				return result;
+			}
+			throw new Exception("DataLayer was not found!");
+		}
+
+    public virtual void Execute(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
 		{
 			Execute(DataLayerName, work, transactional, commit);
 		}

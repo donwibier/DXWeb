@@ -1,6 +1,5 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
-using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,6 +31,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 		}
 
 		#region Embedded Fields class
+		// Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 11-1-2024 10:01
 		public new class FieldsClass : PersistentBase.FieldsClass
 		{
 			public FieldsClass()
@@ -39,40 +39,53 @@ namespace DX.Data.Xpo.Identity.Persistent
 
 			}
 
+			/// <doc>
+			/// <assembly>
+			/// <name>DevExpress.Xpo.v23.2</name>
+			/// </assembly>
+			/// <members>
+			/// <member name="N:DevExpress.Xpo">
+			/// <summary>
+			/// <para>Contains classes that support the infrastructure of the eXpress Persistent Objects.</para>
+			/// </summary>
+			/// </member>
+			/// <member name="T:DevExpress.Xpo.AggregatedAttribute">
+			/// <summary>
+			/// <para>Indicates that persistent objects referenced by the target property are aggregated.</para>
+			/// </summary>
+			/// </member>
 			public FieldsClass(string propertyName) : base(propertyName)
 			{
 
 			}
 
-			public OperandProperty _Id
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_Id))); }
-			}
+			public const string IDFieldName = "ID";
 
-			public OperandProperty Id
-			{
-				get { return new OperandProperty(GetNestedName(nameof(Id))); }
-			}
+			public OperandProperty ID => new OperandProperty(GetNestedName(IDFieldName));
 
-			public OperandProperty _AddStampUTC
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_AddStampUTC))); }
-			}
+			public const string _IdFieldName = "_Id";
 
-			public OperandProperty AddStampUTC
-			{
-				get { return new OperandProperty(GetNestedName(nameof(AddStampUTC))); }
-			}
+			public OperandProperty _Id => new OperandProperty(GetNestedName(_IdFieldName));
 
-			public OperandProperty _ModStampUTC
-			{
-				get { return new OperandProperty(GetNestedName(nameof(_ModStampUTC))); }
-			}
+			public const string IdFieldName = "Id";
 
-			public OperandProperty ModStampUTC
-			{
-				get { return new OperandProperty(GetNestedName(nameof(ModStampUTC))); }
-			}
+			public OperandProperty Id => new OperandProperty(GetNestedName(IdFieldName));
+
+			public const string _AddStampUTCFieldName = "_AddStampUTC";
+
+			public OperandProperty _AddStampUTC => new OperandProperty(GetNestedName(_AddStampUTCFieldName));
+
+			public const string AddStampUTCFieldName = "AddStampUTC";
+
+			public OperandProperty AddStampUTC => new OperandProperty(GetNestedName(AddStampUTCFieldName));
+
+			public const string _ModStampUTCFieldName = "_ModStampUTC";
+
+			public OperandProperty _ModStampUTC => new OperandProperty(GetNestedName(_ModStampUTCFieldName));
+
+			public const string ModStampUTCFieldName = "ModStampUTC";
+
+			public OperandProperty ModStampUTC => new OperandProperty(GetNestedName(ModStampUTCFieldName));
 		}
 
 		public new static FieldsClass Fields

@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DX.Blazor.Identity.Server.Controllers
 {
     public class AuthenticationControllerBase<TUser> : AuthenticationControllerBase<string, TUser, RegistrationModel>
-        where TUser : class, IXPUser<string>, new()
+        where TUser : IdentityUser, IIdentityRefreshToken, new()
     {
         public AuthenticationControllerBase(UserManager<TUser> userManager,
 			ITokenService<string, TUser> tokenService,
@@ -40,7 +40,7 @@ namespace DX.Blazor.Identity.Server.Controllers
     }
 
     public abstract class AuthenticationControllerBase<TUser, TRegistrationModel> : AuthenticationControllerBase<string, TUser, TRegistrationModel>
-        where TUser : class, IXPUser<string>, new()
+        where TUser : IdentityUser<string>, IIdentityRefreshToken, new()
         where TRegistrationModel : class, new()
     {
         public AuthenticationControllerBase(UserManager<TUser> userManager, 
@@ -58,7 +58,7 @@ namespace DX.Blazor.Identity.Server.Controllers
 
     public abstract class AuthenticationControllerBase<TKey, TUser, TRegistrationModel> : Controller
         where TKey : IEquatable<TKey>
-        where TUser : class, IXPUser<TKey>, new()
+        where TUser : IdentityUser<TKey>, IIdentityRefreshToken, new()
         where TRegistrationModel: class, new()
     {
         private readonly UserManager<TUser> _userManager;

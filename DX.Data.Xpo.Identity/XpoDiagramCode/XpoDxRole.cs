@@ -15,10 +15,11 @@ namespace DX.Data.Xpo.Identity.Persistent
 		public override void AfterConstruction() { base.AfterConstruction(); }
 
 		string IXPRole<string>.Id { get => base.Id; set => setId(value); }
-		//string IXPRole<string>.Name { get => Name; set => Name = value; }
+        //string IXPRole<string>.Name { get => Name; set => Name = value; }
 
+        public IList ClaimsList { get { return Claims; } }
 
-		protected override void OnChanged(string propertyName, object oldValue, object newValue)
+        protected override void OnChanged(string propertyName, object oldValue, object newValue)
 		{
 			if (propertyName == nameof(Name))
 				_NameUpper = ((string)newValue ?? string.Empty).ToUpperInvariant();
@@ -74,50 +75,55 @@ namespace DX.Data.Xpo.Identity.Persistent
 			get { return Users; }
 		}
 
-        #region Embedded Fields class
-        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
-        public new class FieldsClass : XpoDxBase.FieldsClass
-        {
-            public FieldsClass()
-            {
+		#region Embedded Fields class
+		// Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 10-1-2024 14:27
+		public new class FieldsClass : XpoDxBase.FieldsClass
+		{
+			public FieldsClass()
+			{
 
-            }
+			}
 
-            public FieldsClass(string propertyName) : base(propertyName)
-            {
+			/// <!-- Badly formed XML comment ignored for member "M:DX.Data.Xpo.Identity.Persistent.XpoDxBase.FieldsClass.#ctor(System.String)" -->
+			public FieldsClass(string propertyName) : base(propertyName)
+			{
 
-            }
+			}
 
-            public const string NameFieldName = "Name";
+			public const string NameFieldName = "Name";
 
-            public OperandProperty Name => new OperandProperty(GetNestedName(NameFieldName));
+			public OperandProperty Name => new OperandProperty(GetNestedName(NameFieldName));
 
-            public const string _NameUpperFieldName = "_NameUpper";
+			public const string _NameUpperFieldName = "_NameUpper";
 
-            public OperandProperty _NameUpper => new OperandProperty(GetNestedName(_NameUpperFieldName));
+			public OperandProperty _NameUpper => new OperandProperty(GetNestedName(_NameUpperFieldName));
 
-            public const string NameUpperFieldName = "NameUpper";
+			public const string NameUpperFieldName = "NameUpper";
 
-            public OperandProperty NameUpper => new OperandProperty(GetNestedName(NameUpperFieldName));
+			public OperandProperty NameUpper => new OperandProperty(GetNestedName(NameUpperFieldName));
 
-            public const string NormalizedNameFieldName = "NormalizedName";
+			public const string NormalizedNameFieldName = "NormalizedName";
 
-            public OperandProperty NormalizedName => new OperandProperty(GetNestedName(NormalizedNameFieldName));
+			public OperandProperty NormalizedName => new OperandProperty(GetNestedName(NormalizedNameFieldName));
 
-            public const string UsersFieldName = "Users";
+			public const string UsersFieldName = "Users";
 
-            public OperandProperty Users => new OperandProperty(GetNestedName(UsersFieldName));
+			public OperandProperty Users => new OperandProperty(GetNestedName(UsersFieldName));
 
-            public const string ClaimsFieldName = "Claims";
+			public const string ClaimsFieldName = "Claims";
 
-            public OperandProperty Claims => new OperandProperty(GetNestedName(ClaimsFieldName));
+			public OperandProperty Claims => new OperandProperty(GetNestedName(ClaimsFieldName));
 
-            public const string UsersListFieldName = "UsersList";
+			public const string ClaimsListFieldName = "ClaimsList";
 
-            public OperandProperty UsersList => new OperandProperty(GetNestedName(UsersListFieldName));
-        }
+			public OperandProperty ClaimsList => new OperandProperty(GetNestedName(ClaimsListFieldName));
 
-        public new static FieldsClass Fields
+			public const string UsersListFieldName = "UsersList";
+
+			public OperandProperty UsersList => new OperandProperty(GetNestedName(UsersListFieldName));
+		}
+
+		public new static FieldsClass Fields
 		{
 			get
 			{

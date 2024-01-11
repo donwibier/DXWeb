@@ -27,7 +27,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 			get { return _Role; }
 			set { SetPropertyValue<XpoDxRole>("Role", ref _Role, value); }
 		}
-		[PersistentAlias("[Role!Key]")]
+		[PersistentAlias("[Role.Id]")]
 		public string RoleId
 		{
 			get { return (string)(EvaluateAlias("RoleId")); }

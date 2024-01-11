@@ -5,7 +5,7 @@
 @using Microsoft.AspNetCore.Authentication
 
 @inject NavigationManager navigationManager
-@inject DX.Blazor.Identity.IAuthService AuthenticationService 
+@inject IAuthService<RegisterUserModel> AuthenticationService 
 
 <h1>Login</h1>
 <EditForm Model="@userModel" OnValidSubmit="@LoginAction" Context="EditFormContext">
@@ -42,36 +42,43 @@
 </EditForm>
 
 @code {
-	    private string redirectUrl = "";
-    private List<string> errors = new List<string>();
+	private string redirectUrl = "";
+	private List<string> errors = new List<string>();
 
-    //IList<AuthenticationScheme>? ExternalLogins { get; set; }
-    DX.Blazor.Identity.Models.AuthenticationModel userModel { get; set; } = new DX.Blazor.Identity.Models.AuthenticationModel();
+	//IList<AuthenticationScheme>? ExternalLogins { get; set; }
+	AuthenticationModel userModel { get; set; } = new AuthenticationModel();
 
-    protected async override Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
+	protected async override Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
 
-        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("redirectUrl", out var url))
-            redirectUrl = url;
-        else 
-            redirectUrl = "/";        
-    }
+		var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+		if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("redirectUrl", out var url))
+			redirectUrl = url;
+		else 
+			redirectUrl = "/";        
+	}
 
-    protected async Task LoginAction()
-    {
-        errors.Clear();
-        userModel.ReturnUrl = redirectUrl;
-        var result = await AuthenticationService.Login(userModel);
-        if (!result.IsAuthSuccessful)
-        {
-            errors.Add(result.ErrorMessage);            
-        }
-        else
-        {
-            navigationManager.NavigateTo("/");
-        }              
-    }
+	protected async Task LoginAction()
+	{
+		errors.Clear();
+		userModel.ReturnUrl = redirectUrl;
+		try
+		{
+			var result = await AuthenticationService.Login(userModel);
+			if (!result.IsAuthSuccessful)
+			{
+				errors.Add(result.ErrorMessage);
+			}
+			else
+			{
+				navigationManager.NavigateTo("/");
+			}
+		}
+		catch(Exception err)
+		{
+			errors.Add(err.InnerException == null ? err.Message : err.InnerException.Message);
+		}
+	}
 
 }

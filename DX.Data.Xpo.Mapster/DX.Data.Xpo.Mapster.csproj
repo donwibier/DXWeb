@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>23.2.3.31</Version>
+		<FileVersion>23.2.3.31</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
+		<Description>DX.Data.IDataStore implementation for use with XPO with FluentValidation and Mapster</Description>
+		<Copyright>Copyright (c) 2023 Don Wibier</Copyright>
+		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
+		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
+		<PackageReleaseNotes>
+			23.2.3.31: Implementation with Mapster DTO handling
+		</PackageReleaseNotes>
+		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Mapster" Version="7.4.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+	</ItemGroup>
+
+</Project>

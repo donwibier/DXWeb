@@ -16,7 +16,8 @@ namespace DX.Test.Web.Blazor.Controllers
     {
         public AuthenticationController(UserManager<ApplicationUser> userManager, 
                 ITokenService<string, ApplicationUser> tokenService,
-                SignInManager<ApplicationUser> signInManager, IDataProtectionProvider dataProtectionProvider, ILogger<AuthenticationControllerBase<string, ApplicationUser, RegisterUserModel>> logger, IConfiguration configuration) 
+                SignInManager<ApplicationUser> signInManager, IDataProtectionProvider dataProtectionProvider, 
+                ILogger<AuthenticationControllerBase<string, ApplicationUser, RegisterUserModel>> logger, IConfiguration configuration) 
             : base(userManager, tokenService, signInManager, dataProtectionProvider, logger, configuration)
         {
 
@@ -26,8 +27,8 @@ namespace DX.Test.Web.Blazor.Controllers
         {
             return new ApplicationUser
             {
-                UserName = registrationModel.EmailAddress,
-                Email = registrationModel.EmailAddress,
+                UserName = registrationModel.Email,
+                Email = registrationModel.Email,
                 BirthDate = registrationModel.BirthDate,
                 Street = registrationModel.Street,
                 HouseNo = registrationModel.HouseNo,

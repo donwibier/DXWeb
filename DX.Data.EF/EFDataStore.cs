@@ -1,13 +1,18 @@
 ﻿using DX.Utils;
-using DX.Utils.Data;
-
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using DX.Data;
+using FluentValidation;
+using FluentValidation.Results;
 
-#if (NET6_0_OR_GREATER)
+
+#if (NETCOREAPP)
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 #else
 using System.Data.Entity;
@@ -15,401 +20,286 @@ using System.Data.Entity;
 
 namespace DX.Data.EF
 {
-	public abstract class EFDataMapper<TKey, TModel, TEFClasss> :
-			DataMapper<TKey, TModel, TEFClasss>,
-			IEFDataMapper<TKey, TModel, TEFClasss>
-		where TKey : IEquatable<TKey>
-		where TModel : class, new()
-		where TEFClasss : class, new()
-	{
+    public abstract class EFDataStore<TEFContext, TKey, TModel, TDBModel> : IQueryableDataStore<TKey, TModel>
+        where TEFContext : DbContext, new()
+        where TKey : IEquatable<TKey>
+        where TModel : class, new()
+        where TDBModel : class, new()
+    {
+        public const string CtxMode = "datamode";
+        public const string CtxStore = "datastore";
 
-	}
-
-	public class EFDataValidator<TKey, TModel, TEFClass> :
-			DataValidator<TKey, TModel, TEFClass>,
-			IEFDataStoreValidator<TKey, TModel, TEFClass>
-		where TKey : IEquatable<TKey>
-		where TModel : class, new()
-		where TEFClass : class, new()
-	{
-		public override IDataValidationResults<TKey> Deleted(TKey id, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Deleted));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Deleting(TKey id, IDataValidationResults<TKey> validationResults, params object[] args)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Inserted(TKey id, TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Inserted));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Inserting(TModel model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, default, string.Empty, string.Empty, 0, DataValidationEventType.Inserting));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Updated(TKey id, TModel model, TEFClass dbModel, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updated));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Updating(TKey id, TModel model, IDataValidationResults<TKey> validationResults)
-		{
-			var result = new DataValidationResults<TKey>(
-				new DataValidationResult<TKey>(DataValidationResultType.Success, id, string.Empty, string.Empty, 0, DataValidationEventType.Updating));
-
-			validationResults.AddRange(result.Results);
-			return result;
-		}
-	}
-
-
-
-	public abstract class EFDataStore<TDBContext, TKey, TModel, TEFClass> : DataStore<TKey, TModel>
-			where TDBContext : DbContext, new()
-			where TKey : IEquatable<TKey>
-			where TModel : class, new()
-			where TEFClass : class, new()
-	{
-		public EFDataStore(EFDatabase<TDBContext> db,
-			IEFDataMapper<TKey, TModel, TEFClass> mapper,
-			IEFDataStoreValidator<TKey, TModel, TEFClass> validator = null)
-		{
-			if (db == null)
-				throw new ArgumentNullException(nameof(db));
-			if (mapper == null)
-				throw new ArgumentNullException(nameof(mapper));
-			DB = db;
-			Mapper = mapper;
-			Validator = validator;
-		}
-		public EFDatabase<TDBContext> DB { get; protected set; }
-		private TDBContext _EFCtx = null;
-		public TDBContext EFCtx
+        public EFDataStore(TEFContext context, IValidator<TDBModel> validator)
         {
-			get
-            {
-				if (_EFCtx == null)
-                {
-					_EFCtx = new TDBContext();
-                }
-				return _EFCtx;
-            }
+            //Mapper = mapper;
+            DbContext = context;
+            Validator = validator;
         }
 
-		public IEFDataMapper<TKey, TModel, TEFClass> Mapper { get; protected set; }
-		public IEFDataStoreValidator<TKey, TModel, TEFClass> Validator { get; protected set; }
-
-		public Type EFType => typeof(TEFClass);
-		public Type EFDBContext => typeof(TDBContext);
-
-		public abstract TKey GetEFModelKey(TEFClass model);
-
-		protected virtual IQueryable<TEFClass> EFQuery()
-        {
-			return EFQuery(EFCtx);
-        }
-
-
-		protected virtual IQueryable<TEFClass> EFQuery(TDBContext ctx)
-		{
-			var result = ctx.Set<TEFClass>();
-			return result;
-		}
-
-		//protected async virtual Task<IEnumerable<TModel>> QueryAsync()
-		//{
-		//	var result = await DB.ExecuteAsync((db, ctx, t) =>
-		//	{
-		//		var r = EFQuery(ctx).Select(CreateModelInstance);
-		//		return r.ToList();
-		//	});
-		//	return result;
-		//}
-
-		public override IQueryable<TModel> Query()=> EFQuery().Select(CreateModelInstance).AsQueryable();
-		protected virtual Func<TEFClass, TModel> CreateModelInstance => Mapper.CreateModel;
-
-		protected TEFClass Assign(TModel source, TEFClass destination)
-		{
-			return Mapper.Assign(source, destination);
-		}
-
-		public override TModel GetByKey(TKey key)
-		{
-			var result = DB.Execute((db, ctx, t) =>
-			{
-				TEFClass item = ctx.Set<TEFClass>().Find(key);
-				if (item != null)
-					return CreateModelInstance(item);
-				return null;
-			});
-			return result;
-		}
-
-		class InsertHelper
-		{
-			public InsertHelper(TModel model, EntityEntry<TEFClass> entry, IDataValidationResult<TKey> insertingResult, IDataValidationResult<TKey> insertedResult)
-			{
-				Model = model;
-				EFEntry = entry;
-				InsertingResult = insertingResult;
-				InsertedResult = insertedResult;
-			}
-			public TModel Model { get; private set; }
-			public EntityEntry<TEFClass> EFEntry { get; private set; }
-			public IDataValidationResult<TKey> InsertingResult { get; private set; }
-			public IDataValidationResult<TKey> InsertedResult { get; private set; }
-		}
-
-#if (!NET6_0_OR_GREATER)
-		class EntityEntry<T> {
-		  public T Entity { get; set;}
-		}
-#endif
-
-		protected enum StoreMode
-		{
-			Create,
-			Update,
-			Store
-		}
-
-		protected virtual IDataValidationResults<TKey> InternalStore(IEnumerable<TModel> items, StoreMode mode, bool continueOnError)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			IDataValidationResults<TKey> result = new DataValidationResults<TKey>();
-
-			result = DB.Execute((db, ctx, t) =>
-			{
-				// need to keep the xpo entities together with the model items so we can update 
-				// the id's of the models afterwards.
-				Dictionary<TEFClass, InsertHelper> batchPairs = new Dictionary<TEFClass, InsertHelper>();
-				var r = new DataValidationResults<TKey>();
-				foreach (var item in items)
-				{
-					var modelKey = GetModelKey(item);
-					if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
-					{
-						var canInsert = Validator?.Inserting(item, r);
-						if (!canInsert.Success)
-						{
-							if (!continueOnError)
-							{
-								t.Rollback();
-								break;
-							}
-						}
-						else
-						{
-							TEFClass newItem = new TEFClass();
-							newItem = Assign(item, newItem);
-
-#if (NET6_0_OR_GREATER)
-							EntityEntry<TEFClass> ee = ctx.Set<TEFClass>().Add(newItem);
-
+        //protected IMapper Mapper { get; }
+        public TEFContext DbContext { get; }
+        public IValidator<TDBModel> Validator { get; }
+        public virtual bool PaginateViaPrimaryKey { get => false; }
+        public TModel CreateModel() => new TModel();
+#if (NETCOREAPP)
+        protected virtual TDBModel EFGetByKey(TKey key) => DbContext.Find<TDBModel>(key);
 #else
-							EntityEntry<TEFClass> ee = new EntityEntry<TEFClass>() 
-							{
-									 Entity = ctx.Set<TEFClass>().Add(newItem)
-							};
+        protected virtual TDBModel EFGetByKey(TKey key) => DbContext.Set<TDBModel>().Find(key);            
 #endif
 
-							var hasInserted = Validator?.Inserted(GetEFModelKey(newItem), item, newItem, r);
-							if (!hasInserted.Success)
-							{
-								if (!continueOnError)
-								{
-									t.Rollback();
-									break;
-								}
-							}
-							batchPairs.Add(newItem, new InsertHelper(item, ee, canInsert.Results.FirstOrDefault(), hasInserted.Results.FirstOrDefault()));
-						}
-					}
-					else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
-					{
-						var canUpdate = Validator?.Updating(modelKey, item, r);
-						if (!canUpdate.Success)
-						{
-							if (!continueOnError)
-							{
-								t.Rollback();
-								break;
-							}
-						}
-						else
-						{
-							var updatedItem = ctx.Set<TEFClass>().Find(modelKey);
-							if (updatedItem == null)
-							{
-								r.Add(
-									DataValidationResultType.Error,
-									modelKey,
-									"KeyField",
-									$"Unable to locate {typeof(TEFClass).Name}({modelKey}) in datastore",
-									0,
-									DataValidationEventType.Updating);
-								break;
-							}
+        protected virtual IQueryable<TDBModel> EFQuery() => DbContext.Set<TDBModel>();
 
-							Assign(item, updatedItem);
-							ctx.Entry(updatedItem).State = EntityState.Modified;
-							//ctx.Set<TEFClass>().Update(updatedItem);
+		public virtual IQueryable<TModel> Query() => Query<TModel>();		
+        public abstract IQueryable<T> Query<T>() where T : class, new();
 
-							var hasUpdated = Validator?.Updated(modelKey, item, updatedItem, r);
-							if (!hasUpdated.Success)
-							{
-								if (!continueOnError)
-								{
-									t.Rollback();
-									break;
-								}
-							}
-						}
-					}
-
-				}
-
-				try
-				{
-					ctx.SaveChanges();
-					t.Commit();
-					// sync the model ids with the newly generated EF id's
-					foreach (var p in batchPairs)
-					{
-						var key = GetEFModelKey(p.Value.EFEntry.Entity);
-						SetModelKey(p.Value.Model, key);
-						p.Value.InsertedResult.ID = key;
-						p.Value.InsertingResult.ID = key;
-
-					}
-				}
-				catch (Exception e)
-				{
-					t.Rollback();
-					r.Add(new DataValidationResult<TKey>
-					{
-						ResultType = DataValidationResultType.Error,
-						Message = e.GetInnerException().Message
-					});
-				}
-				return r;
-			});
-
-			return result;
-		}
-
-
-		//=====
-		public override IDataValidationResults<TKey> Create(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Create, true);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Update(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Update, true);
-			return result;
-		}
-		public override IDataValidationResults<TKey> Store(IEnumerable<TModel> items)
-		{
-			if (items == null)
-				throw new ArgumentNullException(nameof(items));
-
-			var result = InternalStore(items, StoreMode.Store, true);
-			return result;
-		}
-
-		public override IDataValidationResults<TKey> Delete(IEnumerable<TKey> ids)
-		{
-			var result = DB.Execute((db, ctx, tran) =>
-			{
-				var r = new DataValidationResults<TKey>();
-				foreach (var id in ids)
-				{
-
-					var item = ctx.Set<TEFClass>().Find(id);
-					if (item == null)
-					{
-						r.Add(DataValidationResultType.Error, id, "KeyField", $"Unable to locate {typeof(TEFClass).Name}({id}) in datastore", 0, DataValidationEventType.Deleting);
-						break;
-					}
-					var canDelete = Validator?.Deleting(id, r, item);
-					if (!canDelete.Success)
-					{
-						tran.Rollback();
-						break;
-					}
-
-					ctx.Set<TEFClass>().Remove(item);
-
-					//val.Deleted(id, item, r);
-					var hasDeleted = Validator?.Deleted(id, item, r);
-					if (!hasDeleted.Success)
-					{
-						tran.Rollback();
-						break; // throw new Exception(hasInserted.Message);
-					}
-				}
-				try
-				{
-					ctx.SaveChanges();
-					tran.Commit();
-				}
-				catch (Exception e)
-				{
-					r.Add(new DataValidationResult<TKey>
-					{
-						ResultType = DataValidationResultType.Error,
-						Message = e.InnerException != null ? e.InnerException.Message : e.Message
-					});
-				}
-				return r;
-			}, true, false);
-			return result;
-		}
-
-        protected override void DisposeManaged()
+        public abstract TModel GetByKey(TKey key);
+        protected abstract TDBModel ToDBModel(TModel source, TDBModel target);
+        protected abstract TModel ToModel(TDBModel source, TModel target);
+        public abstract string KeyField { get; }
+        public abstract void SetModelKey(TModel model, TKey key);
+        public void Test()
         {
-            base.DisposeManaged();
-			if (_EFCtx != null)
+            var tran = DbContext.Database.BeginTransaction();
+            tran.Commit();
+
+        }
+
+        public abstract TKey ModelKey(TModel model);
+
+        protected abstract TKey DBModelKey(TDBModel model);
+
+#if (NETCOREAPP)
+        protected async virtual Task<T> TransactionalExecAsync<T>(
+            Func<EFDataStore<TEFContext, TKey, TModel, TDBModel>,
+            IDbContextTransaction, Task<T>> work,
+            bool autoCommit = true)
+        {
+            T result = default!;
+
+            using (var dbTrans = await DbContext.Database.BeginTransactionAsync())
             {
-				_EFCtx.Dispose();
+                result = await work(this, dbTrans);
+                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                {
+                    await DbContext.SaveChangesAsync();
+                    await dbTrans.CommitAsync();
+                }
             }
+            return result;
+        }
+        protected async virtual Task TransactionalExecAsync<T>(
+            Func<EFDataStore<TEFContext, TKey, TModel, TDBModel>,
+            IDbContextTransaction, Task> work, bool autoCommit = true)
+        {
+            using (var dbTrans = await DbContext.Database.BeginTransactionAsync())
+            {
+                await work(this, dbTrans);
+                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                {
+                    await DbContext.SaveChangesAsync();
+                    await dbTrans.CommitAsync();
+                }
+            }
+        }
+#else
+        protected async virtual Task<T> TransactionalExecAsync<T>(
+            Func<EFDataStore<TEFContext, TKey, TModel, TDBModel>,
+            DbContextTransaction, Task<T>> work,
+            bool autoCommit = true)
+        {
+            T result = default!;
+
+            using (var dbTrans = DbContext.Database.BeginTransaction())
+            {
+                result = await work(this, dbTrans);
+                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                {
+                    await DbContext.SaveChangesAsync();
+                    dbTrans.Commit();
+                }
+            }
+            return result;
+        }
+        protected async virtual Task TransactionalExecAsync<T>(
+            Func<EFDataStore<TEFContext, TKey, TModel, TDBModel>,
+            DbContextTransaction, Task> work, bool autoCommit = true)
+        {
+            using (var dbTrans = DbContext.Database.BeginTransaction())
+            {
+                await work(this, dbTrans);
+                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                {
+                    await DbContext.SaveChangesAsync();
+                    dbTrans.Commit();
+                }
+            }
+        }
+
+
+#endif
+        protected async Task<ValidationResult> ValidateDBModelAsync(TDBModel item,
+            DataMode mode,
+            EFDataStore<TEFContext, TKey, TModel, TDBModel> store)
+        {
+            var validationContext = new ValidationContext<TDBModel>(item);
+            validationContext.RootContextData[CtxMode] = mode;
+            validationContext.RootContextData[CtxStore] = store;
+
+            var result = await Validator.ValidateAsync(validationContext);
+            return result;
+        }
+
+        class InsertHelper
+        {
+            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey> insertedResult)
+            {
+                Model = model;
+                InsertingResult = insertingResult;
+                InsertedResult = insertedResult;
+            }
+            public TModel Model { get; private set; }
+            public ValidationResult InsertingResult { get; private set; }
+            public IDataResult<TKey> InsertedResult { get; private set; }
+        }
+
+        //===============================
+        protected enum StoreMode { Create, Update, Store }
+        protected TKey EmptyKeyValue => default!;
+
+        protected async virtual Task<IDataResult<TKey>> StoreAsync(StoreMode mode, params TModel[] items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+
+            var result = await TransactionalExecAsync(async (s, wrk) =>
+            {
+                try
+                {
+                    ValidationResult validationResult = default!;
+                    DataMode dataMode = DataMode.Create;
+                    foreach (var item in items)
+                    {
+                        var modelKey = ModelKey(item);                            
+                        if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                        {
+                            dataMode = DataMode.Create;
+                            var newDBItem = new TDBModel();
+                            ToDBModel(item, newDBItem);
+                            validationResult = await ValidateDBModelAsync(newDBItem, DataMode.Create, s);
+                            if (!validationResult.IsValid)
+                                throw new ValidationException(validationResult.Errors);
+#if (NETCOREAPP)
+                            var r = await DbContext.Set<TDBModel>().AddAsync(newDBItem);
+                            await DbContext.SaveChangesAsync();
+                            ToModel(r.Entity, item); //reload changes in item
+#else
+                            var r = DbContext.Set<TDBModel>().Add(newDBItem);
+                            await DbContext.SaveChangesAsync();
+                            SetModelKey(item, DBModelKey(newDBItem));
+#endif
+                        }
+                        else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+                        {
+                            dataMode = DataMode.Update;                                
+                            var dbModel = EFGetByKey(modelKey);
+                            if (dbModel == null)
+                                throw new Exception($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
+
+                            ToDBModel(item, dbModel);
+
+                            validationResult = await ValidateDBModelAsync(dbModel, DataMode.Update, s);
+                            if (!validationResult.IsValid)
+                                throw new ValidationException(validationResult.Errors);
+
+                            DbContext.Entry(dbModel).State = EntityState.Modified;
+                            await DbContext.SaveChangesAsync();                                
+                        }
+#if (NETCOREAPP)
+                        await wrk.CommitAsync();
+#else
+                        wrk.Commit();
+#endif
+                    }
+
+                    return new DataResult<TKey> { Success = true, Mode = dataMode };
+                }
+                catch (Exception err)
+                {
+#if (NETCOREAPP)
+                    await wrk.RollbackAsync();
+#else
+                    wrk.Rollback();
+#endif
+                    return new DataResult<TKey>(DataMode.Create, nameof(TDBModel), err);
+                }
+            }, false);
+            return result;
+        }
+
+        public async virtual Task<IDataResult<TKey>> StoreAsync(params TModel[] items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            return await StoreAsync(StoreMode.Store, items);
+        }
+
+        public async virtual Task<IDataResult<TKey>> CreateAsync(params TModel[] items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            return await StoreAsync(StoreMode.Create, items);
+        }
+
+        public async virtual Task<IDataResult<TKey>> UpdateAsync(params TModel[] items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            return await StoreAsync(StoreMode.Update, items);
+        }
+        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TModel[] items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));            
+            return await DeleteAsync(items.Select(i => ModelKey(i)).ToArray());
+        }
+
+        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TKey[] ids)
+        {
+            if (ids == null)
+                throw new ArgumentNullException(nameof(ids));
+
+            var result = await TransactionalExecAsync(async (s, t) =>
+            {
+                try
+                {
+                    foreach (var id in ids)
+                    {
+                        var dbModel = EFGetByKey(id);
+                        if (dbModel != null)
+                        {
+                            var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
+                            if (!validationResult.IsValid)
+                                throw new ValidationException(validationResult.Errors);
+
+                            DbContext.Entry(dbModel).State = EntityState.Deleted;
+                            await DbContext.SaveChangesAsync();
+                        }
+                    }
+
+                    await s.DbContext.SaveChangesAsync();
+#if (NETCOREAPP)
+                    await t.CommitAsync();
+#else
+                    t.Commit();
+#endif
+                    return new DataResult<TKey> { Success = true, Mode = DataMode.Delete };
+                }
+                catch (ValidationException err)
+                {
+                    return new DataResult<TKey>(DataMode.Delete, nameof(TDBModel), err);
+                }
+            }, false);
+            return result;
         }
     }
 }

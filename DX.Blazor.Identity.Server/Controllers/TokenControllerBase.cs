@@ -15,7 +15,7 @@ namespace DX.Blazor.Identity.Wasm.Controllers
     //[ApiController]
     public class TokenControllerBase<TKey, TUser> : ControllerBase
         where TKey : IEquatable<TKey>
-        where TUser : class, IXPUser<TKey>, new()
+        where TUser : IdentityUser<TKey>, IIdentityRefreshToken, new()
     {
         private readonly UserManager<TUser> _userManager;
         private readonly ITokenService<TKey, TUser> _tokenService;

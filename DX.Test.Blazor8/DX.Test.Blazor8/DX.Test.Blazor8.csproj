@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-DX.Test.Blazor8-e57226f2-1c0f-4a01-9a69-501e5b0e305e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--<ProjectReference Include="..\..\DX.Data.Xpo.Mapster\DX.Data.Xpo.Mapster.csproj" />-->
+    <ProjectReference Include="..\..\DX.Data.Xpo.Identity.Mapster\DX.Data.Xpo.Identity.Mapster.csproj" />
+    <ProjectReference Include="..\..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
+    <ProjectReference Include="..\..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+    <ProjectReference Include="..\DX.Test.Blazor8.Client\DX.Test.Blazor8.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+	  
+  </ItemGroup>
+
+</Project>

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 //using Microsoft.EntityFrameworkCore;
 using DX.Data.Xpo;
-using DX.Data.Xpo.Identity;
+using DX.Data.Xpo.Identity.AutoMapper;	
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using DX.Blazor.Identity.Server.Services;
 using DX.Blazor.Identity.Models;
 using DX.Blazor.Identity;
+using DevExpress.Xpo;
+
 
 namespace DX.Test.Web.Blazor
 {
@@ -42,20 +44,21 @@ namespace DX.Test.Web.Blazor
 				o.Name = connStrName;
 				o.ConnectionString = Configuration.GetConnectionString(connStrName);
 				o.UpdateSchema = DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema;
-			});			
+			});
 
 			services
-				.AddIdentity<ApplicationUser, ApplicationRole>(options => {
+				.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+				{
 					options.Lockout.AllowedForNewUsers = true;
 					options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 					options.Lockout.MaxFailedAccessAttempts = 3;
 				})
 				.AddDefaultTokenProviders() // <===== Add this for blazor login pages
-				.AddXpoIdentityStores(connStrName,
-					new ApplicationUserMapper(),
-					new ApplicationRoleMapper(),
-					new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
-					new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())
+				.AddXpoAutoMapperIdentityStores<ApplicationUser, XpoApplicationUser, ApplicationRole, XpoApplicationRole>(connStrName)
+				//	new ApplicationUserMapper(),
+				//	new ApplicationRoleMapper(),
+				//	new XPUserStoreValidator<string, ApplicationUser, XpoApplicationUser>(),
+				//	new XPRoleStoreValidator<string, ApplicationRole, XpoApplicationRole>())
 				.AddDefaultTokenProviders();
 
 			services.AddRazorPages();
@@ -63,13 +66,13 @@ namespace DX.Test.Web.Blazor
 			services.AddHttpClient(); // <===== Add this for blazor login pages
 			
 			services.AddSingleton<WeatherForecastService>();
-			
+
 			//services.AddTransient<RegisterUser>();
 			//services.AddTransient<RegisterUser>((s) => new RegisterUser());
 
 			// DX.Blazor.Identity.Server configuration
-			
-			services.AddScoped<IAuthService<RegisterUserModel, AuthenticationModel>, Services.AuthService>();
+			services.AddScoped<ITokenService<string, ApplicationUser>, DX.Blazor.Identity.Wasm.Services.TokenService<string, ApplicationUser>>();
+			services.AddScoped<IAuthService<RegisterUserModel>, Services.AuthService>();
 			services.AddScoped<DX.Blazor.Identity.Server.TokenProvider>();
 			services.AddScoped<AuthenticationStateProvider, DX.Blazor.Identity.Server.AuthStateProvider<ApplicationUser>>();
 			// ====

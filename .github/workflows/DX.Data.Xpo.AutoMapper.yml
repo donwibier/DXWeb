@@ -1,0 +1,34 @@
+name: Publish DX.Data.Xpo.AutoMapper to nuget
+on:
+  push:
+    branches:
+      - master # Default release branch
+jobs:
+  build:
+    name: build, pack & publish
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet: [ '6.0.x', '7.0.x']
+    steps:      
+      - uses: actions/checkout@v3
+      - name: Setup .NET 6      
+        uses: actions/setup-dotnet@v3        
+        with:
+          dotnet-version: ${{ matrix.dotnet }} 
+          dotnet-quality: 'preview'
+          
+      - name: add dx nuget source
+        run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish the package to nuget.org
+        run: dotnet nuget push */bin/Release/*.nupkg --skip-duplicate -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
+

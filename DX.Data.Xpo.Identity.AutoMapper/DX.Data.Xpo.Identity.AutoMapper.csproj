@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Version>23.2.3.31</Version>
+		<FileVersion>23.2.3.31</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
+		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
+		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DX.Data.Xpo.AutoMapper\DX.Data.Xpo.AutoMapper.csproj" />
+    <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
+    <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+  </ItemGroup>
+
+</Project>

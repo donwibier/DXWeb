@@ -1,7 +1,5 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
-using DX.Data.Xpo.Identity.Persistent;
-using DX.Utils.Data;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -14,26 +12,18 @@ using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity
 {
-#if (NETCOREAPP)
+	[Obsolete("For legacy reasons only. Use DX.Data.AutoMapper or DX.Data.Mapster descendants")]
 	public class XPRoleMapper<TKey, TRole, TXPORole/*, TXPORoleClaim*/> : XPDataMapper<TKey, TRole, TXPORole>
 		where TKey : IEquatable<TKey>
 		where TRole : class, IXPRole<TKey>, new()
 		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
 		//where TXPORoleClaim : class, IXPSimpleObject, IXPRoleClaim<TKey>
-#else
-	public class XPRoleMapper<TKey, TRole, TXPORole> : XPDataMapper<TKey, TRole, TXPORole>
-		where TKey : IEquatable<TKey>
-		where TRole : class, IXPRole<TKey>, new()
-		where TXPORole : class, IXPSimpleObject, IXPRole<TKey>
-#endif
 	{
 		public override Func<TXPORole, TRole> CreateModel
 			=> (source) => new TRole
 			{
 				Id = source.Id,
-#if (NETCOREAPP)
 				NormalizedName = source.NormalizedName,
-#endif
 				Name = source.Name
 			};
 
@@ -46,17 +36,13 @@ namespace DX.Data.Xpo.Identity
 
 			//destination.Id = source.Id;
 			destination.Name = source.Name;
-#if (NETCOREAPP)
 			destination.NormalizedName = source.NormalizedName;
-#endif
 			return destination;
 		}
 		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>
 		{
 			{"Id", "Id"},			
-#if (NETCOREAPP)
 			{"NormalizedName", "NormalizedName"},
-#endif
 			{"Name", "Name"}
 		};
 

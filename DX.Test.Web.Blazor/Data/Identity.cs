@@ -2,47 +2,48 @@
 using DevExpress.Xpo;
 using DX.Data.Xpo.Identity;
 using DX.Data.Xpo.Identity.Persistent;
+using Microsoft.AspNetCore.Identity;
 using System;
 
 
 namespace DX.Test.Web.Blazor.Data
 {
-	public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
-	{
-        public override Func<XpoApplicationUser, ApplicationUser> CreateModel => (source) => {
-            var r = base.CreateModel(source);
-            r.BirthDate = source.BirthDate;
-            r.Street = source.Street;
-            r.HouseNo = source.HouseNo;
-            r.HouseNoSuffix = source.HouseNoSuffix;
-            r.ZipCode = source.ZipCode;
-            r.City = source.City;
-            r.State = source.State;
-            r.Country = source.Country;
-            return r;
-        };
-        public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
-        {
-            XpoApplicationUser result = base.Assign(source, destination);
-            result.BirthDate = source.BirthDate;
-            result.Street = source.Street;
-            result.HouseNo = source.HouseNo;
-            result.HouseNoSuffix = source.HouseNoSuffix;
-            result.ZipCode = source.ZipCode;
-            result.City = source.City;
-            result.State = source.State;
-            result.Country = source.Country;
+	//public class ApplicationUserMapper : XPUserMapper<ApplicationUser, XpoApplicationUser>
+	//{
+ //       public override Func<XpoApplicationUser, ApplicationUser> CreateModel => (source) => {
+ //           var r = base.CreateModel(source);
+ //           r.BirthDate = source.BirthDate;
+ //           r.Street = source.Street;
+ //           r.HouseNo = source.HouseNo;
+ //           r.HouseNoSuffix = source.HouseNoSuffix;
+ //           r.ZipCode = source.ZipCode;
+ //           r.City = source.City;
+ //           r.State = source.State;
+ //           r.Country = source.Country;
+ //           return r;
+ //       };
+ //       public override XpoApplicationUser Assign(ApplicationUser source, XpoApplicationUser destination)
+ //       {
+ //           XpoApplicationUser result = base.Assign(source, destination);
+ //           result.BirthDate = source.BirthDate;
+ //           result.Street = source.Street;
+ //           result.HouseNo = source.HouseNo;
+ //           result.HouseNoSuffix = source.HouseNoSuffix;
+ //           result.ZipCode = source.ZipCode;
+ //           result.City = source.City;
+ //           result.State = source.State;
+ //           result.Country = source.Country;
 
-            return result;
-        }
-        public override string Map(string sourceField)
-		{
-			return base.Map(sourceField);
-		}		
-	}
+ //           return result;
+ //       }
+ //       public override string Map(string sourceField)
+	//	{
+	//		return base.Map(sourceField);
+	//	}		
+	//}
 
 	// Add profile data for application users by adding properties to the ApplicationUser class
-	public class ApplicationUser : XPIdentityUser
+	public class ApplicationUser : IdentityUser, IIdentityRefreshToken
 	{
 		public ApplicationUser()
 		{
@@ -57,8 +58,9 @@ namespace DX.Test.Web.Blazor.Data
 		public string City { get; set; }
 		public string State { get; set; }
 		public string Country { get; set; }
-
-	}
+        public string RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+    }
 
     // This class will be persisted in the database by XPO
     // It should have the same properties as the ApplicationUser
@@ -133,7 +135,7 @@ namespace DX.Test.Web.Blazor.Data
             set => SetPropertyValue(nameof(country), ref country, value);
         }
 
-        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/16/2022 10:19 AM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 8-1-2024 10:00
         public new class FieldsClass : XpoDxUser.FieldsClass
         {
             public FieldsClass()
@@ -196,26 +198,26 @@ namespace DX.Test.Web.Blazor.Data
     }
 
 
-    public class ApplicationRole : XPIdentityRole
+    public class ApplicationRole : IdentityRole
 	{
 		public ApplicationRole()
 		{ }
 	}
-	public class ApplicationRoleMapper : XPRoleMapper<string, ApplicationRole, XpoApplicationRole>
-	{
-		public override Func<XpoApplicationRole, ApplicationRole> CreateModel => base.CreateModel;
+	//public class ApplicationRoleMapper : XPRoleMapper<string, ApplicationRole, XpoApplicationRole>
+	//{
+	//	public override Func<XpoApplicationRole, ApplicationRole> CreateModel => base.CreateModel;
 
-		public override XpoApplicationRole Assign(ApplicationRole source, XpoApplicationRole destination)
-		{
-			XpoApplicationRole result = base.Assign(source, destination);
-			return result;
-		}
+	//	public override XpoApplicationRole Assign(ApplicationRole source, XpoApplicationRole destination)
+	//	{
+	//		XpoApplicationRole result = base.Assign(source, destination);
+	//		return result;
+	//	}
 
-		public override string Map(string sourceField)
-		{
-			return base.Map(sourceField);
-		}
-	}
+	//	public override string Map(string sourceField)
+	//	{
+	//		return base.Map(sourceField);
+	//	}
+	//}
 
 
 	[MapInheritance(MapInheritanceType.ParentTable)]
@@ -225,7 +227,7 @@ namespace DX.Test.Web.Blazor.Data
 		{
 		}
 
-        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/16/2022 10:19 AM
+        // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 8-1-2024 10:00
         public new class FieldsClass : XpoDxRole.FieldsClass
         {
             public FieldsClass()
@@ -233,6 +235,7 @@ namespace DX.Test.Web.Blazor.Data
 
             }
 
+            /// <!-- Badly formed XML comment ignored for member "M:DX.Data.Xpo.Identity.Persistent.XpoDxBase.FieldsClass.#ctor(System.String)" -->
             public FieldsClass(string propertyName) : base(propertyName)
             {
 
