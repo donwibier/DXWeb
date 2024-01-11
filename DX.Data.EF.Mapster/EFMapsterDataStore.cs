@@ -4,7 +4,7 @@ using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-;
+
 namespace DX.Data.EF.Mapster
 {
 	public abstract class EFMapsterDataStore<TEFContext, TKey, TModel, TDBModel> : EFDataStore<TEFContext, TKey, TModel, TDBModel>
