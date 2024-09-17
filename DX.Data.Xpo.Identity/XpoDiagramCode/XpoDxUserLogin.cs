@@ -3,8 +3,11 @@ using DevExpress.Xpo;
 using DevExpress.Data.Filtering;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if(NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
-
+#else
+using Microsoft.AspNet.Identity;
+#endif
 
 namespace DX.Data.Xpo.Identity.Persistent
 {
@@ -42,7 +45,9 @@ namespace DX.Data.Xpo.Identity.Persistent
             User = user as XpoDxUser;    
             LoginProvider = login.LoginProvider;
             ProviderKey = login.ProviderKey;
+#if (NETCOREAPP)
             ProviderDisplayName = login.ProviderDisplayName;
+#endif
         }
 
         //public override void Assign(object source, int loadingFlags)
@@ -103,7 +108,12 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
         }
 
-        static FieldsClass _Fields;
+		string IXPUserLogin<string>.UserId { 
+            get => this.UserId;
+            set => User = Session.GetObjectByKey<XpoDxUser>(value);
+        }
+
+		static FieldsClass _Fields;
 
         
     }

@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.14</Version>
-		<FileVersion>23.2.3.14</FileVersion>
+		<Version>24.1.5.15</Version>
+		<FileVersion>24.1.5.15</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
 	</PropertyGroup>
   
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
 	  <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Mvc</PackageProjectUrl>
 	  <!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -51,9 +51,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="23.2.3" />
-		<PackageReference Include="DevExpress.Data" Version="23.2.3" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="23.2.3" />
+		<PackageReference Include="DevExpress.Xpo" Version="24.1.5" />
+		<PackageReference Include="DevExpress.Data" Version="24.1.5" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="24.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>

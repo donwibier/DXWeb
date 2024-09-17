@@ -10,8 +10,15 @@ using FluentValidation.Results;
 
 namespace DX.Data
 {
-    public class DataResult<TKey> : IDataResult<TKey> 
-        where TKey : IEquatable<TKey>        
+    public class DataResult<TKey> : DataResult<TKey, object>
+        where TKey : IEquatable<TKey>
+    {
+
+    }
+
+    public class DataResult<TKey, TModel> : IDataResult<TKey, TModel> 
+        where TKey : IEquatable<TKey>
+        where TModel : class
     {
         public DataResult()
         {
@@ -31,6 +38,7 @@ namespace DX.Data
         public bool Success { get; set; }
         public DataMode Mode { get; set; }
         public TKey Key { get; set; }
+        public TModel[] Data { get; set; } = default!;
         public ValidationException Exception { get; set; }
     }
 

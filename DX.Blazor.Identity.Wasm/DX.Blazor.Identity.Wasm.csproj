@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>23.2.3.22</Version>
-		<FileVersion>23.2.3.22</FileVersion>
+		<Version>23.2.3.23</Version>
+		<FileVersion>23.2.3.23</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor WASM token based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
-		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
@@ -24,7 +24,7 @@
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+	<!--<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.16" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
 	</ItemGroup>
@@ -32,11 +32,11 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.13" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.13" />
-	</ItemGroup>
+	</ItemGroup>-->
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

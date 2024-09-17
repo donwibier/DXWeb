@@ -1,5 +1,6 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
+using DX.Data;
 using DX.Data.Xpo.Identity;
 using DX.Data.Xpo.Identity.Persistent;
 using Microsoft.AspNetCore.Identity;

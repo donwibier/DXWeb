@@ -71,6 +71,12 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
         }
 
+        string IXPUserClaim<string>.UserId 
+        { 
+            get => this.UserId;
+            set => User = Session.GetObjectByKey< XpoDxUser>(value); 
+        }
+
         static FieldsClass _Fields;
     }
 

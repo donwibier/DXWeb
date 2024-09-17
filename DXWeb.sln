@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E9580D45-DC31-433B-856B-3DCC4F5FC058}"
 	ProjectSection(SolutionItems) = preProject
 		DXWeb.cmd = DXWeb.cmd
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo", "DX.Data.Xpo\DX.Data.Xpo.csproj", "{94EDFF4D-1819-4D21-B779-C0C0B72DA44F}"
@@ -55,11 +56,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.EF.AutoMapper", "DX
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Identity.AutoMapper", "DX.Data.Xpo.Identity.AutoMapper\DX.Data.Xpo.Identity.AutoMapper.csproj", "{CBBE1EAE-DDB1-427E-BDCE-315376FABB03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo.Mapster", "DX.Data.Xpo.Mapster\DX.Data.Xpo.Mapster.csproj", "{5B5A8EB7-4544-4740-A670-65CCFC43C37B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Mapster", "DX.Data.Xpo.Mapster\DX.Data.Xpo.Mapster.csproj", "{5B5A8EB7-4544-4740-A670-65CCFC43C37B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.Xpo.Identity.Mapster", "DX.Data.Xpo.Identity.Mapster\DX.Data.Xpo.Identity.Mapster.csproj", "{61E29212-54FD-46A3-8A02-9D019ABF6BCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Identity.Mapster", "DX.Data.Xpo.Identity.Mapster\DX.Data.Xpo.Identity.Mapster.csproj", "{61E29212-54FD-46A3-8A02-9D019ABF6BCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX.Data.EF.Mapster", "DX.Data.EF.Mapster\DX.Data.EF.Mapster.csproj", "{C2C267F6-1DA7-4E6C-890A-BD702356F2A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.EF.Mapster", "DX.Data.EF.Mapster\DX.Data.EF.Mapster.csproj", "{C2C267F6-1DA7-4E6C-890A-BD702356F2A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

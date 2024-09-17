@@ -11,7 +11,14 @@ namespace DX.Data
 	{
 		Create,
 		Update,
-		Delete
+		Delete,
+		Store
+	}
+
+	public interface IIdentityRefreshToken
+	{
+		string RefreshToken { get; set; }
+		DateTime? RefreshTokenExpiryTime { get; set; }
 	}
 
 	public interface IAssignable
@@ -19,14 +26,24 @@ namespace DX.Data
 		void Assign(object source);
 	}
 
-	public interface IDataResult<TKey>
-		where TKey : IEquatable<TKey>
-		
-	{
-		bool Success { get; set; }
-		DataMode Mode { get; set; }
-		TKey Key { get; set; }
+	//public interface IDataResult<TKey> : IDataResult<TKey, object>
+	//	where TKey : IEquatable<TKey>
+	//{
+	//}
+
+	public interface IDataResult {
+        bool Success { get; set; }
+        DataMode Mode { get; set; }
         ValidationException Exception { get; set; }
+    }
+
+    public interface IDataResult<TKey, TModel> : IDataResult
+		where TKey : IEquatable<TKey>
+        where TModel : class
+    {
+	
+		TKey Key { get; set; }
+		TModel[] Data { get; set; } 
 	}
 
 	[Obsolete("For legacy reasons only. Use DX.Data.AutoMapper or DX.Data.Mapster descendants")]
@@ -44,16 +61,16 @@ namespace DX.Data
 		where TKey : IEquatable<TKey>
 		where TModel : class
 	{
-        Task<IDataResult<TKey>> DeleteAsync(params TModel[] items);
+        Task<IDataResult<TKey, TModel>> DeleteAsync(params TModel[] items);
 
         string KeyField { get; }
 		TModel GetByKey(TKey key);
 		TKey ModelKey(TModel model);
 		void SetModelKey(TModel model, TKey key);
-		Task<IDataResult<TKey>> StoreAsync(params TModel[] items);
-		Task<IDataResult<TKey>> CreateAsync(params TModel[] items);
-		Task<IDataResult<TKey>> UpdateAsync(params TModel[] items);
-		Task<IDataResult<TKey>> DeleteAsync(params TKey[] ids);
+		Task<IDataResult<TKey, TModel>> StoreAsync(params TModel[] items);
+		Task<IDataResult<TKey, TModel>> CreateAsync(params TModel[] items);
+		Task<IDataResult<TKey, TModel>> UpdateAsync(params TModel[] items);
+		Task<IDataResult<TKey, TModel>> DeleteAsync(params TKey[] ids);
 	}
 
 	public interface IQueryableDataStore<TKey, TModel> : IDataStore<TKey, TModel>

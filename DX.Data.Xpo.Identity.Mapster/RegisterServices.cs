@@ -1,6 +1,5 @@
 ﻿using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Mapster;
 using MapsterMapper;
@@ -10,8 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DX.Data.Xpo.Identity.Mapster
 {
+#if (NETCOREAPP)
+	using Microsoft.AspNetCore.Identity;
+
+
 	public static class RegisterServices
 	{
 		public static IdentityBuilder AddXpoMapsterIdentityStores(this IdentityBuilder builder, string connectionName)
@@ -132,4 +136,6 @@ namespace DX.Data.Xpo.Identity.Mapster
 			TypeAdapterConfig<TXPORoleClaim, TRoleClaim>.NewConfig().Ignore(dest => dest.Id);
 		}
 	}
+#endif
+
 }

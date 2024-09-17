@@ -66,7 +66,12 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
         }
 
-        static FieldsClass _Fields;
+		string IXPUserToken<string>.UserId { 
+            get => this.UserId; 
+            set => User = Session.GetObjectByKey<XpoDxUser>(value); 
+        }
+
+		static FieldsClass _Fields;
     }
 
 }

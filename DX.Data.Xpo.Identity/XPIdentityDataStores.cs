@@ -3,7 +3,6 @@ using DevExpress.Data.Filtering;
 using DevExpress.Entity.Model.Metadata;
 using DevExpress.Xpo;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +15,20 @@ using System.Timers;
 using DevExpress.Data.Filtering.Helpers;
 using System.Data;
 
+#if(NETCOREAPP)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
+
+
 namespace DX.Data.Xpo.Identity
 {
     public abstract class XPBaseUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
                                     TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
             XPDataStore<TKey, TUser, TXPOUser>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>
                 where TKey : IEquatable<TKey>
+#if (NETCOREAPP)
                 where TUser : IdentityUser<TKey>, new()
                 where TRole : IdentityRole<TKey>, new()
                 where TUserClaim : IdentityUserClaim<TKey>, new()
@@ -29,7 +36,17 @@ namespace DX.Data.Xpo.Identity
                 where TUserLogin : IdentityUserLogin<TKey>, new()
                 where TUserToken : IdentityUserToken<TKey>, new()
                 where TRoleClaim : IdentityRoleClaim<TKey>, new()
-                where TXPOUser : XPBaseObject, IXPUser<TKey>
+#else
+				where TUser : class, IXPUser<TKey>, new()
+				where TRole : class, IXPRole<TKey>, new()
+				where TUserClaim : class, IXPUserClaim<TKey>, new()
+				where TUserRole : class, IXPUserRole<TKey>, new()
+				where TUserLogin : class, IXPUserLogin<TKey>, new()
+				where TUserToken : class, IXPUserToken<TKey>, new()
+				where TRoleClaim : class, IXPRoleClaim<TKey>, new()
+
+#endif
+				where TXPOUser : XPBaseObject, IXPUser<TKey>
                 where TXPORole : XPBaseObject, IXPRole<TKey>
                 where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
                 where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
@@ -40,7 +57,7 @@ namespace DX.Data.Xpo.Identity
 
         }
 
-        public override string KeyField => nameof(IdentityUser.Id);
+        public override string KeyField => "Id"; //nameof(IdentityUser.Id);
         public override TKey ModelKey(TUser model) => model.Id;
         public override void SetModelKey(TUser model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPOUser model) => model.Id;
@@ -60,7 +77,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNull(claims);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
                 //get current assigned claims
@@ -90,7 +107,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNull(login);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
                 //get current assigned claims
@@ -117,7 +134,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNullOrEmpty(normalizedRoleName);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
 
@@ -209,7 +226,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNull(claims);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
 
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
@@ -232,7 +249,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNullOrEmpty(normalizedRoleName);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
 
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
@@ -250,7 +267,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNullOrEmpty(loginProvider);
             ThrowIfNullOrEmpty(providerKey);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {                
+            await TransactionalExecAsync(async (s, w) => {                
                 var userLogins = await w.Query<TXPOLogin>()
                         .Where(ul => ul.UserId.Equals(ModelKey(user)) && ul.LoginProvider == loginProvider && ul.ProviderKey == providerKey)
                         .ToListAsync(cancellationToken);
@@ -270,7 +287,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claim);
             ThrowIfNull(newClaim);
 
-            await TransactionalExecAsync<TXPOUser>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
 
                 var userClaims = await w.Query<TXPOClaim>()
                         .Where(uc => uc.UserId.Equals(ModelKey(user)) && uc.ClaimType == claim.Type && uc.ClaimValue == claim.Value)
@@ -296,7 +313,7 @@ namespace DX.Data.Xpo.Identity
                 TUserRole r = null!;
                 var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("Id == ? AND Users[Id == ?]", roleId, userId));
                 if (role != null)
-                {
+                {                    
                     r = new TUserRole() { UserId = userId, RoleId = role.Id };
                     MapTo(role, r);                    
                 }
@@ -311,7 +328,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfDisposed();
             ThrowIfNull(token);
             
-            await TransactionalExecAsync<object>(async (s, w) => {                
+            await TransactionalExecAsync(async (s, w) => {                
                 var tk = await w.FindObjectAsync<TXPOToken>(
                                             CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ? AND [Value] == ?", 
                                                     token.UserId, token.LoginProvider, token.Name, token.Value));
@@ -343,22 +360,106 @@ namespace DX.Data.Xpo.Identity
 			return result.FirstOrDefault();
 		}
 
-        public async Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<TUser?> FindByIdAsync(object userId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 			ThrowIfDisposed();
-			ThrowIfNullOrEmpty(userId);
+            if (userId == null)
+				throw new ArgumentNullException("userId");			
 
             var result = await FindAsync(CriteriaOperator.Parse("Id == ?", userId));
             return result.FirstOrDefault();
+		}
+
+		public async virtual Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			if (user == null)
+				throw new ArgumentNullException("user");
+			
+            //user.PasswordHash = passwordHash;
+			await TransactionalExecAsync(async (s, w) => {
+				var u = await w.GetObjectByKeyAsync<TXPOUser>(user.Id);
+				if (u != null)
+				{
+					u.PasswordHash = passwordHash;
+				}
+
+			});
+		}
+		public async Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken = default) 
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			if (user == null)
+				throw new ArgumentNullException("user");
+
+			var result = await TransactionalExecAsync(async (s, w) => {
+				
+                var u = await w.GetObjectByKeyAsync<TXPOUser>(user.Id);
+				return u?.PasswordHash ?? string.Empty;
+			}, false, false);
+            return result!;
+		}
+
+		public async Task<bool> HasPasswordHashAsync(TUser user, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			if (user == null)
+				throw new ArgumentNullException("user");
+
+			var result = await TransactionalExecAsync(async (s, w) => {
+
+				var u = await w.GetObjectByKeyAsync<TXPOUser>(user.Id);
+				return !string.IsNullOrEmpty(u?.PasswordHash ?? string.Empty);
+			}, false, false);
+			return result;
+		}
+
+		public async virtual Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			if (user == null)
+				throw new ArgumentNullException("user");
+
+			var result = await TransactionalExecAsync(async (s, w) => {
+
+				var u = await w.GetObjectByKeyAsync<TXPOUser>(user.Id);
+				return u?.SecurityStamp?? string.Empty;
+			}, false, false);
+			return result!;
+		}
+
+		public async virtual Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			if (user == null)
+				throw new ArgumentNullException("user");
+
+			await TransactionalExecAsync(async (s, w) => {
+				var u = await w.GetObjectByKeyAsync<TXPOUser>(user.Id);
+				if (u != null)
+				{
+					u.SecurityStamp= stamp;
+				}
+			});
 		}
 	}
 
 	public abstract class XPBaseRoleStore<TKey, TRole, TRoleClaim, TXPORole, TXPOClaim> : XPDataStore<TKey, TRole, TXPORole>, 
             IQueryableRoleStore<TKey, TRole>
         where TKey : IEquatable<TKey>
+#if (NETCOREAPP)
         where TRole : IdentityRole<TKey>, new()
         where TRoleClaim: IdentityRoleClaim<TKey>
+#else
+        where TRole : class, IXPRole<TKey>, new()
+        where TRoleClaim : class, IXPRoleClaim<TKey>, new()
+#endif
         where TXPORole : XPBaseObject, IXPRole<TKey>
         where TXPOClaim : XPBaseObject, IXPRoleClaim<TKey>
     {
@@ -366,7 +467,7 @@ namespace DX.Data.Xpo.Identity
         {
 
         }
-        public override string KeyField => nameof(IdentityUser.Id);
+        public override string KeyField => "Id"; // nameof(IdentityUser.Id);
         public override TKey ModelKey(TRole model) => model.Id;
         public override void SetModelKey(TRole model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPORole model) => model.Id;
@@ -399,7 +500,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(role);
             ThrowIfNull(claim);
 
-            await TransactionalExecAsync<TXPORole>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
                 //get role
                 var rle = await w.GetObjectByKeyAsync<TXPORole>(ModelKey(role), cancellationToken);
                 //get current assigned claims
@@ -426,7 +527,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(role);
             ThrowIfNull(claim);
 
-            await TransactionalExecAsync<object>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
 
                 //get user
                 var rle = await w.GetObjectByKeyAsync<TXPORole>(ModelKey(role), cancellationToken);
@@ -449,7 +550,7 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claim);
             ThrowIfNull(newClaim);
 
-            await TransactionalExecAsync<object>(async (s, w) => {
+            await TransactionalExecAsync(async (s, w) => {
 
                 var roleClaims = await w.Query<TXPOClaim>()
                         .Where(rc => rc.RoleId.Equals(ModelKey(role)) && rc.ClaimType == claim.Type && rc.ClaimValue == claim.Value)
@@ -470,7 +571,11 @@ namespace DX.Data.Xpo.Identity
 	public abstract class XPBaseUserLoginStore<TKey, TUserLogin, TXPOUserLogin> : XPDataStore<TKey, TUserLogin, TXPOUserLogin>,
 		IQueryableUserLoginStore<TKey, TUserLogin>
 	where TKey : IEquatable<TKey>
-	where TUserLogin : IdentityUserLogin<TKey>, new()
+#if(NETCOREAPP)
+    where TUserLogin : IdentityUserLogin<TKey>, new()
+#else
+	where TUserLogin : class, IXPUserLogin<TKey>, new()
+#endif
 	where TXPOUserLogin : XPBaseObject, IXPUserLogin<TKey>
 	{
 		public XPBaseUserLoginStore(IDataLayer dataLayer, IValidator<TXPOUserLogin> validator) : base(dataLayer, validator)
@@ -489,7 +594,11 @@ namespace DX.Data.Xpo.Identity
 			ThrowIfNull(userId);
 
             var results = await FindAsync(CriteriaOperator.Parse("[User.Id] == ?", userId));
-			return results.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey, l.ProviderDisplayName)).ToList();
+#if (NETCOREAPP)
+            return results.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey, l.ProviderDisplayName)).ToList();
+#else
+			return results.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey)).ToList();
+#endif
 		}
 
 		public async virtual Task<TUserLogin?> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
@@ -519,7 +628,11 @@ namespace DX.Data.Xpo.Identity
 	public abstract class XPBaseUserClaimStore<TKey, TUserClaim, TXPOUserClaim> : XPDataStore<TKey, TUserClaim, TXPOUserClaim>,
 			IQueryableUserClaimStore<TKey, TUserClaim>
 		where TKey : IEquatable<TKey>
-		where TUserClaim : IdentityUserClaim<TKey>, new()
+#if (NETCOREAPP)
+        where TUserClaim : IdentityUserClaim<TKey>, new()
+#else
+        where TUserClaim : class, IXPUserClaim<TKey>, new()
+#endif
 		where TXPOUserClaim : XPBaseObject, IXPUserClaim<TKey>
 	{
 		protected XPBaseUserClaimStore(IDataLayer dataLayer, IValidator<TXPOUserClaim> validator) : base(dataLayer, validator)
@@ -545,7 +658,11 @@ namespace DX.Data.Xpo.Identity
 	public abstract class XPBaseUserTokenStore<TKey, TUserToken, TXPOUserToken> : XPDataStore<TKey, TUserToken, TXPOUserToken>,
 			IQueryableUserTokenStore<TKey, TUserToken>
 		where TKey : IEquatable<TKey>
+#if (NETCOREAPP)
 		where TUserToken : IdentityUserToken<TKey>, new()
+#else
+        where TUserToken : class, IXPUserToken<TKey>, new()
+#endif
 		where TXPOUserToken : XPBaseObject, IXPUserToken<TKey>
 	{
 		public XPBaseUserTokenStore(IDataLayer dataLayer, IValidator<TXPOUserToken> validator) : base(dataLayer, validator)
@@ -574,7 +691,12 @@ namespace DX.Data.Xpo.Identity
 	public abstract class XPBaseRoleClaimStore<TKey, TRoleClaim, TXPORoleClaim> : XPDataStore<TKey, TRoleClaim, TXPORoleClaim>,
 		IQueryableRoleClaimStore<TKey, TRoleClaim>
 	where TKey : IEquatable<TKey>
-	where TRoleClaim : IdentityRoleClaim<TKey>, new()
+#if (NETCOREAPP)
+		where TRoleClaim : IdentityRoleClaim<TKey>, new()
+#else
+		where TRoleClaim : class, IXPRoleClaim<TKey>, new()
+#endif
+	
 	where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey>
 	{
 		public XPBaseRoleClaimStore(IDataLayer dataLayer, IValidator<TXPORoleClaim> validator) : base(dataLayer, validator)

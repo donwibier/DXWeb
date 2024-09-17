@@ -151,7 +151,7 @@ namespace DX.Data.EF
 
         class InsertHelper
         {
-            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey> insertedResult)
+            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey, TModel> insertedResult)
             {
                 Model = model;
                 InsertingResult = insertingResult;
@@ -159,14 +159,14 @@ namespace DX.Data.EF
             }
             public TModel Model { get; private set; }
             public ValidationResult InsertingResult { get; private set; }
-            public IDataResult<TKey> InsertedResult { get; private set; }
+            public IDataResult<TKey, TModel> InsertedResult { get; private set; }
         }
 
         //===============================
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
 
-        protected async virtual Task<IDataResult<TKey>> StoreAsync(StoreMode mode, params TModel[] items)
+        protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
@@ -221,7 +221,7 @@ namespace DX.Data.EF
 #endif
                     }
 
-                    return new DataResult<TKey> { Success = true, Mode = dataMode };
+                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode };
                 }
                 catch (Exception err)
                 {
@@ -230,40 +230,40 @@ namespace DX.Data.EF
 #else
                     wrk.Rollback();
 #endif
-                    return new DataResult<TKey>(DataMode.Create, nameof(TDBModel), err);
+                    return new DataResult<TKey, TModel>(DataMode.Create, nameof(TDBModel), err);
                 }
             }, false);
             return result;
         }
 
-        public async virtual Task<IDataResult<TKey>> StoreAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> StoreAsync(params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             return await StoreAsync(StoreMode.Store, items);
         }
 
-        public async virtual Task<IDataResult<TKey>> CreateAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> CreateAsync(params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             return await StoreAsync(StoreMode.Create, items);
         }
 
-        public async virtual Task<IDataResult<TKey>> UpdateAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> UpdateAsync(params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
             return await StoreAsync(StoreMode.Update, items);
         }
-        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> DeleteAsync(params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));            
             return await DeleteAsync(items.Select(i => ModelKey(i)).ToArray());
         }
 
-        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TKey[] ids)
+        public async virtual Task<IDataResult<TKey, TModel>> DeleteAsync(params TKey[] ids)
         {
             if (ids == null)
                 throw new ArgumentNullException(nameof(ids));
@@ -292,14 +292,14 @@ namespace DX.Data.EF
 #else
                     t.Commit();
 #endif
-                    return new DataResult<TKey> { Success = true, Mode = DataMode.Delete };
+                    return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
                 catch (ValidationException err)
                 {
-                    return new DataResult<TKey>(DataMode.Delete, nameof(TDBModel), err);
+                    return new DataResult<TKey, TModel>(DataMode.Delete, nameof(TDBModel), err);
                 }
             }, false);
             return result;
-        }
-    }
+        }		
+	}
 }

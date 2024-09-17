@@ -11,7 +11,7 @@
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 	  <RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
-	  <TargetFrameworks>net46;net6.0;net7.0;net8.0</TargetFrameworks>
+	  <TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
@@ -26,8 +26,8 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net46'">
-		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
+	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+		<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
 	</ItemGroup>
 
 </Project>

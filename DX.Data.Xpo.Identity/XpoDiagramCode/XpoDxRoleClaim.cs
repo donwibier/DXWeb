@@ -72,7 +72,13 @@ namespace DX.Data.Xpo.Identity.Persistent
             }
         }
 
-        static FieldsClass _Fields;
+		string IXPRoleClaim<string>.RoleId 
+        { 
+            get => this.RoleId; 
+            set => Role = Session.GetObjectByKey<XpoDxRole>(value); 
+        }
+
+		static FieldsClass _Fields;
     }
 
 }

@@ -2,10 +2,12 @@
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
-using Microsoft.AspNetCore.Identity;
 
 namespace DX.Data.Xpo.Identity.Mapster
 {
+#if (NETCOREAPP)
+	using Microsoft.AspNetCore.Identity;
+
 	public class XPMapsterUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
 									TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
 			XPBaseUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
@@ -170,4 +172,5 @@ namespace DX.Data.Xpo.Identity.Mapster
 		}
 
 	}
+#endif
 }

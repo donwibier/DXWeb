@@ -6,14 +6,18 @@
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-  </ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+		<PackageReference Include="AutoMapper" Version="10.1.1" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DX.Data.Xpo.AutoMapper\DX.Data.Xpo.AutoMapper.csproj" />
     <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />

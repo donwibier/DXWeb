@@ -9,12 +9,17 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using System.Timers;
+#if (NETCOREAPP)
+using Microsoft.AspNetCore.Identity;
+#else
+using Microsoft.AspNet.Identity;
+#endif
 
 namespace DX.Data.Xpo.Identity
 {
-	public class XPRoleStore<TKey, TRole,
+#if (NETCOREAPP)
+    public class XPRoleStore<TKey, TRole,
 							TUserRole, TRoleClaim, TXPORole, TXPOClaim> :
 		RoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
 			where TKey : IEquatable<TKey>
@@ -104,5 +109,5 @@ namespace DX.Data.Xpo.Identity
         }
 
     }
-
+#endif
 }

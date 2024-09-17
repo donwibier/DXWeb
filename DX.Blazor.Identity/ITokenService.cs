@@ -1,4 +1,5 @@
-﻿using DX.Data.Xpo.Identity;
+﻿using DX.Data;
+using DX.Data.Xpo.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System;

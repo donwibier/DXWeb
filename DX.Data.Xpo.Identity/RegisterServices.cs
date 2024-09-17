@@ -7,14 +7,15 @@ using FluentValidation;
 using DevExpress.Xpo;
 using DevExpress.Xpo.Metadata.Helpers;
 using DX.Data.Xpo.Identity.Persistent;
-using Microsoft.AspNetCore.Identity;
+#if (NETCOREAPP)
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-
+#endif
 
 namespace DX.Data.Xpo.Identity
 {
-
+#if (NETCOREAPP)
     public static class RegisterIdentityServices
     {
         static class Resources
@@ -187,7 +188,7 @@ namespace DX.Data.Xpo.Identity
 
 
     }
-
+#endif
 #if (crap)
 
     using Microsoft.AspNetCore.Identity;

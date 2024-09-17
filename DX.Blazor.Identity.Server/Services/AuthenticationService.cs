@@ -1,4 +1,5 @@
 ﻿using DX.Blazor.Identity.Models;
+using DX.Data;
 using DX.Data.Xpo.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.DataProtection;

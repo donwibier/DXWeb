@@ -7,7 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
+
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 //using Microsoft.AspNetCore.Builder;
+#else
+using System.Configuration;
 #endif
 
 namespace DX.Data.Xpo

@@ -13,8 +13,8 @@ namespace DX.Data.Xpo.Identity.Persistent
 		public override void AfterConstruction() { base.AfterConstruction(); }
 		protected void setId(string s) => _Id = s;
 
-		[PersistentAlias(nameof(Id))]
-		public virtual string ID { get => (string)EvaluateAlias(nameof(ID)); }
+		//[PersistentAlias(nameof(Id))]
+		//public virtual string ID { get => (string)EvaluateAlias(nameof(ID)); }
 		//[NonPersistent]
 		//public virtual string ID { get => _Id; set => _Id = value; }
 
@@ -31,7 +31,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 		}
 
 		#region Embedded Fields class
-		// Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 11-1-2024 10:01
+		// Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 22-1-2024 17:52
 		public new class FieldsClass : PersistentBase.FieldsClass
 		{
 			public FieldsClass()
@@ -53,15 +53,10 @@ namespace DX.Data.Xpo.Identity.Persistent
 			/// <summary>
 			/// <para>Indicates that persistent objects referenced by the target property are aggregated.</para>
 			/// </summary>
-			/// </member>
 			public FieldsClass(string propertyName) : base(propertyName)
 			{
 
 			}
-
-			public const string IDFieldName = "ID";
-
-			public OperandProperty ID => new OperandProperty(GetNestedName(IDFieldName));
 
 			public const string _IdFieldName = "_Id";
 

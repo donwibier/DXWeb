@@ -1,10 +1,15 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Linq;
 
+#if (NETCOREAPP)
+using Microsoft.EntityFrameworkCore;
+#else
+using System.Data.Entity;
+#endif
 
 
 namespace DX.Data.EF.AutoMapper

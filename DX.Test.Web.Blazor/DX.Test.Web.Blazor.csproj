@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="23.2.3" />
-	<PackageReference Include="DevExpress.Data" Version="23.2.3" />
+    <PackageReference Include="DevExpress.Blazor" Version="24.1.5" />
+	<PackageReference Include="DevExpress.Data" Version="24.1.5" />
 	<PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
     <!--<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview9.19424.4" />-->
   </ItemGroup>

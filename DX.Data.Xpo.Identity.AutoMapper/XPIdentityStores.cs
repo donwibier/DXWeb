@@ -5,7 +5,6 @@ using DevExpress.Xpo;
 using DX.Data.Xpo.AutoMapper;
 using DX.Data.Xpo.Identity.Persistent;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
@@ -17,7 +16,10 @@ using System.Threading.Tasks;
 
 namespace DX.Data.Xpo.Identity.AutoMapper
 {
-    public class XPAutoMapperUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
+#if (NETCOREAPP)
+    using Microsoft.AspNetCore.Identity;
+
+	public class XPAutoMapperUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
                                     TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
             XPBaseUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
                                     TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>
@@ -181,4 +183,6 @@ namespace DX.Data.Xpo.Identity.AutoMapper
 		}
 
 	}
+
+#endif
 }

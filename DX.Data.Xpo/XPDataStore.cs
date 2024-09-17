@@ -34,12 +34,6 @@ namespace DX.Data.Xpo
             Validator = validator;
         }
 
-        //public XPDataStore(string connectionName, IValidator<TDBModel> validator)
-        //{
-            
-        //}
-        
-
         private UnitOfWork _uow = default!;
         private bool _disposed;
         protected bool IsUOWDisposed { get => _uow == default; }
@@ -115,7 +109,7 @@ namespace DX.Data.Xpo
             }
             return result;
         }
-        protected async virtual Task TransactionalExecAsync<T>(
+        protected async virtual Task TransactionalExecAsync(
             Func<XPDataStore<TKey, TModel, TDBModel>, Session, Task> work,
             bool transactional = true, bool autoCommit = true)
         {
@@ -129,6 +123,7 @@ namespace DX.Data.Xpo
                 if (autoCommit && transactional)
                     await wrk.CommitTransactionAsync();
             }
+            
         }
         public abstract string KeyField { get; }
 
@@ -150,7 +145,7 @@ namespace DX.Data.Xpo
 
         class InsertHelper
         {
-            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey> insertedResult)
+            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey, TModel> insertedResult)
             {
                 Model = model;
                 InsertingResult = insertingResult;
@@ -158,13 +153,13 @@ namespace DX.Data.Xpo
             }
             public TModel Model { get; private set; }
             public ValidationResult InsertingResult { get; private set; }
-            public IDataResult<TKey> InsertedResult { get; private set; }
+            public IDataResult<TKey, TModel> InsertedResult { get; private set; }
         }
 
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
 
-        protected async virtual Task<IDataResult<TKey>> StoreAsync(StoreMode mode, params TModel[] items)
+        protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             ThrowIfNull(items);
 
@@ -186,7 +181,7 @@ namespace DX.Data.Xpo
                             {
                                 dataMode = DataMode.Create;
                                 dbItem = (Activator.CreateInstance(typeof(TDBModel), wrk) as TDBModel)!;
-                                batchPairs.Add(dbItem, new InsertHelper(item, validationResult, new DataResult<TKey>()));
+                                batchPairs.Add(dbItem, new InsertHelper(item, validationResult, new DataResult<TKey, TModel>()));
                             }
                             else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
                             {
@@ -225,45 +220,45 @@ namespace DX.Data.Xpo
                         };
                         await wrk.CommitTransactionAsync();
                         if (commitFailure != null)
-                            return new DataResult<TKey> { Success = false, Mode = dataMode, Exception = commitFailure };
+                            return new DataResult<TKey, TModel> { Success = false, Mode = dataMode, Exception = commitFailure };
                         else
-                            return new DataResult<TKey> { Success = true, Mode = dataMode };
+                            return new DataResult<TKey, TModel> { Success = true, Mode = dataMode };
                     }
                     catch (Exception err)
                     {
                         wrk.RollbackTransaction();
-                        return new DataResult<TKey>(DataMode.Create, nameof(TDBModel), err);
+                        return new DataResult<TKey, TModel>(DataMode.Create, nameof(TDBModel), err);
                     }
                 },
                 true, false);
             return result;
         }
 
-        public async virtual Task<IDataResult<TKey>> StoreAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> StoreAsync(params TModel[] items)
         {
             ThrowIfNull(items);
             return await StoreAsync(StoreMode.Store, items);
 
         }
 
-        public async virtual Task<IDataResult<TKey>> CreateAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> CreateAsync(params TModel[] items)
         {
             ThrowIfNull(items);
             return await StoreAsync(StoreMode.Create, items);
         }
 
-        public async virtual Task<IDataResult<TKey>> UpdateAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> UpdateAsync(params TModel[] items)
         {
             ThrowIfNull(items);
             return await StoreAsync(StoreMode.Update, items);
         }
-        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TModel[] items)
+        public async virtual Task<IDataResult<TKey, TModel>> DeleteAsync(params TModel[] items)
         {
             ThrowIfNull(items);
             return await DeleteAsync(items.Select(i => ModelKey(i)).ToArray());
         }
 
-        public async virtual Task<IDataResult<TKey>> DeleteAsync(params TKey[] ids)
+        public async virtual Task<IDataResult<TKey, TModel>> DeleteAsync(params TKey[] ids)
         {
             ThrowIfNull(ids);
 
@@ -292,14 +287,14 @@ namespace DX.Data.Xpo
 
                     await wrk.CommitTransactionAsync();
                     if (commitFailure != null)
-                        return new DataResult<TKey> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
+                        return new DataResult<TKey, TModel> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
                     else
-                        return new DataResult<TKey> { Success = true, Mode = DataMode.Delete };
+                        return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
                 catch (ValidationException err)
                 {
                     wrk.RollbackTransaction();
-                    return new DataResult<TKey>(DataMode.Delete, nameof(TDBModel), err);
+                    return new DataResult<TKey, TModel>(DataMode.Delete, nameof(TDBModel), err);
                 }
             }, true, false);
             return result;

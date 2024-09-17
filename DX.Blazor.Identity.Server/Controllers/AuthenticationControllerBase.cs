@@ -14,6 +14,7 @@ using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authorization;
+using DX.Data;
 
 namespace DX.Blazor.Identity.Server.Controllers
 {

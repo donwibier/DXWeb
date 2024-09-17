@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.31</Version>
-		<FileVersion>23.2.3.31</FileVersion>
+		<Version>23.2.3.32</Version>
+		<FileVersion>23.2.3.32</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Abstract DX.Data.IDataStore implementation for use with EF with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -28,6 +28,11 @@
 		<ProjectReference Include="..\DX.Utils\DX.Utils.csproj" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+		<PackageReference Include="EntityFramework" Version="6.4.4" />
+		<PackageReference Include="FluentValidation" Version="9.5.4" />
+	</ItemGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.16" />
 	</ItemGroup>
@@ -40,12 +45,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-		<PackageReference Include="EntityFramework" Version="6.4.4" />
+	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+		<PackageReference Include="FluentValidation" Version="11.9.2" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="11.8.1" />
-	</ItemGroup>
-
 </Project>

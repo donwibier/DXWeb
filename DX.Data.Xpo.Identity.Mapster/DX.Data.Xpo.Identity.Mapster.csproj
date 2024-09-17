@@ -6,13 +6,19 @@
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Mapster implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
+		<LangVersion>10.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 
-	<ItemGroup>
+
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+		<PackageReference Include="Mapster" Version="7.2.0" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
 		<PackageReference Include="Mapster" Version="7.4.0" />
 	</ItemGroup>
 
