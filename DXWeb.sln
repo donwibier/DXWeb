@@ -42,8 +42,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Blazor.Identity.Wasm", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Blazor.Identity.Server", "DX.Blazor.Identity.Server\DX.Blazor.Identity.Server.csproj", "{78E182CB-30FA-492A-BC8F-3C9D9A199D7E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data.Xpo.Interfaces", "DX.Data.Xpo.Interfaces\DX.Data.Xpo.Interfaces.csproj", "{30F0DEA7-9900-40BA-884F-02E0B3D84DD0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Data", "DX.Data\DX.Data.csproj", "{385EDC6A-B815-43EF-A8A3-EDAA99A63024}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DX.Test.Blazor8", "DX.Test.Blazor8\DX.Test.Blazor8\DX.Test.Blazor8.csproj", "{30022217-A55E-4958-ABF2-7700C81979B2}"
@@ -108,10 +106,6 @@ Global
 		{78E182CB-30FA-492A-BC8F-3C9D9A199D7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78E182CB-30FA-492A-BC8F-3C9D9A199D7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78E182CB-30FA-492A-BC8F-3C9D9A199D7E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{30F0DEA7-9900-40BA-884F-02E0B3D84DD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{30F0DEA7-9900-40BA-884F-02E0B3D84DD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{30F0DEA7-9900-40BA-884F-02E0B3D84DD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{30F0DEA7-9900-40BA-884F-02E0B3D84DD0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{385EDC6A-B815-43EF-A8A3-EDAA99A63024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{385EDC6A-B815-43EF-A8A3-EDAA99A63024}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{385EDC6A-B815-43EF-A8A3-EDAA99A63024}.Release|Any CPU.ActiveCfg = Release|Any CPU

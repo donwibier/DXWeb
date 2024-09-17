@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>23.2.3.31</Version>
-		<FileVersion>23.2.3.31</FileVersion>
+		<Version>23.2.3.32</Version>
+		<FileVersion>23.2.3.32</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Mapster implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>

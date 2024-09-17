@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.31</Version>
-		<FileVersion>23.2.3.31</FileVersion>
+		<Version>23.2.3.32</Version>
+		<FileVersion>23.2.3.32</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DX.Data.IDataStore implementation for use with EF with FluentValidation and Mapster</Description>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>24.1.5.32</Version>
-		<FileVersion>24.1.5.32</FileVersion>
+		<Version>24.1.5.33</Version>
+		<FileVersion>24.1.5.33</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based abstract storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>

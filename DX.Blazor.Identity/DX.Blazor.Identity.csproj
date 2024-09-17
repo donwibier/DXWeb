@@ -5,8 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>23.2.3.25</Version>
-		<FileVersion>23.2.3.25</FileVersion>
+		<Version>23.2.3.26</Version>
+		<FileVersion>23.2.3.26</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>

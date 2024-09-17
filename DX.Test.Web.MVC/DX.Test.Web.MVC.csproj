@@ -417,10 +417,6 @@
       <Project>{4a9ec437-f8f0-4c53-b288-de26e58f061f}</Project>
       <Name>DX.Data.Xpo.Identity</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DX.Data.Xpo.Interfaces\DX.Data.Xpo.Interfaces.csproj">
-      <Project>{30f0dea7-9900-40ba-884f-02e0b3d84dd0}</Project>
-      <Name>DX.Data.Xpo.Interfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj">
       <Project>{94edff4d-1819-4d21-b779-c0c0b72da44f}</Project>
       <Name>DX.Data.Xpo</Name>
