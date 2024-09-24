@@ -194,7 +194,10 @@ namespace DX.Data.Xpo
                             ToDBModel(item, dbItem);
                             validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
                             if (!validationResult.IsValid)
-                                throw new ValidationException(validationResult.Errors);
+                            {
+                                throw new ValidationException("Validation Failed", validationResult.Errors);                                
+                            }
+                                
                             await wrk.SaveAsync(dbItem);
                         }
 
@@ -220,14 +223,26 @@ namespace DX.Data.Xpo
                         };
                         await wrk.CommitTransactionAsync();
                         if (commitFailure != null)
-                            return new DataResult<TKey, TModel> { Success = false, Mode = dataMode, Exception = commitFailure };
+                            return new DataResult<TKey, TModel> { 
+                                Success = false, 
+                                Mode = dataMode, 
+                                Exception = commitFailure ,
+                                Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                            };
                         else
-                            return new DataResult<TKey, TModel> { Success = true, Mode = dataMode };
+                            return new DataResult<TKey, TModel> { 
+                                Success = true, 
+                                Mode = dataMode,
+                                Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                            };
                     }
                     catch (Exception err)
                     {
                         wrk.RollbackTransaction();
-                        return new DataResult<TKey, TModel>(DataMode.Create, nameof(TDBModel), err);
+                        return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err)
+                        {
+                            Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                        };                        
                     }
                 },
                 true, false);

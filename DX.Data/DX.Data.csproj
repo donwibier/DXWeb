@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.33</Version>
-		<FileVersion>23.2.3.33</FileVersion>
+		<Version>23.2.3.34</Version>
+		<FileVersion>23.2.3.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>		
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
 		<Description>Base Data Package with DataStore DTO and FluentValidation Mechanism, Interfaces and ApiDataStore</Description>

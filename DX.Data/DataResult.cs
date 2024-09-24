@@ -32,7 +32,8 @@ namespace DX.Data
             Success = (err == null);
             if (!Success)
             {
-                Exception = new ValidationException(new[] { new ValidationFailure(propertyName, err.InnerException == null ? err.Message : err.InnerException.Message) });
+                Exception = (err as ValidationException)??
+                    new ValidationException(new[] { new ValidationFailure(propertyName, err.InnerException == null ? err.Message : err.InnerException.Message) });
             }
         }
         public bool Success { get; set; }

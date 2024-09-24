@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.33</Version>
-		<FileVersion>23.2.3.33</FileVersion>
+		<Version>23.2.3.34</Version>
+		<FileVersion>23.2.3.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes and abstract DX.Data.IDataStore implementation for use with XPO with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
