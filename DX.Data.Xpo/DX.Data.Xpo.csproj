@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>23.2.3.34</Version>
-		<FileVersion>23.2.3.34</FileVersion>
+		<Version>24.1.6.34</Version>
+		<FileVersion>24.1.6.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes and abstract DX.Data.IDataStore implementation for use with XPO with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
@@ -75,21 +75,16 @@
 		<PackageReference Include="FluentValidation" Version="9.5.4" />
 	</ItemGroup>
 
-
-
 	<ItemGroup Condition="'$(TargetFramework)'!='net461'">
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-		<PackageReference Include="FluentValidation" Version="11.9.2" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="11.10.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
 		<!--<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />-->
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
-
-		<PackageReference Include="DevExpress.Xpo" Version="24.1.5" />
-		
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DevExpress.Xpo" Version="24.1.6" />
 	</ItemGroup>
 
 	<ItemGroup>

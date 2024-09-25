@@ -214,7 +214,7 @@ namespace DX.Data.Xpo
         }
         #region ICustomFunctionOperatorQueryable Members
 
-        public System.Reflection.MethodInfo GetMethodInfo()
+        public System.Reflection.MethodInfo? GetMethodInfo()
         {
             return typeof(GeoHaversineFunction).GetMethod(FunctionName);
         }

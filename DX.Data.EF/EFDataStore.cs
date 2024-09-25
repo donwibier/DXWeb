@@ -9,6 +9,10 @@ using DX.Data;
 using FluentValidation;
 using FluentValidation.Results;
 
+//using System.ComponentModel.DataAnnotations;
+
+
+
 
 #if (NETCOREAPP)
 using Microsoft.EntityFrameworkCore;
@@ -161,7 +165,12 @@ namespace DX.Data.EF
             public ValidationResult InsertingResult { get; private set; }
             public IDataResult<TKey, TModel> InsertedResult { get; private set; }
         }
-
+        protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
+        {
+            var err = new ValidationException("Validation Failed", validationResult.Errors);
+            err.Data.Add("model", model);
+            return err;
+        }
         //===============================
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
@@ -187,7 +196,7 @@ namespace DX.Data.EF
                             ToDBModel(item, newDBItem);
                             validationResult = await ValidateDBModelAsync(newDBItem, DataMode.Create, s);
                             if (!validationResult.IsValid)
-                                throw new ValidationException(validationResult.Errors);
+                                throw CreateValidationException(item, validationResult);
 #if (NETCOREAPP)
                             var r = await DbContext.Set<TDBModel>().AddAsync(newDBItem);
                             await DbContext.SaveChangesAsync();
@@ -209,7 +218,7 @@ namespace DX.Data.EF
 
                             validationResult = await ValidateDBModelAsync(dbModel, DataMode.Update, s);
                             if (!validationResult.IsValid)
-                                throw new ValidationException(validationResult.Errors);
+                                throw CreateValidationException(item, validationResult);
 
                             DbContext.Entry(dbModel).State = EntityState.Modified;
                             await DbContext.SaveChangesAsync();                                
@@ -221,7 +230,7 @@ namespace DX.Data.EF
 #endif
                     }
 
-                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode };
+                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode, Data = items };
                 }
                 catch (Exception err)
                 {
@@ -230,7 +239,10 @@ namespace DX.Data.EF
 #else
                     wrk.Rollback();
 #endif
-                    return new DataResult<TKey, TModel>(DataMode.Create, nameof(TDBModel), err);
+                    return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err)
+                    {
+                        Data = new[] { (err as ValidationException)?.Data["model"] as TModel ?? null! }
+                    };
                 }
             }, false);
             return result;

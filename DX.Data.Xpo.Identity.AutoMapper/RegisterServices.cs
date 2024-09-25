@@ -4,8 +4,6 @@ using DevExpress.XtraEditors.Filtering;
 using DX.Data.Xpo.AutoMapper;
 using DX.Data.Xpo.Identity.Persistent;
 using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using System.Resources;
 
@@ -14,8 +12,10 @@ namespace DX.Data.Xpo.Identity.AutoMapper
 #if (NETCOREAPP)
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
-	public static class RegisterServices
+    public static class RegisterServices
     {
         public static IdentityBuilder AddXpoAutoMapperIdentityStores(this IdentityBuilder builder, string connectionName)
         {

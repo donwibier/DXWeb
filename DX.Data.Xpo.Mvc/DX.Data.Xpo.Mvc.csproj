@@ -51,9 +51,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="24.1.5" />
-		<PackageReference Include="DevExpress.Data" Version="24.1.5" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="24.1.5" />
+		<PackageReference Include="DevExpress.Xpo" Version="24.1.6" />
+		<PackageReference Include="DevExpress.Data" Version="24.1.6" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="24.1.6" />
 	</ItemGroup>
 
 	<ItemGroup>

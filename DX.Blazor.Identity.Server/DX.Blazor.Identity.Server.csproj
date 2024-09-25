@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>23.2.3.24</Version>
-		<FileVersion>23.2.3.24</FileVersion>
+		<Version>24.1.6.24</Version>
+		<FileVersion>24.1.6.24</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor Server based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>

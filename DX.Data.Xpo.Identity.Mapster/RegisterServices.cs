@@ -1,6 +1,6 @@
 ﻿using DevExpress.Xpo;
 using DX.Data.Xpo.Identity.Persistent;
-using Microsoft.Extensions.DependencyInjection;
+
 using Mapster;
 using MapsterMapper;
 using System;
@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace DX.Data.Xpo.Identity.Mapster
 {
 #if (NETCOREAPP)
+	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.AspNetCore.Identity;
 
 

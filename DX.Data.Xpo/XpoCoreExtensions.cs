@@ -29,13 +29,13 @@ namespace DX.Data.Xpo
         public static IServiceCollection AddXpoDatabase(this IServiceCollection services, string connectionName/*, string connectionString*/)
 		{
 			return services.AddSingleton<XpoDatabase>((sp) => {
-				var connStr = sp.GetService<IConfiguration>().GetConnectionString(connectionName);
+				var connStr = sp.GetRequiredService<IConfiguration>().GetConnectionString(connectionName)??"";
                 return new XpoDatabase(new XpoDatabaseOptions { ConnectionString = connStr, Name = connectionName });
 			});
         }
         public static IServiceCollection AddXpoUnitOfWork(this IServiceCollection serviceCollection, string connectionName)
         {
-            return serviceCollection.AddScoped<UnitOfWork>((sp) => sp.GetService<XpoDatabase>().GetUnitOfWork());
+            return serviceCollection.AddScoped<UnitOfWork>((sp) => sp.GetRequiredService<XpoDatabase>().GetUnitOfWork());
         }
     }
 #endif

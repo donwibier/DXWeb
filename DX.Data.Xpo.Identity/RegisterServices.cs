@@ -2,20 +2,18 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using FluentValidation;
-using DevExpress.Xpo;
-using DevExpress.Xpo.Metadata.Helpers;
-using DX.Data.Xpo.Identity.Persistent;
-#if (NETCOREAPP)
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-#endif
 
 namespace DX.Data.Xpo.Identity
 {
 #if (NETCOREAPP)
+    using FluentValidation;
+    using DevExpress.Xpo;
+    using DevExpress.Xpo.Metadata.Helpers;
+    using DX.Data.Xpo.Identity.Persistent;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Configuration;
     public static class RegisterIdentityServices
     {
         static class Resources

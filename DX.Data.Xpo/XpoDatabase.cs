@@ -35,8 +35,8 @@ namespace DX.Data.Xpo
 
 	public class XpoDatabaseOptions
 	{
-		public string Name { get; set; }
-		public string ConnectionString { get; set; }
+		public string Name { get; set; } = default!;
+		public string ConnectionString { get; set; } = default!;
 		public bool EnableCaching { get; set; } = false;
 		public AutoCreateOption UpdateSchema { get; set; } = AutoCreateOption.None;
 	}
@@ -48,14 +48,14 @@ namespace DX.Data.Xpo
 		private readonly static ConcurrentDictionary<string, IDataLayer> dataLayers =
 			new ConcurrentDictionary<string, IDataLayer>();
 
-		private readonly XpoDatabaseOptions options;
+		private readonly XpoDatabaseOptions options = new XpoDatabaseOptions();
 		public string ConnectionString { get { return options.ConnectionString; } }
 		public string DataLayerName { get { return options.Name; } }		
 
 #if (NETCOREAPP)
 		[Obsolete("Please use the new constructor with the options argument or options builder", false)]
 		public XpoDatabase(string connectionName, IConfiguration cfg) :
-					this(cfg.GetConnectionString(connectionName), connectionName)
+					this(cfg.GetConnectionString(connectionName)??"", connectionName)
 		{
 
 		}
@@ -92,8 +92,10 @@ namespace DX.Data.Xpo
 			//AddDataLayer(o);
 		}
 
-		public XpoDatabase(Action<XpoDatabaseOptions>[] setupActions)			
+		public XpoDatabase(Action<XpoDatabaseOptions>[]? setupActions)			
 		{
+			if (setupActions == null)
+                throw new ArgumentNullException("setupActions");
 			for (int i = 0; i < setupActions.Length; i++)
 			{
 				var o = new XpoDatabaseOptions();
@@ -140,7 +142,7 @@ namespace DX.Data.Xpo
 
 		public virtual IDataLayer GetDataLayer(string dataLayerName)
 		{
-			if (dataLayers.TryGetValue(options.Name, out IDataLayer result))
+			if (dataLayers.TryGetValue(options.Name, out IDataLayer? result))
 			{
 				return result;
 			}
@@ -216,7 +218,7 @@ namespace DX.Data.Xpo
 
 		public static IDataLayer GetDataLayer(XpoDatabaseOptions options)
 		{
-			if (!dataLayers.TryGetValue(options.Name, out IDataLayer result))
+			if (!dataLayers.TryGetValue(options.Name, out IDataLayer? result))
 			{
 				if (!string.IsNullOrWhiteSpace(options.ConnectionString))
 				{
@@ -336,7 +338,7 @@ namespace DX.Data.Xpo
 
 		public T[] CloneCollection<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
-			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
 			if (target == null)
@@ -349,7 +351,7 @@ namespace DX.Data.Xpo
 				{
 					using (UnitOfWork targetSession = target.GetUnitOfWork())
 					{
-						Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses, synchronizeProperties);
+						Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
 						foreach (T sourceItem in sourceList)
 						{
 							result.Add(c.Clone(sourceItem, synchronize));
@@ -363,7 +365,7 @@ namespace DX.Data.Xpo
 
 		public Task<T[]> CloneCollectionAsync<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
-			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
 			return Task.FromResult(CloneCollection<T>(sourceCriteria, sortProperties, target,
@@ -371,7 +373,7 @@ namespace DX.Data.Xpo
 		}
 
 		public T Clone<T>(T source, XpoDatabase target, bool synchronize = true,
-			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
 			if (source == null)
@@ -382,7 +384,7 @@ namespace DX.Data.Xpo
 			using (Session sourceSession = this.GetSession())
 			using (UnitOfWork targetSession = target.GetUnitOfWork())
 			{
-				Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses, synchronizeProperties);
+				Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
 				T result = c.Clone(source, synchronize);
 				targetSession.CommitChanges();
 				return result;
@@ -390,22 +392,9 @@ namespace DX.Data.Xpo
 		}
 
 		public virtual Task<T> CloneAsync<T>(T source, XpoDatabase target, bool synchronize = true,
-			IEnumerable<XPClassInfo> excludedClasses = null, IEnumerable<string> synchronizeProperties = null)
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
-			//if (source == null)				
-			//	 throw new ArgumentNullException("source");
-			//if (target == null)
-			//	throw new ArgumentNullException("targetSession");
-
-			//T result;
-			//using (Session sourceSession = this.GetSession())
-			//using (UnitOfWork targetSession = target.GetUnitOfWork())
-			//{
-			//	Cloner c = new Cloner(sourceSession, targetSession, excludedClasses, synchronizeProperties);
-			//	result = c.Clone<T>(source, synchronize);
-			//}
-
 			return Task.FromResult(Clone(source, target, synchronize, excludedClasses, synchronizeProperties));
 		}
 
@@ -420,7 +409,7 @@ namespace DX.Data.Xpo
 			readonly List<XPClassInfo> _excluded = new List<XPClassInfo>();
 			readonly List<String> _syncProps = new List<string>();
 			//readonly Session _source = null;
-			readonly Session _target = null;
+			readonly Session _target = null!;
 
 			/// <summary>
 			/// Initializes a new instance of the CloneIXPSimpleObjectHelper class.
@@ -479,19 +468,19 @@ namespace DX.Data.Xpo
 			object Clone(IXPSimpleObject source, Session targetSession, bool synchronize)
 			{
 				if (source == null)
-					return null;
+					return null!;
 				if (clonedObjects.ContainsKey(source))
 					return clonedObjects[source];
 				XPClassInfo targetClassInfo = targetSession.GetClassInfo(source.GetType());
 
 				if (_excluded.Contains(targetClassInfo))
-					return null;
+					return null!;
 
 				object clone;
 				if (synchronize)
 					clone = targetSession.GetObjectByKey(targetClassInfo, source.Session.GetKeyValue(source));
 				else
-					clone = null;
+					clone = null!;
 
 				if (clone == null)
 					clone = targetClassInfo.CreateNewObject(targetSession);

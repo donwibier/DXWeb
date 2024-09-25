@@ -2,6 +2,7 @@
 using DevExpress.Data.Linq.Helpers;
 using DevExpress.Web.Mvc;
 using DevExpress.Xpo;
+
 using DX.Data.Xpo;
 using DX.Data.Xpo.Mvc.Utils;
 using FluentValidation;
@@ -154,7 +155,7 @@ namespace DX.Data.Xpo.Mvc
 
 		public async virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e)
 		{
-			var result = await TransactionalExecAsync(async (db, w) =>
+			var result = await TransactionalExecAsync((db, w) =>
 			{
 				var items = Query()
 					.ApplyFilter(PrepareFilterExpression(e.FilterExpression))
@@ -162,7 +163,7 @@ namespace DX.Data.Xpo.Mvc
 					.ApplySorting(PrepareSorting(e.State.SortedColumns))
 					.Skip(e.StartDataRowIndex)
 					.Take(e.DataRowCount);
-
+				;
 				//var r = ((IQueryable<TXPOClass>)items).Select(CreateModelInstance);								
 				return Task.FromResult(items);
 			});

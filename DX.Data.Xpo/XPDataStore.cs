@@ -155,6 +155,12 @@ namespace DX.Data.Xpo
             public ValidationResult InsertingResult { get; private set; }
             public IDataResult<TKey, TModel> InsertedResult { get; private set; }
         }
+        protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
+        {
+            var err = new ValidationException("Validation Failed", validationResult.Errors);
+            err.Data.Add("model", model);
+            return err;
+        }
 
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
@@ -194,10 +200,7 @@ namespace DX.Data.Xpo
                             ToDBModel(item, dbItem);
                             validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
                             if (!validationResult.IsValid)
-                            {
-                                throw new ValidationException("Validation Failed", validationResult.Errors);                                
-                            }
-                                
+                                throw CreateValidationException(item, validationResult);
                             await wrk.SaveAsync(dbItem);
                         }
 
@@ -241,7 +244,7 @@ namespace DX.Data.Xpo
                         wrk.RollbackTransaction();
                         return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err)
                         {
-                            Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                            Data = new[] { (err as ValidationException)?.Data["model"] as TModel ?? null! }
                         };                        
                     }
                 },
