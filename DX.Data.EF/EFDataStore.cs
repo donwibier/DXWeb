@@ -167,8 +167,7 @@ namespace DX.Data.EF
         }
         protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
         {
-            var err = new ValidationException("Validation Failed", validationResult.Errors);
-            err.Data.Add("model", model);
+            var err = new ValidationException("Validation Failed", validationResult.Errors);            
             return err;
         }
         //===============================
@@ -182,12 +181,15 @@ namespace DX.Data.EF
 
             var result = await TransactionalExecAsync(async (s, wrk) =>
             {
+                TModel currentItem = default!;
                 try
                 {
+
                     ValidationResult validationResult = default!;
                     DataMode dataMode = DataMode.Create;
                     foreach (var item in items)
                     {
+                        currentItem = item;
                         var modelKey = ModelKey(item);                            
                         if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
                         {
@@ -230,7 +232,7 @@ namespace DX.Data.EF
 #endif
                     }
 
-                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode, Data = items };
+                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode, Data = new[] { currentItem } };
                 }
                 catch (Exception err)
                 {
@@ -239,10 +241,7 @@ namespace DX.Data.EF
 #else
                     wrk.Rollback();
 #endif
-                    return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err)
-                    {
-                        Data = new[] { (err as ValidationException)?.Data["model"] as TModel ?? null! }
-                    };
+                    return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
                 }
             }, false);
             return result;

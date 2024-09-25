@@ -157,8 +157,7 @@ namespace DX.Data.Xpo
         }
         protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
         {
-            var err = new ValidationException("Validation Failed", validationResult.Errors);
-            err.Data.Add("model", model);
+            var err = new ValidationException("Validation Failed", validationResult.Errors);            
             return err;
         }
 
@@ -172,6 +171,7 @@ namespace DX.Data.Xpo
             var result = await TransactionalExecAsync(
                 async (s, wrk) =>
                 {
+                    TModel currentItem = default!;
                     // need to keep the xpo entities together with the model items so we can update 
                     // the id's of the models afterwards.
                     Dictionary<TDBModel, InsertHelper> batchPairs = new Dictionary<TDBModel, InsertHelper>();
@@ -181,6 +181,7 @@ namespace DX.Data.Xpo
                         DataMode dataMode = DataMode.Create;
                         foreach (var item in items)
                         {
+                            currentItem = item;
                             var modelKey = ModelKey(item);
                             TDBModel dbItem = null!;
                             if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
@@ -230,7 +231,7 @@ namespace DX.Data.Xpo
                                 Success = false, 
                                 Mode = dataMode, 
                                 Exception = commitFailure ,
-                                Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                                Data = new[] { currentItem } 
                             };
                         else
                             return new DataResult<TKey, TModel> { 
@@ -242,10 +243,7 @@ namespace DX.Data.Xpo
                     catch (Exception err)
                     {
                         wrk.RollbackTransaction();
-                        return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err)
-                        {
-                            Data = new[] { (err as ValidationException)?.Data["model"] as TModel ?? null! }
-                        };                        
+                        return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
                     }
                 },
                 true, false);
