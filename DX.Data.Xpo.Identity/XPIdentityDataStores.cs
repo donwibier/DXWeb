@@ -14,8 +14,10 @@ using static DevExpress.Data.Helpers.FindSearchRichParser;
 using System.Timers;
 using DevExpress.Data.Filtering.Helpers;
 using System.Data;
+using DX.Data.Xpo.Identity.Persistent;
 
-#if(NETCOREAPP)
+
+#if (NETCOREAPP)
 using Microsoft.AspNetCore.Identity;
 #else
 using Microsoft.AspNet.Identity;
@@ -133,17 +135,25 @@ namespace DX.Data.Xpo.Identity
             ThrowIfDisposed();
             ThrowIfNull(user);
             ThrowIfNullOrEmpty(normalizedRoleName);
+            
+            //check if user already in role
+            //if (await IsInRoleAsync(user, normalizedRoleName, cancellationToken))
+            //    return;
 
             await TransactionalExecAsync(async (s, w) => {
-                //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-
-                var role = await w.FindObjectAsync(typeof(TXPORole),
-                    CriteriaOperator.Parse("(NormalizedName == ?) AND (NOT Users[ID == ?])", normalizedRoleName, usr.Id)) as TXPORole;
-                if (role == null)
-                    throw new InvalidOperationException($"Role {normalizedRoleName} was not found");
-                
-                usr.RolesList.Add(role);
+                //check if user already in role
+                if (w.FindObject<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", ModelKey(user), normalizedRoleName)) == null)
+                {
+                    var role = w.FindObject(typeof(TXPORole),
+                        CriteriaOperator.Parse("(NormalizedName == ?)", normalizedRoleName)) as TXPORole;
+                    if (role != null)
+                    {
+                        //user not in role
+                        var usr = w.GetObjectByKey<TXPOUser>(ModelKey(user));
+                        usr.RolesList.Add(role);
+                        //return;
+                    }
+                }
             });
         }
 
@@ -155,15 +165,12 @@ namespace DX.Data.Xpo.Identity
 
             var result = await TransactionalExecAsync(async (s, w) => {
                 //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var r = new List<string>();
-                foreach(var item in usr.RolesList)
-                {
-                    var role = item as IXPRole<TKey>;
-                    if (role != null)
-                        r.Add(role.Name);
-                }
-                return r.ToList();
+                var roles = new XPCollection<TXPORole>(w,
+                    CriteriaOperator.Parse("Users[Id == ?]", ModelKey(user)),
+                    new SortProperty(nameof(IXPRole<TKey>.Name), SortingDirection.Ascending));
+                await roles.LoadAsync(cancellationToken);
+
+                return roles.Select(r => r.Name).ToList();                
             }, false, false);
             return result;
         }
