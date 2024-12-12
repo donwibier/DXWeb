@@ -11,12 +11,12 @@ jobs:
       matrix:
         dotnet: [ '8.0.x', '9.0.x']
     steps:      
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup .NET 8 and 9
-        uses: actions/setup-dotnet@v3        
+        uses: actions/setup-dotnet@v4        
         with:
           dotnet-version: ${{ matrix.dotnet }} 
-          dotnet-quality: 'preview'
+          #dotnet-quality: 'preview'
 
       - name: add dx nuget source
         run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
