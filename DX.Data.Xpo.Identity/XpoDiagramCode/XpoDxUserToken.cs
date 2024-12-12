@@ -13,11 +13,16 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxUserToken(Session session) : base(session) { }
         public override void AfterConstruction() { base.AfterConstruction(); }
-		[PersistentAlias("[User!Key]")]
+		[PersistentAlias("[User.Id]")]
 		public string UserId
 		{
 			get { return (string)(EvaluateAlias("UserId")); }
 		}
+        string IXPUserToken<string>.UserId
+        {
+            get => this.UserId;
+            set => User = Session.GetObjectByKey<XpoDxUser>(value);
+        }
 
         // Created/Updated: DEV-RIG-DON\don on DEV-RIG-DON at 6/15/2022 3:40 PM
         public new class FieldsClass : XpoDxBase.FieldsClass
@@ -57,10 +62,6 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         static readonly FieldsClass _Fields = new FieldsClass();
 
-        string IXPUserToken<string>.UserId { 
-            get => this.UserId; 
-            set => User = Session.GetObjectByKey<XpoDxUser>(value); 
-        }
 
     }
 

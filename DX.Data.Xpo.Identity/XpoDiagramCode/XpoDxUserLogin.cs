@@ -16,12 +16,17 @@ namespace DX.Data.Xpo.Identity.Persistent
     {
         public XpoDxUserLogin(Session session) : base(session) { }
 
-		[PersistentAlias("[User!Key]")]
+		[PersistentAlias("[User.Id]")]
 		public string UserId
 		{
 			get { return (string)(EvaluateAlias("UserId")); }
 		}
-		public override void AfterConstruction() { base.AfterConstruction(); }
+        string IXPUserLogin<string>.UserId
+        {
+            get => this.UserId;
+            set => User = Session.GetObjectByKey<XpoDxUser>(value);
+        }
+        public override void AfterConstruction() { base.AfterConstruction(); }
 
         protected override void OnSaving()
         {
@@ -99,10 +104,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 
         static readonly FieldsClass _Fields = new FieldsClass();
 
-        string IXPUserLogin<string>.UserId { 
-            get => this.UserId;
-            set => User = Session.GetObjectByKey<XpoDxUser>(value);
-        }
+
 
         
     }

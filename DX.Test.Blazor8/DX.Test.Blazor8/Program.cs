@@ -2,6 +2,7 @@ using DX.Test.Blazor8.Client.Pages;
 using DX.Test.Blazor8.Components;
 using DX.Test.Blazor8.Components.Account;
 using DX.Test.Blazor8.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using DX.Data.Xpo;

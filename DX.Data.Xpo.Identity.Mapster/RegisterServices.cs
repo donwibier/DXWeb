@@ -132,11 +132,23 @@ namespace DX.Data.Xpo.Identity.Mapster
 
 			TypeAdapterConfig<TRole, TXPORole>.NewConfig().Ignore(dest => dest.ClaimsList);
 
-			TypeAdapterConfig<TXPOClaim, TUserClaim>.NewConfig().Ignore(dest => dest.Id);
+			
 
-			TypeAdapterConfig<TXPORoleClaim, TRoleClaim>.NewConfig().Ignore(dest => dest.Id);
-		}
-	}
+			TypeAdapterConfig<TXPORoleClaim, TRoleClaim>.NewConfig()
+				.Ignore(dest => dest.Id)
+                .AfterMapping((src, dest) => dest.RoleId = src.RoleId); ;
+
+            TypeAdapterConfig<TUserClaim, TXPOClaim>.NewConfig()
+			    .Ignore(dest => dest.UserId)
+				.AfterMapping((src, dest) => dest.UserId = src.UserId);
+            TypeAdapterConfig<TUserToken, TXPOToken>.NewConfig()
+				.Ignore(dest => dest.UserId)
+				.AfterMapping((src, dest) => dest.UserId = src.UserId);
+            TypeAdapterConfig<TUserLogin, TXPOLogin>.NewConfig()
+                .Ignore(dest => dest.UserId)
+                .AfterMapping((src, dest) => dest.UserId = src.UserId);
+        }
+    }
 #endif
 
 }

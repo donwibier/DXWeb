@@ -19,7 +19,11 @@ namespace DX.Data.Xpo.Identity.Persistent
             this.User = null;
             base.OnDeleting();
         }
-
+        string IXPUserClaim<string>.UserId
+        {
+            get => this.UserId;
+            set => User = Session.GetObjectByKey<XpoDxUser>(value);
+        }
         public void InitializeUserClaim(XPBaseObject user, Claim claim)
         {            
             this.SetPropertyValue(nameof(User), user);
@@ -63,11 +67,7 @@ namespace DX.Data.Xpo.Identity.Persistent
         static readonly FieldsClass _Fields = new FieldsClass();
 
 
-        string IXPUserClaim<string>.UserId 
-        { 
-            get => this.UserId;
-            set => User = Session.GetObjectByKey< XpoDxUser>(value); 
-        }
+
 
     }
 
