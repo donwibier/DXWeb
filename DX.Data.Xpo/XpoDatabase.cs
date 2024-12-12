@@ -181,7 +181,7 @@ namespace DX.Data.Xpo
 		}
 		public T Execute<T>(string dataLayer, Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
 		{
-			T result = default;
+			T result = default!;
 			using (Session s = transactional ? GetUnitOfWork(dataLayer) : GetSession(dataLayer))
 			{
 				result = work(this, s);
@@ -193,12 +193,12 @@ namespace DX.Data.Xpo
 
 		public async virtual Task<T> ExecuteAsync<T>(string dataLayer, Func<XpoDatabase, Session, T> work, bool transactional = true, bool commit = true)
 		{
-			return await Task.FromResult<T>(Execute<T>(dataLayer, work, transactional, commit));
+			return await Task.FromResult(Execute(dataLayer, work, transactional, commit))!;
 		}
 
 		public async virtual Task ExecuteAsync(string dataLayer, Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
 		{
-			await Task.Run(() => { Execute(dataLayer, work, transactional, commit); });
+			await Task.Run(() => { Execute(dataLayer, work, transactional, commit); })!;
 		}
 
 

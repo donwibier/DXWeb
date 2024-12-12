@@ -1,5 +1,8 @@
 # DXWeb
 Repository for several DevExpress releated NuGet packages:
+These packages follow the minimum requirements as described in DevExpress documentation.
+
+**Minimum framework versions: .NET Framework 4.6.2, .NET 8.0 and .NET 9.0**
 
 #### DX.Utils
 This package contains several helper classes for working with:

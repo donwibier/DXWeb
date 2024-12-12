@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
 		<LangVersion>10.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>24.1.6.31</Version>
-		<FileVersion>24.1.6.31</FileVersion>
+		<Version>24.2.3.31</Version>
+		<FileVersion>24.2.3.31</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DX.Data.IDataStore implementation for use with XPO with FluentValidation and Mapster</Description>
 		<Copyright>Copyright (c) 2023 Don Wibier</Copyright>
@@ -19,10 +19,10 @@
 		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 	</PropertyGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
 		<PackageReference Include="Mapster" Version="7.2.0" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+	<ItemGroup Condition="'$(TargetFramework)' != 'net462'">
 		<PackageReference Include="Mapster" Version="7.4.0" />
 	</ItemGroup>
 	<ItemGroup>

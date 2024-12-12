@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
     <ProjectReference Include="..\DX.Test.Blazor8.Client\DX.Test.Blazor8.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
 	  
   </ItemGroup>
 

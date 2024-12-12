@@ -95,25 +95,14 @@ namespace DX.Data.Xpo.Identity.Persistent
             public OperandProperty ProviderDisplayName => new OperandProperty(GetNestedName(ProviderDisplayNameFieldName));
         }
 
-        public new static FieldsClass Fields
-        {
-            get
-            {
-                if (ReferenceEquals(_Fields, null))
-                {
-                    _Fields = new FieldsClass();
-                }
+        public new static FieldsClass Fields { get => _Fields; }
 
-                return _Fields;
-            }
-        }
+        static readonly FieldsClass _Fields = new FieldsClass();
 
-		string IXPUserLogin<string>.UserId { 
+        string IXPUserLogin<string>.UserId { 
             get => this.UserId;
             set => User = Session.GetObjectByKey<XpoDxUser>(value);
         }
-
-		static FieldsClass _Fields;
 
         
     }

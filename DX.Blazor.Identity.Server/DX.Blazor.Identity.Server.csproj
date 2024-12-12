@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>24.1.6.25</Version>
-		<FileVersion>24.1.6.25</FileVersion>
+		<Version>24.2.3.25</Version>
+		<FileVersion>24.2.3.25</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor Server based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
@@ -21,8 +21,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

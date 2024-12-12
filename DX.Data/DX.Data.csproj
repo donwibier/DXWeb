@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>24.1.6.34</Version>
-		<FileVersion>24.1.6.34</FileVersion>
+		<Version>24.2.3.34</Version>
+		<FileVersion>24.2.3.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>		
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
 		<Description>Base Data Package with DataStore DTO and FluentValidation Mechanism, Interfaces and ApiDataStore</Description>
@@ -10,13 +10,13 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO Blazor WebAPI</PackageTags>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
-		<TargetFrameworks>net461;net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
 		<!--<ImplicitUsings>enable</ImplicitUsings>-->
 		<!--<Nullable>enable</Nullable>-->
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net461'">
+	<ItemGroup Condition="'$(TargetFramework)'=='net462'">
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
 		<Reference Include="System.Xml.Linq" />
@@ -29,11 +29,10 @@
 		<!--<PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />-->
 		<PackageReference Include="FluentValidation" Version="9.5.4" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'!='net461'">
-		<PackageReference Include="FluentValidation" Version="11.10.0" />
+	<ItemGroup Condition="'$(TargetFramework)'!='net462'">
+		<PackageReference Include="FluentValidation" Version="11.11.0" />
 	</ItemGroup>
-	<ItemGroup>
-		
+	<ItemGroup>		
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 </Project>

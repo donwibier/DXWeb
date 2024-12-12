@@ -58,27 +58,16 @@ namespace DX.Data.Xpo.Identity.Persistent
 
             public OperandProperty RoleId => new OperandProperty(GetNestedName(RoleIdFieldName));
         }
+        public new static FieldsClass Fields { get => _Fields; }
 
-        public new static FieldsClass Fields
-        {
-            get
-            {
-                if (ReferenceEquals(_Fields, null))
-                {
-                    _Fields = new FieldsClass();
-                }
+        static FieldsClass _Fields = new FieldsClass();
 
-                return _Fields;
-            }
-        }
 
 		string IXPRoleClaim<string>.RoleId 
         { 
             get => this.RoleId; 
             set => Role = Session.GetObjectByKey<XpoDxRole>(value); 
         }
-
-		static FieldsClass _Fields;
     }
 
 }

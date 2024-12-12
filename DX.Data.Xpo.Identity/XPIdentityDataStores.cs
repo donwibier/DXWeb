@@ -142,14 +142,14 @@ namespace DX.Data.Xpo.Identity
 
             await TransactionalExecAsync(async (s, w) => {
                 //check if user already in role
-                if (w.FindObject<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", ModelKey(user), normalizedRoleName)) == null)
+                if ((await w.FindObjectAsync<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", ModelKey(user), normalizedRoleName))) == null)
                 {
                     var role = w.FindObject(typeof(TXPORole),
                         CriteriaOperator.Parse("(NormalizedName == ?)", normalizedRoleName)) as TXPORole;
                     if (role != null)
                     {
                         //user not in role
-                        var usr = w.GetObjectByKey<TXPOUser>(ModelKey(user));
+                        var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user));
                         usr.RolesList.Add(role);
                         //return;
                     }

@@ -104,7 +104,7 @@ namespace DX.Blazor.Identity.Wasm.Services
             var token = await _localStorage.GetItemAsync<string>(authTokenName);
             var refreshToken = await _localStorage.GetItemAsync<string>(refreshTokenName);
 
-            var refreshModel = JsonSerializer.Serialize(new RefreshTokenModel { Token = token, RefreshToken = refreshToken });
+            var refreshModel = JsonSerializer.Serialize(new RefreshTokenModel { Token = token!, RefreshToken = refreshToken! });
             var bodyContent = new StringContent(refreshModel, Encoding.UTF8, "application/json");
 
             var refreshResult = await _client.PostAsync(tokenRefreshEndpoint, bodyContent);

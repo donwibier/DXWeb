@@ -274,23 +274,12 @@ namespace DX.Data.Xpo.Identity.Persistent
 			public OperandProperty Claims => new OperandProperty(GetNestedName(ClaimsFieldName));
 		}
 
-		public new static FieldsClass Fields
-		{
-			get
-			{
-				if (ReferenceEquals(_Fields, null))
-				{
-					_Fields = new FieldsClass();
-				}
+        public new static FieldsClass Fields { get => _Fields; }
 
-				return _Fields;
-			}
-		}
+        static readonly FieldsClass _Fields = new FieldsClass();
 
-		static FieldsClass _Fields;
+        #endregion
 
-		#endregion
-
-	}
+    }
 
 }

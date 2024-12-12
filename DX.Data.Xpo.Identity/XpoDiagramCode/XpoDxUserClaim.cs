@@ -58,18 +58,10 @@ namespace DX.Data.Xpo.Identity.Persistent
             public OperandProperty UserId => new OperandProperty(GetNestedName(UserIdFieldName));
         }
 
-        public new static FieldsClass Fields
-        {
-            get
-            {
-                if (ReferenceEquals(_Fields, null))
-                {
-                    _Fields = new FieldsClass();
-                }
+        public new static FieldsClass Fields { get => _Fields; }
 
-                return _Fields;
-            }
-        }
+        static readonly FieldsClass _Fields = new FieldsClass();
+
 
         string IXPUserClaim<string>.UserId 
         { 
@@ -77,7 +69,6 @@ namespace DX.Data.Xpo.Identity.Persistent
             set => User = Session.GetObjectByKey< XpoDxUser>(value); 
         }
 
-        static FieldsClass _Fields;
     }
 
 }
