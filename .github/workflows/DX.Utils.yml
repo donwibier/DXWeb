@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-dotnet@v4        
         with:
           dotnet-version: ${{ matrix.dotnet }} 
-          #dotnet-quality: 'preview'
+          dotnet-quality: 'signed'
 
       - name: add dx nuget source
         run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
