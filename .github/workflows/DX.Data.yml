@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet: [ '8.0.x', '9.0.x']
+        dotnet: [ '8.0.x' ]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3        
+        uses: actions/setup-dotnet@v4        
         with:
           dotnet-version: ${{ matrix.dotnet }}           
 
@@ -34,7 +34,7 @@ jobs:
         run: dotnet pack --configuration Release --no-restore --output ./nupkg
 
       - name: Publish to NuGet 
-        uses: actions/upload-artifact@v4 
+        uses: actions/upload-artifact@v3 
         with: 
           name: nupkg 
           path: ./nupkg/*.nupkg
