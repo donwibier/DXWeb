@@ -8,7 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFrameworks>net46;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
 	<LangVersion>8.0</LangVersion>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
     <!--<PackageIcon>favicon.ico</PackageIcon>-->	
@@ -43,7 +43,7 @@
 		1.0.0.5: Initial dual mode package for .NET Framework and .NET Standard 2.0
 		Some features don't work yet on .NET Standard 2.0</PackageReleaseNotes>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net46'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net462'">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -55,7 +55,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />    
   </ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'!='net46'">
+	<ItemGroup Condition="'$(TargetFramework)'!='net462'">
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
 	</ItemGroup>
 	

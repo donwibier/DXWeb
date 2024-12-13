@@ -5,19 +5,19 @@ on:
       - master # Default release branch
 jobs:
   build:
-    name: build, pack & publish
+    name: build, pack
     runs-on: ubuntu-latest
     strategy:
       matrix:
         dotnet: [ '8.0.x', '9.0.x']
-    steps:      
-      - uses: actions/checkout@v3
-      - name: Setup .NET 8 and 9    
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3        
         with:
-          dotnet-version: ${{ matrix.dotnet }} 
-          dotnet-quality: 'preview'
-          
+          dotnet-version: ${{ matrix.dotnet }}           
+
       - name: add dx nuget source
         run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
 
@@ -27,8 +27,33 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Publish the package to nuget.org
-        run: dotnet nuget push */bin/Release/*.nupkg --skip-duplicate -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
+      - name: Run tests 
+        run: dotnet test --no-restore --verbosity normal
 
+      - name: Pack 
+        run: dotnet pack --configuration Release --no-restore --output ./nupkg
+
+      - name: Publish to NuGet 
+        uses: actions/upload-artifact@v3 
+        with: 
+          name: nupkg 
+          path: ./nupkg/*.nupkg
+
+      #- name: Publish the package to nuget.org
+      #  run: dotnet nuget push */bin/Release/*.nupkg --skip-duplicate -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
+      #  env:
+      #    NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
+
+  deploy:
+    runs-on: ubuntu-latest 
+    needs: build 
+      
+    steps: 
+      - name: Download package 
+        uses: actions/download-artifact@v3 
+        with: 
+          name: nupkg 
+          path: ./nupkg 
+            
+      - name: Publish to NuGet 
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
