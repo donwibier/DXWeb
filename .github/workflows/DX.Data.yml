@@ -34,7 +34,7 @@ jobs:
         run: dotnet pack --configuration Release --no-restore --output ./nupkg
 
       - name: Publish to NuGet 
-        uses: actions/upload-artifact@v3 
+        uses: actions/upload-artifact@v4 
         with: 
           name: nupkg 
           path: ./nupkg/*.nupkg
