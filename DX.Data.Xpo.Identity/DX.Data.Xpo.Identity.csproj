@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>24.2.3.34</Version>
-		<FileVersion>24.1.6.34</FileVersion>
+		<Version>25.2.3.34</Version>
+		<FileVersion>25.1.6.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based abstract storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -16,7 +16,7 @@
 
 	<PropertyGroup>
 		<!--<TargetFramework>net461;</TargetFramework>-->
-		<TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net462;net8.0;net9.0;net10.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>false</ImplicitUsings>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.Xpo.Identity</PackageProjectUrl>
@@ -88,15 +88,15 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'!='net462'">
-		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.0" />
-		<PackageReference Include="FluentValidation" Version="11.11.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.*" />
+		<PackageReference Include="FluentValidation" Version="12.1.*" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="24.2.*" />
+		<PackageReference Include="DevExpress.Xpo" Version="25.2.*" />
 	</ItemGroup>
 	<ItemGroup>		
 		<ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />

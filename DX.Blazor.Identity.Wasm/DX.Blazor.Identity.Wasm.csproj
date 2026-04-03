@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>24.2.3.25</Version>
-		<FileVersion>24.2.3.25</FileVersion>
+		<Version>25.2.3.25</Version>
+		<FileVersion>25.2.3.25</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor WASM token based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFrameworks>net9.0;net10.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
@@ -23,24 +23,24 @@
 	<ItemGroup>
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
-
-	<!--<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.16" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.13" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.13" />
-	</ItemGroup>-->
-
+	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />	
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.*" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-		<PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.2.0" />
+		<PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.*" />
 	</ItemGroup>
+
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.*" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.*" />
+	</ItemGroup>
+
+
 
 	<ItemGroup>
 		<ProjectReference Include="..\DX.Blazor.Identity\DX.Blazor.Identity.csproj" />

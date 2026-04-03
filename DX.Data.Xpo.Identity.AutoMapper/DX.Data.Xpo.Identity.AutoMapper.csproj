@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>24.2.3.33</Version>
-		<FileVersion>24.2.3.33</FileVersion>
+		<Version>25.2.3.33</Version>
+		<FileVersion>25.2.3.33</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
-		<TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net462;net8.0;net9.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
@@ -16,7 +16,7 @@
 		<PackageReference Include="AutoMapper" Version="10.1.1" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)' != 'net462'">
-		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="AutoMapper" Version="16.*" />
 	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DX.Data.Xpo.AutoMapper\DX.Data.Xpo.AutoMapper.csproj" />

@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>24.2.3.34</Version>
-    <FileVersion>24.2.3.34</FileVersion>
+    <Version>25.2.3.35</Version>
+    <FileVersion>25.2.3.35</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFrameworks>net462;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net462;net8.0;net9.0;net10.0</TargetFrameworks>
 	<LangVersion>8.0</LangVersion>
     <PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Utils</PackageProjectUrl>
     <!--<PackageIcon>favicon.ico</PackageIcon>-->	
