@@ -1,9 +1,10 @@
 name: Obsolete .NET Interfaces
 
 on:
-  push:
-    branches:
-      - master # Default release branch
+  workflow_dispatch: {}
+#  push:
+#    branches:
+#      - master # Default release branch
 jobs:
   build:
     name: build, pack

@@ -1,0 +1,10 @@
+{
+  "categories": [
+    { "title": "🚀 Features", "labels": ["feat"] },
+    { "title": "🐛 Fixes", "labels": ["fix"] },
+    { "title": "🧹 Chores", "labels": ["chore"] },
+    { "title": "📦 Dependencies", "labels": ["deps"] }
+  ],
+  "ignore_labels": ["ignore"],
+  "sort": "ASC"
+}
