@@ -21,16 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-#      - name: Determine next version from conventional commits
-#        id: semver
-#        uses: paulhatch/semantic-version@v5.4.0
-#        with:
-#          tag_prefix: "v"
-#          major_pattern: "BREAKING CHANGE"
-#          minor_pattern: "feat"
-#          patch_pattern: "fix"
-#          format: "${major}.${minor}.${patch}"
-#          bump_each_commit: false
         - name: Determine next version
           id: semver
           uses: cycjimmy/semantic-release-action@v4
@@ -52,7 +42,6 @@ jobs:
     strategy:
       matrix:
         dotnet: [ '8.0.x', '9.0.x' ]
-        #, '10.0.x'
 
     steps:
       - name: Checkout
