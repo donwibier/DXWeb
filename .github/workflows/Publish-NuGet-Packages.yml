@@ -126,43 +126,62 @@ jobs:
           path: ./nupkg/*.nupkg
           if-no-files-found: error
 
-  publish:
-    name: Publish to NuGet & Create Release
-    runs-on: ubuntu-latest
-    needs: [version, build]
+	publish:
+	  name: Publish to NuGet & Create Release
+	  runs-on: ubuntu-latest
+	  needs: [version, build]
 
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./nupkg
-          pattern: nupkg-*
-          merge-multiple: true
+	  steps:
+	    - name: Ensure nupkg folder exists
+	      run: mkdir -p ./nupkg
 
-      - name: Publish packages
-        run: |
-          for pkg in ./nupkg/*.nupkg; do
-            echo "Publishing $pkg"
-            dotnet nuget push "$pkg" \
-              --api-key ${{ secrets.NUGET_API_KEY }} \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
-          done
+	    - name: Download all artifacts
+	      uses: actions/download-artifact@v4
+	      with:
+	        path: ./nupkg
+	        pattern: nupkg-*
+	        merge-multiple: true
+	        # Prevent failure if some matrix jobs produced no artifacts
+	        ignore-missing: true
 
-      - name: Auto-generate release notes
-        id: notes
-        uses: mikepenz/release-changelog-builder-action@v4
-        with:
-          configuration: ".github/release-notes-config.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+	    - name: Check for packages
+	      id: check
+	      run: |
+	        COUNT=$(ls ./nupkg/*.nupkg 2>/dev/null | wc -l)
+	        echo "count=$COUNT" >> $GITHUB_OUTPUT
+	        echo "Found $COUNT packages"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.version.outputs.version }}
-          name: Release v${{ needs.version.outputs.version }}
-          body: ${{ steps.notes.outputs.changelog }}
-          files: ./nupkg/*.nupkg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+	    - name: Stop if no packages to publish
+	      if: ${{ steps.check.outputs.count == '0' }}
+	      run: echo "No packages to publish. Skipping."
+
+	    - name: Publish packages
+	      if: ${{ steps.check.outputs.count != '0' }}
+	      run: |
+	        for pkg in ./nupkg/*.nupkg; do
+	          echo "Publishing $pkg"
+	          dotnet nuget push "$pkg" \
+	            --api-key ${{ secrets.NUGET_API_KEY }} \
+	            --source https://api.nuget.org/v3/index.json \
+	            --skip-duplicate
+	        done
+
+	    - name: Auto-generate release notes
+	      if: ${{ steps.check.outputs.count != '0' }}
+	      id: notes
+	      uses: mikepenz/release-changelog-builder-action@v4
+	      with:
+	        configuration: ".github/release-notes-config.json"
+	      env:
+	        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+	    - name: Create GitHub Release
+	      if: ${{ steps.check.outputs.count != '0' }}
+	      uses: softprops/action-gh-release@v2
+	      with:
+	        tag_name: v${{ needs.version.outputs.version }}
+	        name: Release v${{ needs.version.outputs.version }}
+	        body: ${{ steps.notes.outputs.changelog }}
+	        files: ./nupkg/*.nupkg
+	      env:
+	        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
