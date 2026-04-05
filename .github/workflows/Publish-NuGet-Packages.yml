@@ -21,13 +21,13 @@ jobs:
         with:
           fetch-depth: 0
 
-        - name: Determine next version
-          id: semver
-          uses: cycjimmy/semantic-release-action@v4
-          with:
-            dry_run: true
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Determine next version
+        id: semver
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Output version
         run: |
