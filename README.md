@@ -1,8 +1,9 @@
-# DXWeb
+# DXWeb 
 Repository for several DevExpress releated NuGet packages:
 These packages follow the minimum requirements as described in DevExpress documentation.
 
 **Minimum framework versions: .NET Framework 4.6.2, .NET 8.0 and .NET 9.0**
+
 
 #### DX.Utils
 This package contains several helper classes for working with:
@@ -55,7 +56,7 @@ public void ConfigureServices(IServiceCollection services)
                 .AddIdentity<ApplicationUser>(options => {
                     options.Lockout.AllowedForNewUsers = true;
                     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                    options.Lockout.MaxFailedAccessAttempts = 3;					
+                    options.Lockout.MaxFailedAccessAttempts = 3;
                 })
                 /***** OLD OBSOLETE CONFIG < 23.2.3.31 
                 .AddXpoIdentityStores<ApplicationUser, XpoApplicationUser>(connStrName,
@@ -69,7 +70,7 @@ public void ConfigureServices(IServiceCollection services)
 		// When using Mapster
                 .AddXpoMapsterIdentityStores<ApplicationUser/*, XpoApplicationUser*/>(connStrName)
                 .AddDefaultTokenProviders();
-				
+
 		// token config
 		builder.Services.AddScoped<ITokenService<string, ApplicationUser>, TokenService<string, ApplicationUser> >();
 
@@ -110,7 +111,7 @@ Initial publish with code to make incoporate MS Identity in you Blazor apps simp
 Add package DX.Blazor.Identity.Server to project
 
 In Startup.ConfigureServices:
-```cs			
+```cs
 			services.AddScoped<IAuthService<RegisterUserModel>, AuthenticationService<ApplicationUser, RegisterUserModel>>();
 			services.AddScoped<DX.Blazor.Identity.Server.TokenProvider>();
 			services.AddScoped<AuthenticationStateProvider, DX.Blazor.Identity.Server.AuthStateProvider<ApplicationUser>>();
@@ -184,11 +185,11 @@ In WASM project add DX.Blazor.Identity.WASM, Blazored.LocalStorage and Toolbelt.
 In Startup.ConfigureServices (or Program.cs)
 
 ```cs
-    builder.Services.AddBlazoredLocalStorage(); //Blazored.LocalStorage											
+    builder.Services.AddBlazoredLocalStorage(); //Blazored.LocalStorage
     builder.Services.AddHttpClientInterceptor(); //Toolbelt.HttpClientInterceptor
     //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
     builder.Services.AddScoped(sp => new HttpClient
-    {        
+    {
         BaseAddress = new Uri(builder.HostEnvironment.BaseAddress + "api/")
     }
     .EnableIntercept(sp));
@@ -223,12 +224,12 @@ For both projects (WASM and Server) you can use the following Login.razor:
         var result = await AuthenticationService.Login(userModel);
         if (!result.IsAuthSuccessful)
         {
-            errors.Add(result.ErrorMessage);            
+            errors.Add(result.ErrorMessage);
         }
         else
         {
             navigationManager.NavigateTo("/");
-        }              
+        }
     }
 }
 
@@ -240,4 +241,4 @@ For both projects (WASM and Server) you can use the following Login.razor:
 
 Some helper classes to have the ASPxGridView extensions support server-side filtering and sorting based on the XPDataStore implementation.
 
-More documentation to follow...
+More documentation to follow also on the EF counterparts...
