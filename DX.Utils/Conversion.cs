@@ -303,9 +303,17 @@ namespace DX.Utils
 		public static bool GetConfigOption(string configString, string configOption, out string result)
 		{
 			result = String.Empty;
-			Dictionary<string, string> connStringParts = configString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-					.Select(t => t.Split(new char[] { '=' }, 2))
-					.ToDictionary(t => t[0].Trim(), t => t[1].Trim(), StringComparer.InvariantCultureIgnoreCase);
+			if (string.IsNullOrEmpty(configString)) 
+				return false;
+
+			var configPairs = configString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+			if (configPairs == null || configPairs.Length == 0)
+				return false;
+
+			var connStringParts = configPairs.Select(t => t.Split(new char[] { '=' }, 2))
+					.ToDictionary(t => t.Length > 0 ? t[0].Trim() : string.Empty, 
+								  t => t.Length > 1 ? t[1].Trim() : string.Empty, StringComparer.InvariantCultureIgnoreCase);
+
 			if (connStringParts.ContainsKey(configOption))
 			{
 				result = connStringParts[configOption];
