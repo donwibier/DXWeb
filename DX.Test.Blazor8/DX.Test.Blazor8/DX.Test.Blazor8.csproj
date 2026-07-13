@@ -14,9 +14,9 @@
     <ProjectReference Include="..\..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
     <ProjectReference Include="..\..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
     <ProjectReference Include="..\DX.Test.Blazor8.Client\DX.Test.Blazor8.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.*" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.*" />
     <PackageReference Include="Mapster" Version="10.*" />
   </ItemGroup>
 </Project>

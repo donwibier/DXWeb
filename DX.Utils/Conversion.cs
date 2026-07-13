@@ -12,8 +12,8 @@ namespace DX.Utils
 		{
 			if (comparison)
 				trueAction();
-			else if (falseAction != null)
-				falseAction();
+			else
+				falseAction?.Invoke();
 		}
 	}
 	public static class ListExtensions
@@ -71,7 +71,7 @@ namespace DX.Utils
 			}
 			catch
 			{
-				result = defaultValue;
+				// Conversion failed - result already holds defaultValue.
 			}
 			return result;
 		}
@@ -145,7 +145,7 @@ namespace DX.Utils
 				}
 				catch
 				{
-					result = defaultValue;
+					// Conversion failed - result already holds defaultValue.
 				}
 			}
 			return result;
@@ -220,7 +220,7 @@ namespace DX.Utils
 				}
 				catch
 				{
-					result = defaultValue;
+					// Conversion failed - result already holds defaultValue.
 				}
 			}
 			return result;
@@ -240,16 +240,18 @@ namespace DX.Utils
 		{
 			if (value == null)
 				return false;
-			else if (value is string)
+			else if (value is string str)
 			{
-				if (String.IsNullOrEmpty((string)value))
+				if (String.IsNullOrEmpty(str))
 					return false;
 
-				string s = ((string)value).ToUpper();
-				return (s.Equals("TRUE") || s.Equals("1") || (s.Equals("T")));
+				string s = str.ToUpperInvariant();
+				return s.Equals("TRUE", StringComparison.Ordinal)
+					|| s.Equals("1", StringComparison.Ordinal)
+					|| s.Equals("T", StringComparison.Ordinal);
 			}
 
-			bool result = false;
+			bool result;
 			try
 			{
 				result = Convert.ToBoolean(value);
@@ -275,7 +277,7 @@ namespace DX.Utils
 		public static TEnum ParseEnum<TEnum>(object value)
 			where TEnum : struct, IConvertible
 		{
-			return ParseEnum<TEnum>(value, default(TEnum));
+			return ParseEnum<TEnum>(value, default);
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,52 +296,48 @@ namespace DX.Utils
 		public static TEnum ParseEnum<TEnum>(object value, TEnum defaultValue)
 			where TEnum : struct, IConvertible
 		{
-			TEnum result;
-			if (!Enum.TryParse<TEnum>($"{value}", out result))
-				result = defaultValue;
-			return result;
+            if (!Enum.TryParse<TEnum>($"{value}", out TEnum result))
+                result = defaultValue;
+            return result;
 		}
 
-		public static bool GetConfigOption(string configString, string configOption, out string result)
+		static readonly char[] configOptionSeparators = new char[] { ';' };
+        static readonly char[] configOptionValueSeparators = new char[] { '=' };
+
+        public static bool GetConfigOption(string configString, string configOption, out string result)
 		{
 			result = String.Empty;
 			if (string.IsNullOrEmpty(configString)) 
 				return false;
 
-			var configPairs = configString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+			var configPairs = configString.Split(configOptionSeparators, StringSplitOptions.RemoveEmptyEntries);
 			if (configPairs == null || configPairs.Length == 0)
 				return false;
 
-			var connStringParts = configPairs.Select(t => t.Split(new char[] { '=' }, 2))
+			var connStringParts = configPairs.Select(t => t.Split(configOptionValueSeparators, 2))
 					.ToDictionary(t => t.Length > 0 ? t[0].Trim() : string.Empty, 
 								  t => t.Length > 1 ? t[1].Trim() : string.Empty, StringComparer.InvariantCultureIgnoreCase);
 
-			if (connStringParts.ContainsKey(configOption))
-			{
-				result = connStringParts[configOption];
-				return true;
-			}
-			return false;
+			return connStringParts.TryGetValue(configOption, out result);
 		}
 
 		public static TEnum GetConfigOption<TEnum>(string configString, string configOption, TEnum defaultValue)
 			where TEnum : struct, IConvertible
 		{
-			string resultString = string.Empty;
-			TEnum result = defaultValue;
-			if (GetConfigOption(configString, configOption, out resultString))
-			{
-				Enum.TryParse<TEnum>(resultString, out result);
-			}
+            TEnum result = defaultValue;            
+            if (GetConfigOption(configString, configOption, out string resultString))
+            {
+                if (!Enum.TryParse<TEnum>(resultString, out result))
+                    result = defaultValue;
+            }
 
-			return result;
+            return result;
 		}
 
 		public static bool GetConfigOption(string configString, string configOption, bool defaultValue = false)
-		{
-			string resultString = string.Empty;
+		{			
 			bool result = defaultValue;
-			if (GetConfigOption(configString, configOption, out resultString))
+			if (GetConfigOption(configString, configOption, out string resultString))
 			{
 				result = ParseBool(resultString);
 			}

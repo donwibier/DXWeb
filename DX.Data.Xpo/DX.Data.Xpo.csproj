@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>25.2.3.35</Version>
-		<FileVersion>25.2.3.35</FileVersion>
+		<Version>26.1.3.36</Version>
+		<FileVersion>26.1.3.36</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes and abstract DX.Data.IDataStore implementation for use with XPO with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
@@ -16,6 +16,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			26.1.3.36: Upgrade to DevExpress v26.1.3
 			23.2.3.31: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
 					BREAKING CHANGES:
 						Data base classes moved to DX.Data package
@@ -86,7 +87,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="25.2.*" />
+		<PackageReference Include="DevExpress.Xpo" Version="26.1.*" />
 	</ItemGroup>
 	
 	<ItemGroup>

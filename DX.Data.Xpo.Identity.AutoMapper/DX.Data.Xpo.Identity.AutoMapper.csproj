@@ -1,21 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>25.2.3.33</Version>
-		<FileVersion>25.2.3.33</FileVersion>
+		<Version>26.1.3.34</Version>
+		<FileVersion>26.1.3.34</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
-		<TargetFrameworks>net462;net8.0;net9.0;net10.0</TargetFrameworks>
+		<TargetFrameworks>net471;net8.0;net9.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
+		<PackageReleaseNotes>
+			26.1.3.34: Upgrade to DevExpress v26.1.3
+			BREAKING CHANGES:
+			Dropped .NET Framework 4.6.2 support. Minimum .NET Framework target is now 4.7.1 (net471).
+			This was required to move AutoMapper from 10.1.1 to 16.x, which patches a high-severity Denial-of-Service
+			vulnerability (CVE-2026-32933 / GHSA-rvv3-g6hj-g44x, uncontrolled recursion on deeply nested/circular
+			object graphs) present in AutoMapper 10.1.1 and every version below 15.1.3/16.1.1. AutoMapper no longer
+			publishes any release that supports .NET Framework below 4.7.1, so there is no version that is both
+			patched and net462-compatible.
+			If you cannot move your project off net462, do not take this update. Stay on the previous package
+			version (accepting the AutoMapper vulnerability), or switch to DX.Data.Xpo.Identity.Mapster, which
+			still supports net462 and does not depend on AutoMapper.
+		</PackageReleaseNotes>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-		<PackageReference Include="AutoMapper" Version="10.1.1" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' != 'net462'">
+	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="16.*" />
 	</ItemGroup>
   <ItemGroup>

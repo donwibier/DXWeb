@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>25.2.3.36</Version>
-    <FileVersion>25.2.3.36</FileVersion>
+    <Version>26.1.3.37</Version>
+    <FileVersion>26.1.3.37</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>	  
@@ -15,6 +15,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReleaseNotes>
+		26.1.3.37: Fixed IDE1005, IDE0059 and CA1304/CA1307/CA1310/CA1805-class analyzer warnings in Conversion.cs
+		(simplified conditional delegate invocation, removed dead re-assignments in catch blocks, and made
+		ParseBool's string comparison culture- and comparison-explicit). No behavior change.
 		23.2.3.34: .NETv9 support
 		23.2.3.31: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
 		BREAKING CHANGES:

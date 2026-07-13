@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>25.2.5.16</Version>
-		<FileVersion>25.2.5.16</FileVersion>
+		<Version>26.1.3.17</Version>
+		<FileVersion>26.1.3.17</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several extension classes and methods on DevExpress MVC Controls, XPO and XPDataStore implementations. This package needs an active DevExpress ASP.NET license</Description>
 		<Copyright>Copyright (c) 2017 Don Wibier</Copyright>
@@ -14,6 +14,7 @@
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageTags>DXWeb Wibier DevExpress XPO ORM GridView ASP.NET MVC</PackageTags>	  
 	  <PackageReleaseNotes>
+		  26.1.3.17: Upgrade to DevExpress v26.1.3
 		  23.2.3.15: Changes to work with updated and simplified DataStores
 		  23.2.3.14: Upgrade to DevExpress v23.2.3
 		  23.1.3.13: Upgrade to DevExpress v23.1.3
@@ -51,9 +52,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DevExpress.Xpo" Version="25.2.*" />
-		<PackageReference Include="DevExpress.Data" Version="25.2.*" />
-		<PackageReference Include="DevExpress.Web.Mvc5" Version="25.2.*" />
+		<PackageReference Include="DevExpress.Xpo" Version="26.1.*" />
+		<PackageReference Include="DevExpress.Data" Version="26.1.*" />
+		<PackageReference Include="DevExpress.Web.Mvc5" Version="26.1.*" />
 	</ItemGroup>
 
 	<ItemGroup>
