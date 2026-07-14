@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>25.2.3.25</Version>
-		<FileVersion>25.2.3.25</FileVersion>
+		<Version>26.1.3.26</Version>
+		<FileVersion>26.1.3.26</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor Server based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
@@ -12,6 +12,7 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			26.1.3.26: Rebuilt against DX.Blazor.Identity 26.1.3.28 to pick up DevExpress v26.1.3 transitively.
 			23.2.3.23: Upgraded to .NET 8 and DX v23.2
 			22.1.4.20: Upgraded several packages
 			22.1.4.19: Upgraded several packages incl DevExpress v21.1.4

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>25.2.3.34</Version>
-		<FileVersion>25.2.3.34</FileVersion>
+		<Version>26.1.3.35</Version>
+		<FileVersion>26.1.3.35</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Mapster implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -10,6 +10,9 @@
 		<LangVersion>10.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<PackageReleaseNotes>
+			26.1.3.35: Rebuilt against DX.Data.Xpo.Identity 26.1.3.35 / DX.Data.Xpo.Mapster 26.1.3.32 to pick up DevExpress v26.1.3 transitively.
+		</PackageReleaseNotes>
 	</PropertyGroup>
 
 

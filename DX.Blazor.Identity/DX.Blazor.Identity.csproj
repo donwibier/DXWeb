@@ -5,14 +5,15 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>25.2.3.27</Version>
-		<FileVersion>25.2.3.27</FileVersion>
+		<Version>26.1.3.28</Version>
+		<FileVersion>26.1.3.28</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
 	</PropertyGroup>
 	<PropertyGroup>
 		<PackageReleaseNotes>
+			v26.1.3.28: Rebuilt against DX.Data.Xpo.Identity 26.1.3.35 to pick up DevExpress v26.1.3 transitively.
 			v23.2.3.24: Upgraded to .NET 8 and DX v23.2
 			v23.2.3.23: Upgraded to .NET 8 and DX v23.2
 			v22.1.4.21: Small fix on refresh token

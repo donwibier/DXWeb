@@ -1,14 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>25.2.3.34</Version>
-		<FileVersion>25.2.3.34</FileVersion>
-		<Authors>Don Wibier (DevExpress)</Authors>		
+		<Version>26.1.3.35</Version>
+		<FileVersion>26.1.3.35</FileVersion>
+		<Authors>Don Wibier (DevExpress)</Authors>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
 		<Description>Base Data Package with DataStore DTO and FluentValidation Mechanism, Interfaces and ApiDataStore</Description>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data</PackageProjectUrl>
 		<!--<PackageIconUrl>https://www.devexpress.com/favicon.ico</PackageIconUrl>-->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO Blazor WebAPI</PackageTags>
+		<PackageReleaseNotes>
+			26.1.3.35: Rebuilt to align with the DXWeb v26.1.3 release wave (no DevExpress dependency in this package; version bumped for consistency across the repo).
+		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
 		<TargetFrameworks>net462;net8.0;net9.0;net10.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>

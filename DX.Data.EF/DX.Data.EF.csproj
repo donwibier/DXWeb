@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>25.2.3.34</Version>
-		<FileVersion>25.2.3.34</FileVersion>
+		<Version>26.1.3.35</Version>
+		<FileVersion>26.1.3.35</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Abstract DX.Data.IDataStore implementation for use with EF with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -13,6 +13,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
 		<PackageReleaseNotes>
+			26.1.3.35: Rebuilt to align with the DXWeb v26.1.3 release wave and pick up the latest DX.Data/DX.Utils dependency versions (no direct DevExpress dependency in this package).
 			23.2.3.30: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
 			BREAKING CHANGES:
 				Data base classes moved to DX.Data package

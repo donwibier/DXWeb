@@ -5,8 +5,8 @@
 		<LangVersion>10.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>25.2.3.31</Version>
-		<FileVersion>25.2.3.31</FileVersion>
+		<Version>26.1.3.32</Version>
+		<FileVersion>26.1.3.32</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>DX.Data.IDataStore implementation for use with XPO with FluentValidation and Mapster</Description>
 		<Copyright>Copyright (c) 2023 Don Wibier</Copyright>
@@ -15,6 +15,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReleaseNotes>
+			26.1.3.32: Rebuilt against DX.Data.Xpo 26.1.3.36 to pick up DevExpress v26.1.3 transitively.
 			23.2.3.31: Implementation with Mapster DTO handling
 		</PackageReleaseNotes>
 		<RepositoryUrl>https://github.com/donwibier/DXWeb</RepositoryUrl>
