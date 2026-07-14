@@ -76,6 +76,7 @@ jobs:
 
           for proj in $(find . -name "*.csproj"); do
             DIR=$(dirname "$proj")
+            DIR="${DIR#./}"
             if echo "$DIFF" | grep -q "^$DIR/"; then
               CHANGED="$CHANGED $proj"
             fi

@@ -1,0 +1,11 @@
+fix: strip leading ./ from project dir before matching git diff paths
+
+The changed-project detection compared find's "./Dir/Project.csproj" paths
+(dirname -> "./Dir") against git diff --name-only paths, which never have
+a leading "./" (e.g. "Dir/Project.csproj"). The grep pattern "^./Dir/" could
+never match, so the build job always saw zero changed projects and silently
+skipped restore/build/pack/publish on every run - this is why no package
+version has been published since this workflow was introduced, despite runs
+reporting overall "success". Verified locally against the actual 106ed50
+commit diff: before the fix, 0 projects detected; after, all 13 correctly
+detected.
