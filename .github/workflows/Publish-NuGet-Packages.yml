@@ -5,6 +5,11 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      force_projects:
+        description: "Space-separated csproj paths to force-pack/publish, bypassing diff detection (e.g. for one-off catch-up runs). Leave empty for normal diff-based behavior."
+        required: false
+        default: ""
 
 jobs:
   version:
@@ -28,8 +33,7 @@ jobs:
           tag_prefix: "v"
           major_pattern: "BREAKING CHANGE"
           minor_pattern: "feat"
-          patch_pattern: "fix"
-          format: "${major}.${minor}.${patch}"
+          version_format: "${major}.${minor}.${patch}"
           bump_each_commit: false
 
       - name: Output version
@@ -71,18 +75,30 @@ jobs:
       - name: Detect changed projects
         id: changed
         run: |
-          DIFF=$(git diff --name-only HEAD~1 HEAD)
-          CHANGED=""
+          FORCE="${{ github.event.inputs.force_projects }}"
 
-          for proj in $(find . -name "*.csproj"); do
-            DIR=$(dirname "$proj")
-            DIR="${DIR#./}"
-            if echo "$DIFF" | grep -q "^$DIR/"; then
-              CHANGED="$CHANGED $proj"
+          if [ -n "$FORCE" ]; then
+            echo "Force mode: using explicitly listed projects"
+            CHANGED=$(echo "$FORCE" | xargs)
+          else
+            BASE="${{ github.event.before }}"
+            if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE" 2>/dev/null; then
+              BASE=$(git rev-parse HEAD~1)
             fi
-          done
+            echo "Diff base: $BASE"
+            DIFF=$(git diff --name-only "$BASE" HEAD)
+            CHANGED=""
 
-          CHANGED=$(echo "$CHANGED" | xargs)
+            for proj in $(find . -name "*.csproj"); do
+              DIR=$(dirname "$proj")
+              DIR="${DIR#./}"
+              if echo "$DIFF" | grep -q "^$DIR/"; then
+                CHANGED="$CHANGED $proj"
+              fi
+            done
+
+            CHANGED=$(echo "$CHANGED" | xargs)
+          fi
 
           echo "Changed projects: $CHANGED"
 
@@ -112,7 +128,6 @@ jobs:
             [ -z "$proj" ] && continue
             echo "Packing $proj"
             dotnet pack "$proj" \
-              /p:Version=${{ needs.version.outputs.version }} \
               --configuration Release \
               --no-build \
               --output ./nupkg
