@@ -33,24 +33,26 @@ dotnet add package DX.Data.Xpo.Identity.AutoMapper   # or DX.Data.Xpo.Identity.M
 
 Since DevExpress v25.1, DevExpress packages (`DevExpress.Xpo`, `DevExpress.Data`, `DevExpress.Web.Mvc5`, `DevExpress.Blazor`, etc.) are published directly on nuget.org as well, so restoring any package below pulls in the matching DevExpress dependency automatically — **no separate DevExpress private NuGet feed is required just to build**. You do still need a valid, active [DevExpress subscription/license](https://www.devexpress.com/products/) registered on your machine (or a license key at build/runtime, depending on the product) to legally use the underlying DevExpress components.
 
-| Package | Purpose |
-|---|---|
-| `DX.Utils` | Helper classes (attributes, bit operations, collections, conversion, logging, URLs) |
-| `DX.Data` | Base `DataStore<TKey, TModel>` abstraction, DTO mapping + FluentValidation, Blazor WASM `ApiDataStore` |
-| `DX.Data.Xpo` | `XpoDatabase`/`XpoDataStore` for DTO pattern, no mapper included |
-| `DX.Data.Xpo.AutoMapper` | Same as above, using AutoMapper for DTO mapping — **requires net471+** (see Breaking Changes) |
-| `DX.Data.Xpo.Mapster` | Same as above, using Mapster for DTO mapping |
-| `DX.Data.Xpo.Interfaces` | Shared interfaces for `DX.Data.Xpo.Identity` |
-| `DX.Data.Xpo.Identity` | Abstract XPO-based storage for ASP.NET/Microsoft Identity |
-| `DX.Data.Xpo.Identity.AutoMapper` | `DX.Data.Xpo.Identity` wired up with AutoMapper — **requires net471+** (see Breaking Changes) |
-| `DX.Data.Xpo.Identity.Mapster` | `DX.Data.Xpo.Identity` wired up with Mapster |
-| `DX.Data.EF` | Base EF Core `IDataStore` implementation, no mapper included |
-| `DX.Data.EF.AutoMapper` | Same as above, using AutoMapper — **requires net471+** (see Breaking Changes) |
-| `DX.Data.EF.Mapster` | Same as above, using Mapster |
-| `DX.Blazor.Identity` / `.Server` / `.Wasm` | Ready-made MS Identity integration for Blazor Server & WASM |
-| `DX.Data.Xpo.Mvc` | ASPxGridView (ASP.NET MVC 5) extensions on top of `DX.Data.Xpo` — requires an active DevExpress ASP.NET license |
+| Package | Purpose | Docs |
+|---|---|---|
+| `DX.Utils` | Helper classes (attributes, bit operations, collections, conversion, logging, URLs) | [README](DX.Utils/README.md) |
+| `DX.Data` | Base `DataStore<TKey, TModel>` abstraction, DTO mapping + FluentValidation, Blazor WASM `ApiDataStore` | [README](DX.Data/README.md) |
+| `DX.Data.Xpo` | `XpoDatabase`/`XpoDataStore` for DTO pattern, no mapper included | [README](DX.Data.Xpo/README.md) |
+| `DX.Data.Xpo.AutoMapper` | Same as above, using AutoMapper for DTO mapping — **requires net471+** (see Breaking Changes) | [README](DX.Data.Xpo.AutoMapper/README.md) |
+| `DX.Data.Xpo.Mapster` | Same as above, using Mapster for DTO mapping | [README](DX.Data.Xpo.Mapster/README.md) |
+| `DX.Data.Xpo.Interfaces` | Shared interfaces for `DX.Data.Xpo.Identity` | — |
+| `DX.Data.Xpo.Identity` | Abstract XPO-based storage for ASP.NET/Microsoft Identity | [README](DX.Data.Xpo.Identity/README.md) |
+| `DX.Data.Xpo.Identity.AutoMapper` | `DX.Data.Xpo.Identity` wired up with AutoMapper — **requires net471+** (see Breaking Changes) | [README](DX.Data.Xpo.Identity.AutoMapper/README.md) |
+| `DX.Data.Xpo.Identity.Mapster` | `DX.Data.Xpo.Identity` wired up with Mapster | [README](DX.Data.Xpo.Identity.Mapster/README.md) |
+| `DX.Data.EF` | Base EF Core `IDataStore` implementation, no mapper included | [README](DX.Data.EF/README.md) |
+| `DX.Data.EF.AutoMapper` | Same as above, using AutoMapper — **requires net471+** (see Breaking Changes) | [README](DX.Data.EF.AutoMapper/README.md) |
+| `DX.Data.EF.Mapster` | Same as above, using Mapster | [README](DX.Data.EF.Mapster/README.md) |
+| `DX.Blazor.Identity` / `.Server` / `.Wasm` | Ready-made MS Identity integration for Blazor Server & WASM | [README](DX.Blazor.Identity/README.md) · [Server](DX.Blazor.Identity.Server/README.md) · [Wasm](DX.Blazor.Identity.Wasm/README.md) |
+| `DX.Data.Xpo.Mvc` | ASPxGridView (ASP.NET MVC 5) extensions on top of `DX.Data.Xpo` — requires an active DevExpress ASP.NET license | [README](DX.Data.Xpo.Mvc/README.md) |
 
-#### DX.Utils
+Each linked README is a deep-dive into that package's actual source: class/interface signatures, what each method does, and usage snippets — beyond the quick summaries below.
+
+#### DX.Utils ([full README](DX.Utils/README.md))
 This package contains several helper classes for working with:
 * Attributes
 * Bit operations
@@ -59,47 +61,47 @@ This package contains several helper classes for working with:
 * Logging helpers
 * Url manipulations
 
-#### DX.Data
+#### DX.Data ([full README](DX.Data/README.md))
 * DataStore<TKey, TModel> base class to work with DataSets ->
   Abstract DTO Mapping, FluentValidator validation and ApiDataStore for BlazorWASM with CRUD support.
 
-#### DX.Data.Xpo
+#### DX.Data.Xpo ([full README](DX.Data.Xpo/README.md))
 This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern **no mapping implementation**
 
-#### DX.Data.Xpo.AutoMapper
+#### DX.Data.Xpo.AutoMapper ([full README](DX.Data.Xpo.AutoMapper/README.md))
 This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern by using AutoMapper.
 
 **Requires .NET Framework 4.7.1 or higher (net471+); net462 is no longer supported as of `26.1.3.34`** — see [Breaking Changes](#-breaking-changes). If you need net462, use `DX.Data.Xpo.Mapster` instead.
 
-#### DX.Data.Xpo.Mapster
+#### DX.Data.Xpo.Mapster ([full README](DX.Data.Xpo.Mapster/README.md))
 This package contains the XpoDatabase and XpoDataStore for easy config and use of DTO pattern by using Mapster
 
 #### DX.Data.Xpo.Interfaces
 Shared interfaces used by **DX.Data.Xpo.Identity** to support ASP.NET/Microsoft Identity storage. Referenced automatically as a dependency — you normally don't need to install it directly.
 
-#### DX.Data.Xpo.Identity
+#### DX.Data.Xpo.Identity ([full README](DX.Data.Xpo.Identity/README.md))
 This package contains an XPO based *abstract* storage mechanism for use with MS Identity to support a small dozen different DB engines.
 
-#### DX.Data.Xpo.Identity.AutoMapper
+#### DX.Data.Xpo.Identity.AutoMapper ([full README](DX.Data.Xpo.Identity.AutoMapper/README.md))
 This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines with AutMapper DTO handling.
 
 **Requires .NET Framework 4.7.1 or higher (net471+); net462 is no longer supported as of `26.1.3.34`** — see [Breaking Changes](#-breaking-changes). If you need net462, use `DX.Data.Xpo.Identity.Mapster` instead.
 
-#### DX.Data.Xpo.Identity.Mapster
+#### DX.Data.Xpo.Identity.Mapster ([full README](DX.Data.Xpo.Identity.Mapster/README.md))
 This package contains an XPO based storage mechanism for use with MS Identity to support a small dozen different DB engines with Mapster DTO handling.
 
 #### Note
 From v23.2.3.31, you will need to include either **DX.Data.Xpo.Identity.AutoMapper**  or **DX.Data.Xpo.Identity.Mapster** (**NOT BOTH**), depending on the DTO Mapper you're already (or planning) using! Note that as of `26.1.3.34`, the AutoMapper variant requires net471+ — if your project is still on net462, **DX.Data.Xpo.Identity.Mapster** is your only option.
 
-#### DX.Data.EF
+#### DX.Data.EF ([full README](DX.Data.EF/README.md))
 Abstract EF Core based `DX.Data.IDataStore` implementation with FluentValidation, **no mapping implementation** included — pick one of the mapper-specific packages below (or roll your own) on top of it.
 
-#### DX.Data.EF.AutoMapper
+#### DX.Data.EF.AutoMapper ([full README](DX.Data.EF.AutoMapper/README.md))
 `DX.Data.IDataStore` implementation for use with EF Core, using FluentValidation and AutoMapper for DTO mapping.
 
 **Requires .NET Framework 4.7.1 or higher (net471+); net462 is no longer supported as of `26.1.3.33`** — see [Breaking Changes](#-breaking-changes). If you need net462, use `DX.Data.EF.Mapster` instead.
 
-#### DX.Data.EF.Mapster
+#### DX.Data.EF.Mapster ([full README](DX.Data.EF.Mapster/README.md))
 `DX.Data.IDataStore` implementation for use with EF Core, using FluentValidation and Mapster for DTO mapping.
 
 As with the XPO Identity packages, install either the AutoMapper or the Mapster variant depending on which mapper you're standardized on — not both. If you're on net462, Mapster is your only option.
@@ -168,7 +170,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-#### DX.Blazor.Identity (Server/Wasm)
+#### DX.Blazor.Identity (Server/Wasm) — [core README](DX.Blazor.Identity/README.md) · [Server README](DX.Blazor.Identity.Server/README.md) · [Wasm README](DX.Blazor.Identity.Wasm/README.md)
 
 Initial publish with code to make incoporate MS Identity in you Blazor apps simple
 
@@ -300,7 +302,7 @@ For both projects (WASM and Server) you can use the following Login.razor:
 
 
 
-#### DX.Data.Xpo.Mvc (For ASP.NET Framework ASPxGridView MVC Extension only)
+#### DX.Data.Xpo.Mvc (For ASP.NET Framework ASPxGridView MVC Extension only) — [full README](DX.Data.Xpo.Mvc/README.md)
 
 **Please note:** _You will need at least an **active** [DevExpress ASP.NET **License**](https://www.devexpress.com/products/net/controls/asp/) for this package_
 

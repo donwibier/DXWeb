@@ -1,187 +1,85 @@
-﻿# XPPagedDataSource
+# DX.Data.Xpo.Mvc
 
-The XPPagedDataSource implements logic to support an the DevExpress MVC GridView with Advanced Custom databinding like the example at the [Demo Center](https://demos.devexpress.com/MVCxGridViewDemos/DataBinding/AdvancedCustomBinding)
-This class is using [DevExpress XPO](https://www.devexpress.com/products/net/orm/) as data access layer.
+Server-side filtering, sorting, grouping, and summary-calculation support for DevExpress ASP.NET MVC 5's `ASPxGridView`, built directly on top of `DX.Data.Xpo`'s `XPDataStore`. **Requires an active DevExpress ASP.NET license** — this package references `DevExpress.Web.Mvc5`.
 
-The idea behind this is to have DTOModel which incoorporate data from one or more XPOEntities.
-Also see Utils.Data.DataStore and Data.Xpo.XPDataStore.
+**Target framework:** net462 only (classic ASP.NET MVC 5 / `System.Web`)
+**DevExpress dependency:** `DevExpress.Xpo`, `DevExpress.Data`, `DevExpress.Web.Mvc5` (all `26.1.*`)
 
-```C#
-    public class XPInvoiceStore : XPPagedDataStore<int, DTOModel, XPOEntity>
-	{
-		public XPInvoiceStore(XpoDatabase db, XPDataValidator<int, DTOModel, XPOEntity> validator) 
-		    : base(db, validator)
-		{
+## Install
 
-		}
-
-		protected override DTOModel Assign(XPOEntity source, DTOModel destination)
-		{
-			var result = base.Assign(source, destination);
-
-			return result;
-		}
-
-		protected override CRM_FRM Assign(DTOModel source, XPOEntity destination)
-		{
-			var result = base.Assign(source, destination);
-
-			return result;
-		}
-		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>()
-		{
-			{"ID", "ID"},
-			{"OrderDate", "OrderDate"},
-			{"CustomerID", "Customer.ID"}, /* You can use the XPView property notation (like the LINQ below) */
-			{"CustomerName", "Customer.Name"}
-			// ...
-		};
-		protected override Dictionary<string, string> PropertyMap => _propertyMap;
-
-		protected override Func<XPOEntity, DTOModel> CreateModelInstance => 
-		    (x) => new DTOModel
-		{
-			ID = x.ID,
-			OrderDate = x.OrderDate,
-			CustomerID = x.Customer.ID,
-			CustomerName = x.Customer.Name
-		};
-
-		protected override IQueryable<XPOEntity> Query(Session s)
-		{
-			var r = from n in s.Query<XPOEntity>()
-			        /* if needed, preset filter */
-					where n.OrderDate > new DateTime(DateTime.Now.Year, 1, 1) 
-					/* At least set default order */
-					orderby n.ID 
-					select n;
-			return r;
-		}
-
-		protected override IEnumerable<DTOModel> Query()
-		{
-			var results = DB.Execute((db, w) =>
-					{
-						var r = Query(w).Select(CreateModelInstance);
-						return r.ToList();
-					});
-
-			return results;
-		}
-	}
+```
+dotnet add package DX.Data.Xpo.Mvc
 ```
 
-Then in the Controller which operates the GridView, you will need to add the following action methods:
+## XPPagedDataStore<TKey, TModel, TXPOClass> (XPPagedDataStore.cs)
 
-```C#
-    public class InvoiceController : Controller
-    {		
-		var DB = new XPPagedDataStore<int, DTOModel, XPOEntity>(new XPDatabase("DefaultConnection"), new InvoiceValidator())
-        //...
-        
-        
-		public InvoiceViewModel CreateViewModel()
-		{
-			var model = new InvoiceViewModel
-			{
-				ControllerName = "Invoices",
-				//..more properties whatever you need
-			};
-			var gm = GridViewExtension.GetViewModel($"InvoiceGrid");
-			if (gm == null)
-			{
-				gm = new GridViewModel { KeyFieldName = "ID" };
-				gm.Columns.Add("OrderDate");
-				gm.Columns.Add("CustomerID");
-				gm.Columns.Add("CustomerName");
-                //... all columns configured in grid
-			}
-			model.GridViewModel = gm;
-			return model;
-		}
-		public ActionResult Index()
-		{
-			var model = CreateViewModel();
-			return View(model);
-		}
+```cs
+public abstract class XPPagedDataStore<TKey, TModel, TXPOClass> : XPDataStore<TKey, TModel, TXPOClass>, IPagedDataStore
+    where TXPOClass : XPBaseObject
+{
+    protected XPPagedDataStore(IDataLayer dataLayer, IValidator<TXPOClass> validator);
 
-		public ActionResult GridViewPartialView()
-		{
-			var viewModel = CreateViewModel();			
-			return GridViewCoreBinder(viewModel);				
-		}
-
-		//==
-		// Paging
-		public ActionResult GridViewPagingAction(GridViewPagerState pager)
-		{
-			var model = CreateViewModel(null);
-			model.GridViewModel.ApplyPagingState(pager);
-			return GridViewCoreBinder(model);
-		}
-		// Filtering
-		public ActionResult GridViewFilteringAction(GridViewFilteringState filteringState)
-		{
-			var model = CreateViewModel(null);
-			model.GridViewModel.ApplyFilteringState(filteringState);
-			return GridViewCoreBinder(model);
-		}
-		// Sorting
-		public ActionResult GridViewSortingAction(GridViewColumnState column, bool reset)
-		{
-			var model = CreateViewModel(null);
-			model.GridViewModel.ApplySortingState(column, reset);
-			return GridViewCoreBinder(model);
-		}
-		// Grouping
-		public ActionResult GridViewGroupingAction(GridViewColumnState column)
-		{
-			var model = CreateViewModel(null);
-			model.GridViewModel.ApplyGroupingState(column);
-			return GridViewCoreBinder(model);
-		}
-
-		PartialViewResult GridViewCoreBinder(InvoiceLineViewModel model)
-		{
-			model.GridViewModel.ProcessCustomBinding(
-				DB.GetGridCustomDataRowCount,
-				DB.GetGridCustomData,
-				DB.GetGridCustomSummaryValues,
-				DB.GetGridCustomGroupingInfo,
-				DB.GetGridCustomUniqueHeaderFilterValues
-			);
-			return PartialView("GridViewPartialView", model);
-		}
-		//...
-	}
-```
-
-Last, configure the Grid as follows:
-
-```c#
-@{
-	var grid = Html.DevExpress().GridView(
-		settings =>
-		{
-			settings.Name = "InvoiceLinesGrid";
-			settings.KeyFieldName = "ID";
-			settings.CallbackRouteValues = new { Controller = "InvoiceLines", Action = "GridViewPartialView" };
-
-			settings.CustomBindingRouteValuesCollection.Add(GridViewOperationType.Paging, new { Controller = "InvoiceLines", Action = "GridViewPagingAction" });
-			settings.CustomBindingRouteValuesCollection.Add(GridViewOperationType.Sorting, new { Controller = "InvoiceLines", Action = "GridViewSortingAction" });
-			settings.CustomBindingRouteValuesCollection.Add(GridViewOperationType.Filtering, new { Controller = "InvoiceLines", Action = "GridViewFilteringAction" });
-			settings.CustomBindingRouteValuesCollection.Add(GridViewOperationType.Grouping, new { Controller = "InvoiceLines", Action = "GridViewGroupingAction" });
-
-			settings.Columns.Add("OrderDate", "Order Date");
-			settings.Columns.Add("CustomerID", "Cust. ID");
-			settings.Columns.Add("CustomerName", "Cust. Name");
-            //... more configuration of grid
-		});
-
-	if (ViewData["EditError"] != null)
-	{
-		grid.SetEditErrorText((string)ViewData["EditError"]);
-	}
+    // ASPxGridView custom-binding event handlers:
+    public virtual void GetGridViewDataRowCount(GridViewCustomBindingGetDataRowCountArgs e);
+    public virtual void GetGridViewUniqueHeaderFilterValues(GridViewCustomBindingGetUniqueHeaderFilterValuesArgs e);
+    public virtual void GetGridViewGroupingInfo(GridViewCustomBindingGetGroupingInfoArgs e);
+    public virtual void GetGridViewData(GridViewCustomBindingGetDataArgs e);
+    public virtual void GetGridViewSummaryValues(GridViewCustomBindingGetSummaryValuesArgs e);
+    public virtual void GetGridLookupRowValues(GridViewCustomBindingGetRowValuesArgs e);
 }
-@grid.BindToCustomData(Model.GridViewModel).SetEditErrorText(ViewBag.EditError).GetHtml()
 ```
+
+Wire an `ASPxGridView`'s custom-data-binding events directly to these six methods and the grid gets server-side paging, sorting, filtering, grouping, and summary calculation for free — all translated into `CriteriaOperator`/XPO `IQueryable` operations against your existing `XPDataStore`, so query logic isn't duplicated between the grid and the rest of your data layer. A row-count cache (`GetGridViewDataRowCount`) is kept per filter expression in `HostingEnvironment.Cache`, keyed by `Counts_{GetType().FullName}`, so repeated identical-filter requests skip the `COUNT(*)` round-trip.
+
+### Usage
+
+```cs
+public class CustomerGridStore : XPPagedDataStore<int, CustomerDto, XpoCustomer>
+{
+    public CustomerGridStore(IDataLayer dataLayer, IValidator<XpoCustomer> validator) : base(dataLayer, validator) { }
+    // ToDBModel / ToModel / Query<T>() implemented as with any XPDataStore subclass (see DX.Data.Xpo's README)
+}
+```
+
+```cs
+public class InvoiceController : Controller
+{
+    readonly CustomerGridStore store;
+
+    public ActionResult GridViewPartialView()
+    {
+        // wire the grid's CustomDataBinding events straight to the store:
+        // grid.CustomDataBinding.GetDataRowCount += (s, e) => store.GetGridViewDataRowCount(e);
+        // grid.CustomDataBinding.GetData += (s, e) => store.GetGridViewData(e);
+        // grid.CustomDataBinding.GetGroupingInfo += (s, e) => store.GetGridViewGroupingInfo(e);
+        // grid.CustomDataBinding.GetSummaryValues += (s, e) => store.GetGridViewSummaryValues(e);
+        // grid.CustomDataBinding.GetUniqueHeaderFilterValues += (s, e) => store.GetGridViewUniqueHeaderFilterValues(e);
+        return PartialView("GridViewPartialView");
+    }
+}
+```
+
+See the [DevExpress Demo Center's Advanced Custom Binding example](https://demos.devexpress.com/MVCxGridViewDemos/DataBinding/AdvancedCustomBinding) for the full `ASPxGridView` markup/routing pattern this class is designed to plug into.
+
+## Utils/GridViewCustomOperationDataHelper.cs
+
+Internal `IQueryable` extension methods (`ApplySorting`, `ApplyFilter`, `Select`, `UniqueValuesForField`, `GetGroupInfo`, `CalculateSummary`) that translate `ASPxGridView` state (`GridViewColumnState`, `GridViewGroupInfo`, `GridViewSummaryItemState`) into DevExpress `CriteriaOperator`/LINQ expression-tree operations against the underlying `IQueryable`. You don't call these directly — `XPPagedDataStore`'s methods use them internally.
+
+## Utils/CriteriaValidator.cs
+
+```cs
+public class CriteriaValidator : EvaluatorCriteriaValidator
+{
+    public static bool IsCriteriaOperatorValid(CriteriaOperator criteria);
+}
+```
+
+Rejects a parsed filter `CriteriaOperator` if it contains an `OperandValue` with a `null` value — a defensive check applied before any filter expression coming from the grid's UI is turned into a query, preventing malformed/incomplete filter clauses (e.g. mid-typing autofilter state) from reaching the database.
+
+## Notes
+
+- This package targets **net462 only** — `ASPxGridView`/MVC 5 is a classic ASP.NET Framework technology with no .NET (Core) equivalent in this repo.
+- Requires an active [DevExpress ASP.NET license](https://www.devexpress.com/products/net/controls/asp/) — the underlying `DevExpress.Web.Mvc5` package will not function without one.
+- Builds directly on `DX.Data.Xpo`'s `XPDataStore` — see that package's README for the base store API this class extends.
+
+See the [root README](../README.md) for the full package list and DevExpress version alignment notes.

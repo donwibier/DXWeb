@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>26.1.3.34</Version>
-		<FileVersion>26.1.3.34</FileVersion>
+		<Version>26.1.3.35</Version>
+		<FileVersion>26.1.3.35</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -10,7 +10,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>10.0</LangVersion>
 		<Nullable>enable</Nullable>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.35: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 			26.1.3.34: Upgrade to DevExpress v26.1.3
 			BREAKING CHANGES:
 			Dropped .NET Framework 4.6.2 support. Minimum .NET Framework target is now 4.7.1 (net471).
@@ -32,6 +34,10 @@
     <ProjectReference Include="..\DX.Data.Xpo.AutoMapper\DX.Data.Xpo.AutoMapper.csproj" />
     <ProjectReference Include="..\DX.Data.Xpo.Identity\DX.Data.Xpo.Identity.csproj" />
     <ProjectReference Include="..\DX.Data.Xpo\DX.Data.Xpo.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

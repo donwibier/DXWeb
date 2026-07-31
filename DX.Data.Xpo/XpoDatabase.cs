@@ -343,27 +343,41 @@ namespace DX.Data.Xpo
 		{
 			if (target == null)
 				throw new ArgumentNullException("target");
-			List<T> result = new List<T>();
-			using (Session sourceSession = this.GetSession())
+            
+            using (UnitOfWork targetSession = target.GetUnitOfWork())
 			{
-				XPCollection sourceList = new XPCollection(sourceSession, typeof(T), sourceCriteria, sortProperties);
-				if (sourceList.Count > 0)
-				{
-					using (UnitOfWork targetSession = target.GetUnitOfWork())
-					{
-						Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
-						foreach (T sourceItem in sourceList)
-						{
-							result.Add(c.Clone(sourceItem, synchronize));
-						}
-						targetSession.CommitChanges();
-					}
-				}
-			}
-			return result.ToArray();
+				var result = CloneCollection<T>(sourceCriteria, sortProperties, targetSession, synchronize, excludedClasses, synchronizeProperties);
+                targetSession.CommitChanges();
+				return result;
+            }
 		}
 
-		public Task<T[]> CloneCollectionAsync<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
+        public T[] CloneCollection<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
+			Session targetSession, bool synchronize = true,
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
+			where T : IXPSimpleObject
+        {
+            if (targetSession == null)
+                throw new ArgumentNullException("targetSession");
+
+            List<T> result = new List<T>();
+            using (Session sourceSession = this.GetSession())
+            {
+                XPCollection sourceList = new XPCollection(sourceSession, typeof(T), sourceCriteria, sortProperties);
+                if (sourceList.Count > 0)
+                {
+                        Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
+                        foreach (T sourceItem in sourceList)
+                        {
+                            result.Add(c.Clone(sourceItem, synchronize));
+                        }
+                }
+            }
+            return result.ToArray();
+        }
+
+
+        public Task<T[]> CloneCollectionAsync<T>(CriteriaOperator sourceCriteria, SortProperty[] sortProperties,
 			XpoDatabase target, bool synchronize = true,
 			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
@@ -380,18 +394,34 @@ namespace DX.Data.Xpo
 				throw new ArgumentNullException("source");
 			if (target == null)
 				throw new ArgumentNullException("target");
-
-			using (Session sourceSession = this.GetSession())
+			
 			using (UnitOfWork targetSession = target.GetUnitOfWork())
 			{
-				Cloner c = new Cloner(/*sourceSession,*/ targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
-				T result = c.Clone(source, synchronize);
-				targetSession.CommitChanges();
+				var result = Clone(source, targetSession, synchronize, excludedClasses, synchronizeProperties);
+                targetSession.CommitChanges();
 				return result;
 			}
 		}
 
-		public virtual Task<T> CloneAsync<T>(T source, XpoDatabase target, bool synchronize = true,
+        public T Clone<T>(T source, Session targetSession, bool synchronize = true,
+			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
+			where T : IXPSimpleObject
+		{
+			if (source == null)
+				throw new ArgumentNullException("source");
+			if (targetSession == null)
+                throw new ArgumentNullException("targetSession");
+
+            using (Session sourceSession = this.GetSession())            
+            {
+                Cloner c = new Cloner(targetSession, excludedClasses ?? null!, synchronizeProperties ?? null!);
+                T result = c.Clone(source, synchronize);
+                return result;
+            }
+        }
+
+
+        public virtual Task<T> CloneAsync<T>(T source, XpoDatabase target, bool synchronize = true,
 			IEnumerable<XPClassInfo>? excludedClasses = null, IEnumerable<string>? synchronizeProperties = null)
 			where T : IXPSimpleObject
 		{
