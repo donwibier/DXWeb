@@ -119,6 +119,34 @@ public static class Log
 
 Backed by `UtilsConfig.LoggerType` (read from the `DXWeb/Utils` config section) so the logging target can be swapped without code changes.
 
+### MimeDetection — content-based MIME type detection
+
+```cs
+public static class MimeTypes
+{
+    public const string DEFAULT = "application/octet-stream";
+
+    public static string DetermineMimeType(string fileName, byte[] fileBytes);
+    public static MimeType GetMimeTypeFromBytes(string fileName, byte[] fileBytes);
+}
+
+public sealed class MimeType
+{
+    public string Name { get; }         // e.g. "image/png"
+    public string PrimaryType { get; }  // e.g. "image"
+    public string SubType { get; }      // e.g. "png"
+}
+```
+
+Determines a file's real MIME type by sniffing its content (magic bytes) rather than trusting its extension or a browser-supplied `Content-Type` — useful when validating uploads that could be mislabeled or renamed to spoof a type.
+
+```cs
+byte[] bytes = File.ReadAllBytes(path);
+string mime = MimeTypes.DetermineMimeType(fileName, bytes); // "" if undetermined
+```
+
+`DetermineMimeType` first checks the byte content against a table of known magic-byte signatures; if nothing matches it falls back to the file's extension. The signature table (`mime-types.xml`, embedded as a resource) and detection approach are ported from the [Winista.Mime](https://github.com/lupomontero/winista.mime) project (itself derived from Apache Tika's `mime-info`). `sbyte[]`-based overloads (`GetMimeTypeFromSBytes`, etc.) are also available for callers already working with signed bytes.
+
 ### PropertyExtensions.cs — reflection-based object utilities
 
 ```cs

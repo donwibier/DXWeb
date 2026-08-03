@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>26.1.3.38</Version>
-    <FileVersion>26.1.3.38</FileVersion>
+    <Version>26.1.3.39</Version>
+    <FileVersion>26.1.3.39</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>
@@ -16,6 +16,7 @@
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
+		26.1.3.39: Added MimeDetection by content.
 		26.1.3.38: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 		26.1.3.37: Fixed IDE1005, IDE0059 and CA1304/CA1307/CA1310/CA1805-class analyzer warnings in Conversion.cs
 		(simplified conditional delegate invocation, removed dead re-assignments in catch blocks, and made
@@ -62,6 +63,14 @@
   </ItemGroup>
 	<ItemGroup Condition="'$(TargetFramework)'!='net462'">
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="MimeDetection\mime-types.dtd" />
+	  <None Remove="MimeDetection\mime-types.xml" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="MimeDetection\mime-types.dtd" />
+	  <EmbeddedResource Include="MimeDetection\mime-types.xml" />
 	</ItemGroup>
 	
 	<ItemGroup>
