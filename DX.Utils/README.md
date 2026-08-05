@@ -70,6 +70,116 @@ public static class Conversion
 
 All the `Parse*` methods swallow format/overflow exceptions and fall back to `defaultValue` — handy for reading loosely-typed data (query strings, `DataRow` cells, config values) without wrapping every call in a `try/catch`.
 
+### CronJobs — a self-contained cron scheduler
+
+```cs
+public class CronExpression // 5-field: minutes hours days months daysOfWeek
+{
+    public CronExpression();                                                            // "* * * * *"
+    public CronExpression(string minutes, string hours, string days, string months, string daysOfWeek);
+}
+
+public static class CronBuilder // fluent-ish factories for common CronExpressions
+{
+    public static CronExpression CreateMinutelyTrigger();
+    public static CronExpression CreateHourlyTrigger(int triggerMinute = 0);
+    public static CronExpression CreateDailyTrigger(int triggerHour = 0);
+    public static CronExpression CreateDailyOnlyWeekDayTrigger(int triggerHour = 0);
+    public static CronExpression CreateDailyOnlyWeekEndTrigger(int triggerHour = 0);
+    public static CronExpression CreateMonthlyTrigger(int triggerDay = 0);
+    public static CronExpression CreateYearlyTrigger(int triggerMonth = 0);
+    // ... plus range/interval/multi-value overloads of each
+}
+
+public class CronSchedule // computes occurrences for one parsed CronExpression
+{
+    public static CronSchedule Parse(string cronExpression);           // "0 12 * * *"
+    public static CronSchedule Parse(string minutes, string hours, string days, string months, string daysOfWeek);
+    public static CronSchedule Create(CronExpression cronExpression);
+
+    public bool GetNext(DateTime start, out DateTime next);
+    public bool GetNext(DateTime start, DateTime end, out DateTime next);
+    public List<DateTime> GetAll(DateTime start, DateTime end);
+}
+
+public class CronObject // runs one job's own wait/fire loop against one or more CronSchedules
+{
+    public CronObject(CronObjectDataContext cronObjectDataContext);
+
+    public bool Start();
+    public bool Stop();
+
+    public bool IsStarted { get; }
+    public bool IsExecuting { get; }
+    public bool TriggerOnApplicationStart { get; set; } // fire once immediately on Start(), in addition to the schedule
+
+    public event CronEvent OnCronTrigger; // the job fired - do the work here
+    public event CronEvent OnStarted;
+    public event CronEvent OnStopped;
+    public event CronEvent OnThreadAbort;      // Stop() gave up waiting for a still-running handler
+    public event CronErrorEvent OnError;       // an OnCronTrigger handler threw; the loop keeps running
+}
+```
+
+`CronExpression` is a 5-field expression (no seconds, no year) - `minutes hours days months daysOfWeek` - supporting `*`, single values, `a-b` ranges, `a,b,c` lists, and `/n` intervals (eg. `"*/15 8-18 * * 1-5"` = every 15 minutes, 8am-6pm, Monday-Friday). `CronSchedule` parses one expression and answers "what's the next matching `DateTime` after X" - minute resolution, no seconds. `CronObject` wraps one or more `CronSchedule`s plus an `OnCronTrigger` handler into a self-driving background loop (`Task`-based, cancellation-token cooperative - no `Thread.Abort`): `Start()` begins waiting for the next occurrence and firing on it, `Stop()` cancels the wait and waits up to 5s for an in-flight handler to finish. A handler that throws is caught, logged via `Log.Exception`, and raised on `OnError` - it does **not** kill the job's loop, so one bad firing only skips that firing.
+
+For a single long-lived job you can use `CronObject` directly:
+
+```cs
+var schedule = CronSchedule.Create(CronBuilder.CreateDailyOnlyWeekDayTrigger(9)); // 9am, Mon-Fri
+var context = new CronObjectDataContext("daily-report", dataContext: null, schedule);
+var job = new CronObject(context);
+job.OnCronTrigger += _ => SendDailyReport();
+job.Start();
+// ... later: job.Stop();
+```
+
+#### CronJobService — a runtime job registry
+
+```cs
+public sealed class CronJobService : IDisposable
+{
+    public static CronJobService Default { get; } // process-wide singleton, no DI required
+
+    public CronObject AddJob(string jobId, string cronExpression, Action<CronObject> onTrigger, bool startImmediately = true, bool triggerOnRegister = false);
+    public CronObject AddJob(string jobId, CronExpression cronExpression, Action<CronObject> onTrigger, bool startImmediately = true, bool triggerOnRegister = false);
+    public CronObject AddJob(string jobId, Action<CronObject> onTrigger, bool startImmediately, bool triggerOnRegister, params CronSchedule[] schedules);
+
+    public bool RemoveJob(string jobId);
+    public bool TryGetJob(string jobId, out CronObject job);
+    public bool StartJob(string jobId);
+    public bool StopJob(string jobId);
+    public void StartAll();
+    public void StopAll();
+
+    public IReadOnlyCollection<string> JobIds { get; }
+    public int Count { get; }
+    public event CronJobErrorEvent OnJobError; // fan-in of every registered job's OnError
+}
+```
+
+`CronJobService` is a thread-safe registry over `CronObject` for adding and removing jobs by id **at runtime**, instead of wiring each `CronObject` up by hand and keeping track of the instances yourself. Job ids are case-insensitive and unique - registering a duplicate id throws `InvalidOperationException`.
+
+Without DI, use the process-wide singleton:
+
+```cs
+CronJobService.Default.AddJob("cleanup-temp-files", "0 3 * * *", _ => CleanupTempFiles());
+CronJobService.Default.AddJob("send-reminders", CronBuilder.CreateHourlyTrigger(), _ => SendReminders());
+...
+CronJobService.Default.RemoveJob("send-reminders");
+```
+
+With DI (ASP.NET Core / generic host, non-.NET-Framework targets only), register it as a singleton and inject it:
+
+```cs
+services.AddCronJobService(); // Microsoft.Extensions.DependencyInjection
+
+// elsewhere, injected as CronJobService:
+cronJobService.AddJob("cleanup-temp-files", "0 3 * * *", _ => CleanupTempFiles());
+```
+
+`Dispose()` (or process shutdown, if you call it from your host's shutdown hook) stops and forgets every registered job.
+
 ### DateTimeExtensions.cs
 
 ```cs
