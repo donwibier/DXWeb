@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>26.1.3.36</Version>
-		<FileVersion>26.1.3.36</FileVersion>
+		<Version>26.1.3.37</Version>
+		<FileVersion>26.1.3.37</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based abstract storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -25,6 +25,7 @@
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.37: Rebuilt against DX.Data.Xpo 26.1.3.38 to pick up the System.Security.Cryptography.Xml 8.0.4 fix (NU1903) transitively.
 			26.1.3.36: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 			26.1.3.35: Upgrade to DevExpress v26.1.3
 			24.2.3.34: Dropped NET461, NET6 and NET7 support, Upgrade to DevExpress v24.2.3

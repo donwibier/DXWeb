@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>26.1.3.27</Version>
-		<FileVersion>26.1.3.27</FileVersion>
+		<Version>26.1.3.28</Version>
+		<FileVersion>26.1.3.28</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor WASM token based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
@@ -13,6 +13,7 @@
 	<PropertyGroup>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.28: Rebuilt against DX.Blazor.Identity 26.1.3.30 to pick up the System.Security.Cryptography.Xml 8.0.4 fix (NU1903) transitively.
 			26.1.3.27: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile. Rebuilt against DX.Blazor.Identity 26.1.3.29.
 			26.1.3.26: Rebuilt against DX.Blazor.Identity 26.1.3.28 to pick up DevExpress v26.1.3 transitively.
 			23.2.3.23: Upgraded to .NET 8 and DX v23.2

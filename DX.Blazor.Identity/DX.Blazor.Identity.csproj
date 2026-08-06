@@ -5,8 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-		<Version>26.1.3.29</Version>
-		<FileVersion>26.1.3.29</FileVersion>
+		<Version>26.1.3.30</Version>
+		<FileVersion>26.1.3.30</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Blazor Server and WASM Identity Authentication Library</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
@@ -14,6 +14,7 @@
 	<PropertyGroup>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			v26.1.3.30: Rebuilt against DX.Data.Xpo.Identity 26.1.3.37 to pick up the System.Security.Cryptography.Xml 8.0.4 fix (NU1903) transitively.
 			v26.1.3.29: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 			v26.1.3.28: Rebuilt against DX.Data.Xpo.Identity 26.1.3.35 to pick up DevExpress v26.1.3 transitively.
 			v23.2.3.24: Upgraded to .NET 8 and DX v23.2
