@@ -138,6 +138,11 @@ namespace DX.Data.Xpo.Identity.Mapster
 				.Ignore(dest => dest.Id)
                 .AfterMapping((src, dest) => dest.RoleId = src.RoleId); ;
 
+			// as the role claims: the XPO claim's key is a string, IdentityUserClaim.Id an int
+			TypeAdapterConfig<TXPOClaim, TUserClaim>.NewConfig()
+				.Ignore(dest => dest.Id)
+				.AfterMapping((src, dest) => dest.UserId = src.UserId);
+
             TypeAdapterConfig<TUserClaim, TXPOClaim>.NewConfig()
 			    .Ignore(dest => dest.UserId)
 				.AfterMapping((src, dest) => dest.UserId = src.UserId);
