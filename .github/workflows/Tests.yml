@@ -1,0 +1,33 @@
+name: Tests
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch: {}
+jobs:
+  test:
+    name: dotnet test
+    runs-on: ubuntu-latest
+    env:
+      DX_FEED: ${{ secrets.DX_PRIVATE_NUGET }}
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: add dx nuget source
+        if: env.DX_FEED != ''
+        run: dotnet nuget add source "$DX_FEED"
+
+      - name: DX.Utils.CronJobs.Tests
+        run: dotnet test DX.Utils.CronJobs.Tests --verbosity normal
+
+      - name: DX.Data.Xpo.Identity.Tests
+        run: dotnet test DX.Data.Xpo.Identity.Tests --verbosity normal
