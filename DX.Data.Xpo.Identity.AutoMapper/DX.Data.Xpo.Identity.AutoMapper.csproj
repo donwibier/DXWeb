@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>26.1.3.36</Version>
-		<FileVersion>26.1.3.36</FileVersion>
+		<Version>26.1.3.37</Version>
+		<FileVersion>26.1.3.37</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based storage provider for ASP.NET Identity with Automapper implementation</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>

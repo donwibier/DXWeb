@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>26.1.3.28</Version>
-		<FileVersion>26.1.3.28</FileVersion>
+		<Version>26.1.3.29</Version>
+		<FileVersion>26.1.3.29</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Identity helper and configuration for Blazor WASM token based authorization</Description>
 		<Copyright>Copyright (c) 2022 Don Wibier</Copyright>
