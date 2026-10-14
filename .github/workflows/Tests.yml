@@ -7,15 +7,20 @@ on:
   workflow_dispatch: {}
 jobs:
   test:
-    name: dotnet test
-    runs-on: ubuntu-latest
+    name: dotnet test (${{ matrix.os }})
+    # ubuntu-latest moves to 26.04 between 2026-10-19 and 2026-11-19: both until then
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, ubuntu-26.04 ]
+    runs-on: ${{ matrix.os }}
     env:
       DX_FEED: ${{ secrets.DX_PRIVATE_NUGET }}
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: |
             8.0.x
@@ -26,8 +31,14 @@ jobs:
         if: env.DX_FEED != ''
         run: dotnet nuget add source "$DX_FEED"
 
+      # the whole solution, as Publish NuGet Packages builds it
+      - name: Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+
       - name: DX.Utils.CronJobs.Tests
-        run: dotnet test DX.Utils.CronJobs.Tests --verbosity normal
+        run: dotnet test DX.Utils.CronJobs.Tests --configuration Release --no-build --verbosity normal
 
       - name: DX.Data.Xpo.Identity.Tests
-        run: dotnet test DX.Data.Xpo.Identity.Tests --verbosity normal
+        run: dotnet test DX.Data.Xpo.Identity.Tests --configuration Release --no-build --verbosity normal

@@ -13,11 +13,14 @@ jobs:
         dotnet: [ '8.0.x' ]
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ matrix.dotnet }}           
+          # 10.0.x as well: the projects target net10.0 too, so don't rely on the image having it
+          dotnet-version: |
+            ${{ matrix.dotnet }}
+            10.0.x
 
       - name: add dx nuget source
         run: dotnet nuget add source ${{secrets.DX_PRIVATE_NUGET}}
@@ -35,7 +38,7 @@ jobs:
         run: dotnet pack --configuration Release --no-restore --output ./nupkg
 
       - name: Publish to NuGet 
-        uses: actions/upload-artifact@v3 
+        uses: actions/upload-artifact@v7 
         with: 
           name: nupkg 
           path: ./nupkg/*.nupkg
@@ -51,7 +54,7 @@ jobs:
       
     steps: 
       - name: Download package 
-        uses: actions/download-artifact@v3 
+        uses: actions/download-artifact@v8 
         with: 
           name: nupkg 
           path: ./nupkg 
