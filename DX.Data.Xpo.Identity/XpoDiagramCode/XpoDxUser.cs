@@ -17,7 +17,8 @@ namespace DX.Data.Xpo.Identity.Persistent
 		string IXPUser<string>.Id { get => base.Id; set => setId(value); }
 		protected override void OnDeleting()
 		{
-			var roles = new XPCollection<XpoDxRole>(CriteriaOperator.Parse("Users[Id == ?]", Id), null);
+			// in this user's own session: without one, XPCollection uses XpoDefault.Session, which XpoDatabase sets to null
+			var roles = new XPCollection<XpoDxRole>(Session, CriteriaOperator.Parse("Users[Id == ?]", Id), null);
 			foreach (var r in roles)
 			{
 				r.Users.Remove(this);
@@ -25,7 +26,7 @@ namespace DX.Data.Xpo.Identity.Persistent
 					r.Save();
 
 			}
-			Session.Delete(new XPCollection<XpoDxUserClaim>(CriteriaOperator.Parse("User.Id == ?", Id), null));
+			Session.Delete(new XPCollection<XpoDxUserClaim>(Session, CriteriaOperator.Parse("User.Id == ?", Id), null));
 
 			base.OnDeleting();
 		}
