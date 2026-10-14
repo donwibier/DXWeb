@@ -80,10 +80,12 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claims);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var userKey = ModelKey(user);
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
                 //get current assigned claims
-                var dbClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.FromLambda<TXPOClaim>(cl => cl.UserId.Equals(ModelKey(user))));
+                var dbClaims = new XPCollection<TXPOClaim>(w, new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey));
 
                 if (usr != null)
                 {
@@ -202,7 +204,7 @@ namespace DX.Data.Xpo.Identity
             var result = await TransactionalExecAsync(async (s, w) => {
 
                 var users = new XPCollection<TXPOUser>(w,
-                    CriteriaOperator.Parse("Roles[NormalizedName == ?])", normalizedRoleName),
+                    CriteriaOperator.Parse("Roles[NormalizedName == ?]", normalizedRoleName),
                     new SortProperty(nameof(IXPUser<TKey>.UserName), SortingDirection.Ascending));
                 await users.LoadAsync(cancellationToken);
                 return users.Select(u=>ToModel(u, new TUser())).ToList();
@@ -234,12 +236,14 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claims);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var userKey = ModelKey(user);
 
                 //get user
                 var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var userClaims = await w.Query<TXPOClaim>()
-                        .Where(uc => uc.UserId.Equals(ModelKey(user)) && claims.Any(cl=>cl.Type == uc.ClaimType && cl.Value == uc.ClaimValue))
-                        .ToListAsync(cancellationToken);
+                var userClaims = new XPCollection<TXPOClaim>(w, new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey))
+                        .Where(uc => claims.Any(cl => cl.Type == uc.ClaimType && cl.Value == uc.ClaimValue))
+                        .ToList();
                 foreach (var uc in userClaims)
                 {
                     uc.SetMemberValue("User", null);
@@ -275,9 +279,10 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNullOrEmpty(providerKey);
 
             await TransactionalExecAsync(async (s, w) => {                
-                var userLogins = await w.Query<TXPOLogin>()
-                        .Where(ul => ul.UserId.Equals(ModelKey(user)) && ul.LoginProvider == loginProvider && ul.ProviderKey == providerKey)
-                        .ToListAsync(cancellationToken);
+                // the key as a value for the criteria
+                var userKey = ModelKey(user);
+                var userLogins = new XPCollection<TXPOLogin>(w, CriteriaOperator.Parse("UserId == ? AND LoginProvider == ? AND ProviderKey == ?",
+                        userKey, loginProvider, providerKey)).ToList();
                 foreach (var ul in userLogins)
                 {
                     ul.SetMemberValue("User", null);                    
@@ -295,10 +300,11 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(newClaim);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var userKey = ModelKey(user);
 
-                var userClaims = await w.Query<TXPOClaim>()
-                        .Where(uc => uc.UserId.Equals(ModelKey(user)) && uc.ClaimType == claim.Type && uc.ClaimValue == claim.Value)
-                        .ToListAsync(cancellationToken);
+                var userClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.Parse("UserId == ? AND ClaimType == ? AND ClaimValue == ?",
+                        userKey, claim.Type, claim.Value)).ToList();
                 
                 foreach (var uc in userClaims)
                 {
@@ -508,10 +514,12 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claim);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var roleKey = ModelKey(role);
                 //get role
                 var rle = await w.GetObjectByKeyAsync<TXPORole>(ModelKey(role), cancellationToken);
                 //get current assigned claims
-                var dbClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.FromLambda<TXPOClaim>(cl => cl.RoleId.Equals(ModelKey(role))));
+                var dbClaims = new XPCollection<TXPOClaim>(w, new BinaryOperator(nameof(IXPRoleClaim<TKey>.RoleId), roleKey));
 
                 if (rle != null)
                 {
@@ -535,12 +543,13 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(claim);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var roleKey = ModelKey(role);
 
                 //get user
                 var rle = await w.GetObjectByKeyAsync<TXPORole>(ModelKey(role), cancellationToken);
-                var roleClaims = await w.Query<TXPOClaim>()
-                        .Where(rc => rc.RoleId.Equals(ModelKey(role)) && rc.ClaimType == claim.Type && rc.ClaimValue == claim.Value)
-                        .ToListAsync(cancellationToken);
+                var roleClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.Parse("RoleId == ? AND ClaimType == ? AND ClaimValue == ?",
+                        roleKey, claim.Type, claim.Value)).ToList();
                 foreach (var rc in roleClaims)
                 {
                     rc.SetMemberValue("Role", null);                    
@@ -558,10 +567,11 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(newClaim);
 
             await TransactionalExecAsync(async (s, w) => {
+                // the key as a value for the criteria
+                var roleKey = ModelKey(role);
 
-                var roleClaims = await w.Query<TXPOClaim>()
-                        .Where(rc => rc.RoleId.Equals(ModelKey(role)) && rc.ClaimType == claim.Type && rc.ClaimValue == claim.Value)
-                        .ToListAsync(cancellationToken);
+                var roleClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.Parse("RoleId == ? AND ClaimType == ? AND ClaimValue == ?",
+                        roleKey, claim.Type, claim.Value)).ToList();
 
                 foreach (var rc in roleClaims)
                 {
