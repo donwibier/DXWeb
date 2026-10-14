@@ -22,13 +22,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Determine next version from conventional commits
         id: semver
-        uses: paulhatch/semantic-version@v5.4.0
+        uses: paulhatch/semantic-version@v6.0.2
         with:
           tag_prefix: "v"
           major_pattern: "BREAKING CHANGE"
@@ -52,17 +52,20 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ matrix.dotnet }}
+          # 10.0.x as well: the projects target net10.0 too, so don't rely on the image having it
+          dotnet-version: |
+            ${{ matrix.dotnet }}
+            10.0.x
 
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
@@ -135,7 +138,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ steps.changed.outputs.changed_projects != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nupkg-${{ matrix.dotnet }}
           path: ./nupkg/*.nupkg
@@ -152,7 +155,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -160,7 +163,7 @@ jobs:
         run: mkdir -p ./nupkg
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ./nupkg
           pattern: nupkg-*
@@ -199,7 +202,7 @@ jobs:
       - name: Auto-generate release notes
         if: ${{ steps.check.outputs.count != '0' }}
         id: notes
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@v6
         with:
           configuration: ".github/release-notes-config.json"
         env:
@@ -207,7 +210,7 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ steps.check.outputs.count != '0' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.version.outputs.version }}
           name: Release v${{ needs.version.outputs.version }}
