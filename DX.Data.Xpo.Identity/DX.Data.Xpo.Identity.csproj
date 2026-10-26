@@ -92,28 +92,22 @@
 		<PackageReference Include="FluentValidation" Version="9.5.4" />
 	</ItemGroup>
 
+	<!-- The Identity packages come with ASP.NET Core's crypto (Microsoft.AspNetCore.Cryptography.KeyDerivation and
+	     .Internal), which must be the version of the app's ASP.NET Core: 10.0 on net8.0 replaced .NET 8's own
+	     Cryptography.Internal and broke Data Protection (tokens, antiforgery) on Linux. So per target framework. -->
+	<PropertyGroup>
+		<AspNetIdentityVersion Condition="'$(TargetFramework)'=='net8.0'">8.0.*</AspNetIdentityVersion>
+		<AspNetIdentityVersion Condition="'$(TargetFramework)'=='net9.0'">9.0.*</AspNetIdentityVersion>
+		<AspNetIdentityVersion Condition="'$(TargetFramework)'=='net10.0'">10.0.*</AspNetIdentityVersion>
+	</PropertyGroup>
+
 	<ItemGroup Condition="'$(TargetFramework)'!='net462'">
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.*" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.*" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="$(AspNetIdentityVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="$(AspNetIdentityVersion)" />
 		<PackageReference Include="FluentValidation" Version="12.1.*" />
-	</ItemGroup>
-	<!--
-		Identity per target framework: Identity.Core brings Microsoft.AspNetCore.Cryptography.Internal along, which also
-		belongs to the ASP.NET Core shared framework. A newer one in a net8.0 app replaces the framework's, and its
-		Data Protection (8.0) then misses CryptoUtil methods: on Linux every antiforgery token fails to decrypt.
-	-->
-	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.*" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.*" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.*" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.*" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net10.0'">
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.*" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.*" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="DevExpress.Xpo" Version="26.1.*" />
