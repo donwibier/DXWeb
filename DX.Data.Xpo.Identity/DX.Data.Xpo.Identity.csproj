@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>26.1.3.38</Version>
-		<FileVersion>26.1.3.38</FileVersion>
+		<Version>26.1.3.39</Version>
+		<FileVersion>26.1.3.39</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>XPO Based abstract storage provider for ASP.NET Identity</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -25,6 +25,7 @@
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.39: Microsoft.Extensions.Identity.Core/Stores per target framework (8.0 for net8.0, 9.0 for net9.0, 10.0 for net10.0): the 10.0 packages put a newer Microsoft.AspNetCore.Cryptography.Internal in a net8.0 app, whose Data Protection then failed to decrypt antiforgery tokens on Linux.
 			26.1.3.37: Rebuilt against DX.Data.Xpo 26.1.3.38 to pick up the System.Security.Cryptography.Xml 8.0.4 fix (NU1903) transitively.
 			26.1.3.36: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 			26.1.3.35: Upgrade to DevExpress v26.1.3
@@ -95,9 +96,24 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.*" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.*" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
+		<PackageReference Include="FluentValidation" Version="12.1.*" />
+	</ItemGroup>
+	<!--
+		Identity per target framework: Identity.Core brings Microsoft.AspNetCore.Cryptography.Internal along, which also
+		belongs to the ASP.NET Core shared framework. A newer one in a net8.0 app replaces the framework's, and its
+		Data Protection (8.0) then misses CryptoUtil methods: on Linux every antiforgery token fails to decrypt.
+	-->
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.*" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net9.0'">
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.*" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.*" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)'=='net10.0'">
 		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.*" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.*" />
-		<PackageReference Include="FluentValidation" Version="12.1.*" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="DevExpress.Xpo" Version="26.1.*" />
