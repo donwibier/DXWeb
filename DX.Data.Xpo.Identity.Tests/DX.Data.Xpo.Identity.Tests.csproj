@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DX.Data.Xpo.Identity.Mapster\DX.Data.Xpo.Identity.Mapster.csproj" />
+    <ProjectReference Include="..\DX.Data.Xpo.Identity.AutoMapper\DX.Data.Xpo.Identity.AutoMapper.csproj" />
   </ItemGroup>
 
 </Project>
