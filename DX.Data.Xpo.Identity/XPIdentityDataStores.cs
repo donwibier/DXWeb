@@ -112,15 +112,16 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(login);
 
             await TransactionalExecAsync(async (s, w) => {
+                var userKey = ModelKey(user);
                 //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                //get current assigned claims
-                var dbLogins = new XPCollection<TXPOLogin>(w, 
-                                    CriteriaOperator.FromLambda<TXPOLogin>(lg => lg.UserId.Equals(user.Id) && 
-                                                                                lg.ProviderKey == login.ProviderKey &&
-                                                                                lg.LoginProvider == login.LoginProvider));
+                var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                // is this login already assigned? (a criteria string: TKey has no == XPO could translate, and
+                // lg.UserId.Equals(..) becomes an unknown custom function "Equals")
+                var existing = await w.FindObjectAsync<TXPOLogin>(
+                                    CriteriaOperator.Parse("UserId == ? AND ProviderKey == ? AND LoginProvider == ?",
+                                                            userKey, login.ProviderKey, login.LoginProvider), cancellationToken);
 
-                if (usr != null && dbLogins.Count() == 0)
+                if (usr != null && existing == null)
                 {
                     var newLogin = Activator.CreateInstance(typeof(TXPOLogin), w) as TXPOLogin;
                     newLogin!.InitializeUserLogin(usr, login);
@@ -186,7 +187,7 @@ namespace DX.Data.Xpo.Identity
             var result = await TransactionalExecAsync(async (s, w) => {
 
                 var users = new XPCollection<TXPOUser>(w,
-                    CriteriaOperator.Parse("Claims[ClaimType == ? AND ClaimValue ==?])", claim.Type, claim.Value),                     
+                    CriteriaOperator.Parse("Claims[ClaimType == ? AND ClaimValue == ?]", claim.Type, claim.Value),                     
                     new SortProperty(nameof(IXPUser<TKey>.UserName), SortingDirection.Ascending));
                 await users.LoadAsync(cancellationToken);
 

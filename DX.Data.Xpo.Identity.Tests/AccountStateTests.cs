@@ -307,15 +307,16 @@ namespace DX.Data.Xpo.Identity.Tests
                 await Users.AddClaimAsync(u, new Claim("department", "kitchen"));
                 await Users.SetAuthenticationTokenAsync(u, "Google", "access_token", "token-" + u.UserName);
             }
-            // one login only: a second login in the table trips the AddLoginAsync bug (ClaimsLoginsTokensTests.LoginEqualsBug)
             await Users.AddLoginAsync(user, new UserLoginInfo("Google", "key-one", "Google"));
+            await Users.AddLoginAsync(other, new UserLoginInfo("Google", "key-two", "Google"));
 
             Assert.True((await Users.DeleteAsync(user)).Succeeded);
 
             Assert.Null(await Users.FindByLoginAsync("Google", "key-one"));
             Assert.Equal(1, Host.Count<XpoDxUser>());
             Assert.Equal(1, Host.Count<XpoDxUserClaim>());
-            Assert.Equal(0, Host.Count<XpoDxUserLogin>());
+            Assert.Equal(1, Host.Count<XpoDxUserLogin>());
+            Assert.Equal(other.Id, (await Users.FindByLoginAsync("Google", "key-two"))?.Id);
             Assert.Equal(1, Host.Count<XpoDxUserToken>());
             Assert.Equal(new[] { "two@example.com" }, (await Users.GetUsersInRoleAsync("Cook")).Select(u => u.UserName));
             Assert.Equal("token-two@example.com", await Users.GetAuthenticationTokenAsync(other, "Google", "access_token"));

@@ -113,7 +113,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Single(await FreshUsers().GetClaimsAsync(user));
         }
 
-        [Fact(Skip = "BUG: XPBaseUserStore.GetUsersForClaimAsync builds criteria with a stray ')' (\"Claims[...])\"), so it throws a CriteriaParserException")]
+        [Fact]
         public async Task Claims_GetUsersForClaim_ReturnsTheUsersWithIt()
         {
             var user = await CreateUserAsync("one@example.com");
@@ -139,9 +139,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Null(await Users.FindByLoginAsync("Microsoft", "google-key"));
         }
 
-        public const string LoginEqualsBug = "BUG: XPBaseUserStore.AddLoginAsync filters with lg.UserId.Equals(user.Id), which XPO turns into an unknown custom function \"Equals\": once any login exists in the table, every further AddLoginAsync throws InvalidOperationException";
-
-        [Fact(Skip = LoginEqualsBug)]
+        [Fact]
         public async Task Logins_FindByProviderKey_PicksTheRightUser()
         {
             var user = await CreateUserAsync("one@example.com");
@@ -153,7 +151,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal(user.Id, (await Users.FindByLoginAsync("Google", "key-1"))?.Id);
         }
 
-        [Fact(Skip = LoginEqualsBug)]
+        [Fact]
         public async Task Logins_TwoProvidersForOneUser()
         {
             var user = await CreateUserAsync();
