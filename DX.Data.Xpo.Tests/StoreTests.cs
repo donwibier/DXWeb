@@ -164,7 +164,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(3m, Db.Load(uow, id).Price);
         }
 
-        [Fact(Skip = "BUG: XPDataStore.StoreAsync only collects created items into Data, so a successful Update returns an empty Data array")]
+        [Fact]
         public async Task Update_ReturnsUpdatedItemsInData()
         {
             var id = Db.AddProduct("Old");
@@ -175,7 +175,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Same(model, Assert.Single(result.Data));
         }
 
-        [Fact(Skip = "BUG: XPDataStore.StoreAsync does not map the saved db object back into an updated model (OnSaving changes are lost, only done for created items)")]
+        [Fact]
         public async Task Update_MapsServerSideChangesBackIntoModel()
         {
             var id = Db.AddProduct("Old");
@@ -184,7 +184,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal("saved:New", model.Stamp);
         }
 
-        [Fact(Skip = "BUG: XPDataStore.StoreAsync reports Mode=Create for every failure, also when updating")]
+        [Fact]
         public async Task Update_Invalid_ReportsUpdateMode()
         {
             var id = Db.AddProduct("Old");
@@ -216,7 +216,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(0, Db.Count<Product>());
         }
 
-        [Fact(Skip = "BUG: XPDataStore.StoreAsync treats a default key as 'new' in Update mode, so UpdateAsync silently inserts a record")]
+        [Fact]
         public async Task Update_WithDefaultKey_DoesNotInsert()
         {
             var result = await Store.UpdateAsync(new ProductModel { Id = 0, Name = "NotThere" });
@@ -251,7 +251,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal("Existing2", Db.Load(uow, id).Name);
         }
 
-        [Fact(Skip = "BUG: XPDataStore.StoreAsync returns only the inserted items in Data (updated ones are dropped) and Mode reflects the last item only")]
+        [Fact]
         public async Task Store_ReturnsAllItemsInData()
         {
             var id = Db.AddProduct("Existing");
@@ -324,7 +324,7 @@ namespace DX.Data.Xpo.Tests
             await Assert.ThrowsAsync<ArgumentNullException>(() => Store.DeleteAsync((ProductModel[])null));
         }
 
-        [Fact(Skip = "BUG: XPDataStore.DeleteAsync only catches ValidationException; any other error escapes as an exception instead of a failed IDataResult (StoreAsync catches all)")]
+        [Fact]
         public async Task Delete_NonValidationError_ReturnsFailedResult()
         {
             var id = Db.AddProduct("Boom");
@@ -399,7 +399,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(0, Store.Query().Count());
         }
 
-        [Fact(Skip = "BUG: PredicateBuilder.And/Or compose with Expression.Invoke, which the XPO LINQ provider rejects (NotSupportedException)")]
+        [Fact]
         public async Task Query_SupportsPredicateBuilderComposition()
         {
             Db.AddProduct("A", 1m);
@@ -429,7 +429,7 @@ namespace DX.Data.Xpo.Tests
         protected override XPDataStore<int, ProductModel, Product> CreateStore(IDataLayer dataLayer, IValidator<Product> validator)
             => new ProductMapsterStore(dataLayer, Mappers.Mapster(), validator);
 
-        [Fact(Skip = "BUG: XPMapsterStore.Query<T>() calls ProjectToType<T>() without Mapper.Config, so it projects with TypeAdapterConfig.GlobalSettings and ignores the injected mapping (Id stays 0)")]
+        [Fact]
         public void Query_UsesInjectedMapsterConfig() => AssertQueryUsesStoreMapping();
 
         [Fact]
@@ -478,7 +478,7 @@ namespace DX.Data.Xpo.Tests
         [Fact]
         public void Query_UsesInjectedAutoMapperConfig() => AssertQueryUsesStoreMapping();
 
-        [Fact(Skip = "BUG: XPAutoMapperStore.GetByKey returns a blank model (Id 0) instead of null for an unknown key; the Mapster store returns null")]
+        [Fact]
         public void GetByKey_UnknownKey_ReturnsNull() => Assert.Null(Store.GetByKey(4242));
     }
 }

@@ -61,7 +61,7 @@ namespace DX.Data.Xpo
                 new FunctionOperator(FunctionOperatorType.Cos, latRadOrigin) *
                 new FunctionOperator(FunctionOperatorType.Power, new FunctionOperator(FunctionOperatorType.Sin, dlon / 2), 2);
 
-            result = new FunctionOperator(FunctionOperatorType.Min, 1, new FunctionOperator(FunctionOperatorType.Sqr, result));
+            result = new FunctionOperator(FunctionOperatorType.Min, 1.0, new FunctionOperator(FunctionOperatorType.Sqr, result));
             result = 2 * new FunctionOperator(FunctionOperatorType.Asin, result);
 
             return result;

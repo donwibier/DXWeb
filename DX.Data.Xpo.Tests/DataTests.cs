@@ -120,17 +120,46 @@ namespace DX.Data.Xpo.Tests
         }
 
         [Fact]
-        public void Composed_CurrentlyWrapsSecondOperandInInvoke()
+        public void Composed_InlinesSecondOperandWithoutInvoke()
         {
             // a query provider (XPO, EF) can only translate the composed predicate when the second operand is
             // inlined with the parameter replaced, rather than wrapped in Expression.Invoke
             Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
             Expression<Func<ProductModel, bool>> b = x => x.Price < 10;
-            var body = (BinaryExpression)a.And(b).Body;
-            Assert.Equal(ExpressionType.Invoke, body.Right.NodeType); // documents the current implementation
+            foreach (var composed in new[] { a.And(b), a.Or(b) })
+            {
+                var body = (BinaryExpression)composed.Body;
+                Assert.NotEqual(ExpressionType.Invoke, body.Right.NodeType);
+                var right = (BinaryExpression)body.Right;
+                Assert.Same(a.Parameters[0], ((MemberExpression)right.Left).Expression);
+            }
         }
 
-        [Fact(Skip = "BUG: PredicateBuilder.And/Or (PredicateBuilder.cs:18,26) wrap expr2 in Expression.Invoke; XPO LINQ throws NotSupportedException 'The expression is not supported in the Where clause'")]
+        [Fact]
+        public void Composed_ReplacesParameterInsideNestedLambdas()
+        {
+            var allowed = new[] { 1, 3 };
+            Expression<Func<ProductModel, bool>> a = p => p.Price >= 1;
+            Expression<Func<ProductModel, bool>> b = x => allowed.Any(id => id == x.Id);
+            Assert.Equal(new[] { 1, 3 }, Ids(a.And(b)));
+        }
+
+        [Fact]
+        public void Composed_WithItself_Works()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Assert.Equal(new[] { 2, 3 }, Ids(a.And(a)));
+        }
+
+        [Fact]
+        public void Composed_NullSecondOperand_Throws()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Assert.Throws<ArgumentNullException>(() => a.And(null));
+            Assert.Throws<ArgumentNullException>(() => a.Or(null));
+        }
+
+        [Fact]
         public void ComposedPredicate_TranslatesInXpoQuery()
         {
             var db = new InMemoryDb();
@@ -145,19 +174,17 @@ namespace DX.Data.Xpo.Tests
         }
 
         [Fact]
-        public void SameParameterInstances_StillNotTranslatableInXpo()
+        public void SameParameterInstances_TranslatableInXpo()
         {
-            // even with one shared parameter, the Invoke node is what XPO rejects
             var db = new InMemoryDb();
             db.AddProduct("A", 1m);
+            db.AddProduct("B", 20m);
             var p = Expression.Parameter(typeof(Product), "p");
             var a = Expression.Lambda<Func<Product, bool>>(Expression.GreaterThan(Expression.Property(p, nameof(Product.Price)), Expression.Constant(0m)), p);
             var b = Expression.Lambda<Func<Product, bool>>(Expression.LessThan(Expression.Property(p, nameof(Product.Price)), Expression.Constant(10m)), p);
             using var uow = db.NewUnitOfWork();
-            Assert.Throws<NotSupportedException>(() => uow.Query<Product>().Where(a.And(b)).ToList());
-            // the hand-inlined equivalent works
-            var inlined = Expression.Lambda<Func<Product, bool>>(Expression.AndAlso(a.Body, b.Body), p);
-            Assert.Single(uow.Query<Product>().Where(inlined).ToList());
+            Assert.Equal("A", Assert.Single(uow.Query<Product>().Where(a.And(b)).ToList()).Name);
+            Assert.Equal(2, uow.Query<Product>().Where(a.Or(b)).Count());
         }
     }
 }
