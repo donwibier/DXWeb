@@ -154,6 +154,59 @@ namespace DX.Data.Xpo
 
         private bool IsEmptyKey(TKey key) => key == null || key.Equals(EmptyKeyValue);
 
+        // public TDBModel(Session session) constructor, compiled once per TDBModel; null when there is none
+        // (CreateDBModel then falls back to Activator so the exception is the same as before)
+        private static readonly Lazy<Func<Session, TDBModel>?> dbModelFactory = new Lazy<Func<Session, TDBModel>?>(() =>
+        {
+            var ctor = typeof(TDBModel).GetConstructor(new[] { typeof(Session) });
+            if (ctor == null || typeof(TDBModel).IsAbstract)
+                return null;
+            var p = System.Linq.Expressions.Expression.Parameter(typeof(Session), "session");
+            return System.Linq.Expressions.Expression.Lambda<Func<Session, TDBModel>>(
+                System.Linq.Expressions.Expression.New(ctor, p), p).Compile();
+        });
+
+        private static TDBModel CreateDBModel(Session session)
+        {
+            var factory = dbModelFactory.Value;
+            if (factory != null)
+                return factory(session);
+            return (Activator.CreateInstance(typeof(TDBModel), session) as TDBModel)!;
+        }
+
+        private bool? _usesDefaultXPOGetByKey;
+
+        /// <summary>
+        /// Loads the objects with the given keys into the session with one round-trip, so the XPOGetByKey calls
+        /// that follow are served from the session's identity map. Only done when XPOGetByKey is not overridden,
+        /// because an override may interpret the keys differently.
+        /// </summary>
+        protected virtual void XPOPrefetchByKeys(IEnumerable<TKey> keys, Session session)
+        {
+            if (!UsesDefaultXPOGetByKey())
+                return;
+            var list = new List<object>();
+            var seen = new HashSet<TKey>();
+            foreach (var key in keys)
+            {
+                if (!IsEmptyKey(key) && seen.Add(key))
+                    list.Add(key!);
+            }
+            if (list.Count > 1)
+                session.GetObjectsByKey(session.GetClassInfo<TDBModel>(), list, false);
+        }
+
+        private bool UsesDefaultXPOGetByKey()
+        {
+            if (_usesDefaultXPOGetByKey == null)
+            {
+                var m = GetType().GetMethod(nameof(XPOGetByKey), BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, new[] { typeof(TKey), typeof(Session) }, null);
+                _usesDefaultXPOGetByKey = m != null && m.DeclaringType == typeof(XPDataStore<TKey, TModel, TDBModel>);
+            }
+            return _usesDefaultXPOGetByKey.Value;
+        }
+
         protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             ThrowIfNull(items);
@@ -169,6 +222,9 @@ namespace DX.Data.Xpo
                     var batchPairs = new Dictionary<TDBModel, List<TModel>>();
                     try
                     {
+                        if (mode != StoreMode.Create)
+                            XPOPrefetchByKeys(items.Where(i => i != null).Select(i => ModelKey(i)), wrk);
+
                         foreach (var item in items)
                         {
                             currentItem = item;
@@ -177,7 +233,7 @@ namespace DX.Data.Xpo
                             if (mode == StoreMode.Create || (mode == StoreMode.Store && IsEmptyKey(modelKey)))
                             {
                                 dataMode = DataMode.Create;
-                                dbItem = (Activator.CreateInstance(typeof(TDBModel), wrk) as TDBModel)!;
+                                dbItem = CreateDBModel(wrk);
                             }
                             else
                             {
@@ -275,6 +331,7 @@ namespace DX.Data.Xpo
             {
                 try
                 {
+                    XPOPrefetchByKeys(ids, wrk);
                     foreach (var id in ids)
                     {
                         var dbModel = XPOGetByKey(id, wrk);

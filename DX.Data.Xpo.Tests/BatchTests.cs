@@ -66,6 +66,40 @@ namespace DX.Data.Xpo.Tests
         }
 
         [Fact]
+        public async Task UpdateBatch_LoadsExistingObjectsInOneRoundTrip()
+        {
+            var ids = Seed(20);
+            using var store = CreateStore(CountingLayer, new ProductValidator());
+            var models = ids.Select(id => new ProductModel { Id = id, Name = "U" + id, Price = 1 }).ToArray();
+
+            WarmUp();
+            Counter.Reset();
+            var result = await store.UpdateAsync(models);
+
+            Assert.True(result.Success, result.Exception?.Message);
+            Assert.Equal(1, Counter.Selects);
+            Assert.Equal(models, result.Data);
+            using var uow = Db.NewUnitOfWork();
+            foreach (var id in ids)
+                Assert.Equal("U" + id, Db.Load(uow, id).Name);
+        }
+
+        [Fact]
+        public async Task DeleteBatch_LoadsExistingObjectsInOneRoundTrip()
+        {
+            var ids = Seed(20);
+            using var store = CreateStore(CountingLayer, new ProductValidator());
+
+            WarmUp();
+            Counter.Reset();
+            var result = await store.DeleteAsync(ids.Take(15).ToArray());
+
+            Assert.True(result.Success, result.Exception?.Message);
+            Assert.Equal(1, Counter.Selects);
+            Assert.Equal(5, Db.Count<Product>());
+        }
+
+        [Fact]
         public async Task StoreBatch_Mixed_KeepsInputOrderAndKeys()
         {
             var ids = Seed(3);
