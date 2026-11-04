@@ -39,6 +39,14 @@ namespace DX.Data.Xpo
 		public string ConnectionString { get; set; } = default!;
 		public bool EnableCaching { get; set; } = false;
 		public AutoCreateOption UpdateSchema { get; set; } = AutoCreateOption.None;
+		/// <summary>
+		/// Also make this database's data layer the process-wide <see cref="XpoDefault.DataLayer"/>, for code that creates
+		/// sessions without one (<c>new UnitOfWork()</c>, <c>new Session()</c>, an <c>XPCollection</c> without a session).
+		/// Off by default: XpoDatabase hands out its data layers itself, and a process-wide default is easy to pick up by
+		/// accident. Up to 26.1.3.40 the default was set implicitly, but only when <see cref="UpdateSchema"/> was
+		/// <see cref="AutoCreateOption.DatabaseAndSchema"/>, and then to whichever database was created last.
+		/// </summary>
+		public bool SetAsXpoDefault { get; set; } = false;
 	}
 
 	public class XpoDatabase : IDisposable
@@ -246,7 +254,10 @@ namespace DX.Data.Xpo
 			}
 			try
 			{
-				return entry.Value;
+				var dataLayer = entry.Value;
+				if (options.SetAsXpoDefault)
+					XpoDefault.DataLayer = dataLayer;
+				return dataLayer;
 			}
 			catch
 			{
@@ -316,7 +327,6 @@ namespace DX.Data.Xpo
 						// place code here to patch metadata              
 						session.UpdateSchema();
 						session.CreateObjectTypeRecords();
-						XpoDefault.DataLayer = new ThreadSafeDataLayer(session.Dictionary, dataStore);
 					}
 				}
 			}
