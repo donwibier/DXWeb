@@ -275,21 +275,27 @@ namespace DX.Utils.MimeDetection
 			{
 				// There's an extension, so try to find
 				// the corresponding mime-types
-				string ext = name.ToLower().Substring(index + 1);
+				string ext = name.Substring(index + 1).ToLowerInvariant();
 				mimeTypes = (IList) extIdx[ext]!;
 				// if no mimetypes found in our own list then check the mimetypes set in the web.config staticContent section for custom mimetypes like ".s01".
 				//if (mimeTypes == null)
 				//	mimeTypes = GetMimeTypesFromWebConfigStaticContent(ext);
 			}
-			if (mimeTypes != null)
+			if (mimeTypes != null && mimeTypes.Count > 0)
 			{
-				var result = SupportUtil.ToArray(mimeTypes, new MimeType[mimeTypes.Count]);
-
+				var result = new MimeType[mimeTypes.Count];
+				mimeTypes.CopyTo(result, 0);
+				return result;
 			}
-			return null!; // (mimeTypes != null) ? (MimeType[])SupportUtil.ToArray(mimeTypes, new MimeType[mimeTypes.Count]) : null!;
+			return null!;
 		}
 		
         #region Some static methods for easy mimetype detection
+
+        // The embedded definitions are parsed once and shared. A MimeTypes instance is only mutated
+        // while it is being constructed (Add is internal), so concurrent lookups on it are safe.
+        private static readonly Lazy<MimeTypes> embeddedInstance =
+            new Lazy<MimeTypes>(() => new MimeTypes(), System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
         /// <summary>
         /// Determines the mime type by filename and content as byte array.
@@ -337,7 +343,7 @@ namespace DX.Utils.MimeDetection
         public static MimeType GetMimeTypeFromSBytes(string fileName, sbyte[] fileBytes)
         {
             //check mimetype
-            MimeTypes mimeDictionary = new MimeTypes();
+            MimeTypes mimeDictionary = embeddedInstance.Value;
             MimeType result = null;
 
             if (fileBytes != null)

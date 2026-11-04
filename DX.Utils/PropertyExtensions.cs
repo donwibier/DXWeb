@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace DX.Utils
@@ -15,30 +14,46 @@ namespace DX.Utils
 	/// </summary>
 	public static class PropertyExtensions
 	{
-		static readonly ConcurrentDictionary<Type, PropertyInfo[]> cache =
-			new ConcurrentDictionary<Type, PropertyInfo[]>();
-
-		static Action CleanCache => () =>
+		// Per-type reflection cache: the (public, non-indexer) instance properties in declaration
+		// order plus a name lookup. Types are a bounded set, so no eviction is needed.
+		sealed class TypePropertyMap
 		{
-			if (cache.Count > 1000)
-			{
-				while (cache.Count > 1000)
-					if (!cache.TryRemove(cache.Keys.Last(), out PropertyInfo[] r))
-						return; // break if can't be removed
-			}
-		};
+			public readonly PropertyInfo[] Properties;
+			public readonly Dictionary<string, PropertyInfo> ByName;
 
-		static readonly BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+			public TypePropertyMap(Type type)
+			{
+				Properties = type.GetProperties(flags)
+					.Where(p => p.GetIndexParameters().Length == 0)
+					.ToArray();
+				ByName = new Dictionary<string, PropertyInfo>(StringComparer.Ordinal);
+				foreach (var p in Properties)
+				{
+					// keep the first one (most derived) when a property is hidden with 'new'
+					if (!ByName.ContainsKey(p.Name))
+						ByName.Add(p.Name, p);
+				}
+			}
+		}
+
+		static readonly ConcurrentDictionary<Type, TypePropertyMap> cache =
+			new ConcurrentDictionary<Type, TypePropertyMap>();
+
+		static readonly BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+
+		static TypePropertyMap GetMap(Type objectType)
+		{
+			return cache.GetOrAdd(objectType, t => new TypePropertyMap(t));
+		}
 		static PropertyInfo[] GetInfo(Type objectType)
 		{
-			PropertyInfo[] props = cache.GetOrAdd(objectType, (key) => objectType.GetProperties(flags));
-			Task.Run(CleanCache);
-			return props;
+			return GetMap(objectType).Properties;
 		}
 		static PropertyInfo GetInfo(Type objectType, string propertyName)
 		{
-			PropertyInfo[] props = cache.GetOrAdd(objectType, (key) => objectType.GetProperties(flags));
-			var result = GetInfo(objectType).Where(p => p.Name == propertyName).FirstOrDefault();
+			if (propertyName == null)
+				return null;
+			GetMap(objectType).ByName.TryGetValue(propertyName, out PropertyInfo result);
 			return result;
 		}
 
@@ -56,6 +71,8 @@ namespace DX.Utils
 
         public static bool IsCollectionProperty(this PropertyInfo property)
         {
+            if (typeof(string).Equals(property.PropertyType))
+                return false; // string implements IEnumerable<char> but is not a collection
             return property.PropertyType.IsArray ||
                 (property.PropertyType.GetInterface(typeof(IEnumerable<>).FullName) != null) ||
 				(!typeof(string).Equals(property.PropertyType) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType));
@@ -113,10 +130,13 @@ namespace DX.Utils
 			where TDestinationType : class
 		{
 			var propsInfo = GetInfo(source.GetType());
-			bool skipExcl = excludeProperties == null;
+			var destType = destination.GetType();
 			foreach (var p in propsInfo)
 			{
-				if (!skipExcl && !excludeProperties.Contains(p.Name) && destination.HasProperty(p.Name))
+				if (!p.CanRead || IsExcluded(excludeProperties, p.Name))
+					continue;
+				var destProp = GetInfo(destType, p.Name);
+				if (destProp != null && destProp.CanWrite)
 					destination.SetPropertyValue(p.Name, p.GetValue(source));
 			}
 			return destination;
@@ -127,21 +147,29 @@ namespace DX.Utils
 				params string[] excludeProperties)
 		{
 			var propsInfo = GetInfo(source.GetType());
-			bool skipExcl = excludeProperties == null;
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			foreach (var p in propsInfo)
 			{
-				if ((!skipExcl && !excludeProperties.Contains(p.Name) && (p.GetCustomAttribute(typeof(AppendQueryIgnoreAttribute), true) == null)))
+				if (p.CanRead && !IsExcluded(excludeProperties, p.Name) && (p.GetCustomAttribute(typeof(AppendQueryIgnoreAttribute), true) == null))
 					result[p.Name] = p.GetValue(source);
 			}
 			return result;
+		}
+
+		static bool IsExcluded(string[] excludeProperties, string name)
+		{
+			return excludeProperties != null && excludeProperties.Contains(name);
 		}
 
 		public static Uri AppendQueryParameters(this Uri url, object pars, params string[] excludeProperties)
 		{
 			var u = new UriBuilder(url);
 			string query = AsQueryParameters(pars, excludeProperties);
-			u.Query = query.ToString();
+			// append to (instead of replacing) an existing query string
+			string existing = (u.Query ?? string.Empty).TrimStart('?');
+			if (!string.IsNullOrEmpty(existing))
+				query = string.IsNullOrEmpty(query) ? existing : existing + "&" + query;
+			u.Query = query;
 			return u.Uri;
 		}
 		public static string AsQueryParameters(this object pars, params string[] excludeProperties)
@@ -150,11 +178,10 @@ namespace DX.Utils
 				return string.Empty;
 			
 			var q = HttpUtility.ParseQueryString("");
-			var propsInfo = GetInfo(pars.GetType());
 			foreach (var kvp in pars.AsDictionary(excludeProperties))
 			{				
 				string paramValue = string.Format("{0}", kvp.Value);
-				var prop = propsInfo.FirstOrDefault(p => p.Name == kvp.Key);
+				var prop = GetInfo(pars.GetType(), kvp.Key);
 				if (prop != null)
 				{
 					AppendQueryFormatAttribute attr = prop.GetCustomAttribute(typeof(AppendQueryFormatAttribute), true) as AppendQueryFormatAttribute;
@@ -169,7 +196,7 @@ namespace DX.Utils
 				var v = string.Format("{0}", kvp.Value).Trim(); //skip empty params
 				if (!string.IsNullOrWhiteSpace(v))
 				{
-					q[kvp.Key] = HttpUtility.UrlEncode(paramValue);
+					q[kvp.Key] = paramValue; // q.ToString() URL-encodes; encoding here too would double-encode
 				}
 			}
 			

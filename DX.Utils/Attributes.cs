@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,7 +20,8 @@ namespace DX.Utils
 
     public class Attributes
     {
-        private static readonly Dictionary<string, IEnumerable<Type>> typeDictionary = new Dictionary<string, IEnumerable<Type>>();
+        // Materialised results per (attribute type, inherit); thread safe.
+        private static readonly ConcurrentDictionary<string, IEnumerable<Type>> typeDictionary = new ConcurrentDictionary<string, IEnumerable<Type>>();
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Gets the types withs in this collection. </summary>
@@ -39,14 +41,23 @@ namespace DX.Utils
         {
             string key = String.Format("{0}${1}", typeof(TAttribute).AssemblyQualifiedName, inherit);
 
-            if (!typeDictionary.ContainsKey(key))
+            return typeDictionary.GetOrAdd(key, k => Array.AsReadOnly(
+                (from a in AppDomain.CurrentDomain.GetAssemblies()
+                 from t in GetLoadableTypes(a)
+                 where t.IsDefined(typeof(TAttribute), inherit)
+                 select t).ToArray()));
+        }
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
             {
-                typeDictionary[key] = from a in AppDomain.CurrentDomain.GetAssemblies()
-                                      from t in a.GetTypes()
-                                      where t.IsDefined(typeof(TAttribute), inherit)
-                                      select t;
+                return assembly.GetTypes();
             }
-            return typeDictionary[key];
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,9 +79,8 @@ namespace DX.Utils
         public static IEnumerable<TResult> GetAttributeData<TAttribute, TResult>(Type type, bool inherit, AttributeDataResult<TAttribute, TResult> result)
             where TAttribute : System.Attribute
         {
-            var res = from a in Attribute.GetCustomAttributes(type, inherit)
-                      where typeof(Attribute).IsAssignableFrom(typeof(TAttribute))                            
-                      select (TResult)result((TAttribute)Attribute.GetCustomAttributes(type).FirstOrDefault<Attribute>());
+            var res = from a in Attribute.GetCustomAttributes(type, typeof(TAttribute), inherit)
+                      select result((TAttribute)a);
             return res;
         }
 
@@ -102,6 +112,7 @@ namespace DX.Utils
         public RequiredIfComparison Comparison { get; private set; }
         public object Value { get; private set; }
         public RequiredIfAttribute(string otherProperty, RequiredIfComparison comparison, object value)
+            : base(DefaultErrorMessageFormatString)
         {
             if (string.IsNullOrEmpty(otherProperty))
             {
@@ -140,7 +151,7 @@ namespace DX.Utils
 
                     if (Validate(propertyValue))
                     {
-                        return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                        return CreateFailure(validationContext);
                     }
                 }
                 catch (Exception)
@@ -152,14 +163,22 @@ namespace DX.Utils
                         var property = validationContext.ObjectInstance.GetType().GetProperty(prop.Last());
                         var propertyValue = property.GetValue(validationContext.ObjectInstance, null);
 
-                        if (!Validate(propertyValue))
+                        if (Validate(propertyValue))
                         {
-                            return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                            return CreateFailure(validationContext);
                         }
                     }
                 }
             }
             return ValidationResult.Success;
+        }
+
+        private ValidationResult CreateFailure(ValidationContext validationContext)
+        {
+            string message = FormatErrorMessage(validationContext.DisplayName);
+            return string.IsNullOrEmpty(validationContext.MemberName)
+                ? new ValidationResult(message)
+                : new ValidationResult(message, new[] { validationContext.MemberName });
         }
     }
 #endif

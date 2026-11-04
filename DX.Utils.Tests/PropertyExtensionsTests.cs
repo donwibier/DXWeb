@@ -125,7 +125,7 @@ namespace DX.Utils.Tests
             Assert.Equal(0, dst.Score);
         }
 
-        [Fact(Skip = "BUG: Assign/AsDictionary with excludeProperties == null copy nothing; the 'skipExcl' flag is inverted ('!skipExcl && ...')")]
+        [Fact]
         public void Assign_NullExclusions_CopiesEverything()
         {
             var src = new Person { Id = 1, Name = "src" };
@@ -142,7 +142,7 @@ namespace DX.Utils.Tests
             Assert.True(d.ContainsKey("Id"));
         }
 
-        [Fact(Skip = "BUG: GetInfo uses BindingFlags.NonPublic, so private properties leak into AsDictionary / AsQueryParameters (and HasProperty)")]
+        [Fact]
         public void AsDictionary_ExcludesPrivateProperties()
         {
             var p = new Person();
@@ -150,14 +150,14 @@ namespace DX.Utils.Tests
             Assert.False(p.HasProperty("Secret"));
         }
 
-        [Fact(Skip = "BUG: indexer properties are not filtered out; AsDictionary calls GetValue on 'Item' and throws TargetParameterCountException")]
+        [Fact]
         public void AsDictionary_TypeWithIndexer_DoesNotThrow()
         {
             var d = new WithIndexer().AsDictionary();
             Assert.Equal("x", d["Name"]);
         }
 
-        [Fact(Skip = "BUG: Assign/SetPropertyValue do not check CanWrite; a get-only (computed) property on the destination throws ArgumentException 'Property set method not found'")]
+        [Fact]
         public void Assign_ToReadOnlyProperty_IsSkipped()
         {
             var dst = new ReadOnlyName().Assign(new ReadOnlyName());
@@ -172,7 +172,7 @@ namespace DX.Utils.Tests
             Assert.False(typeof(Person).GetProperty("Id").IsCollectionProperty());
         }
 
-        [Fact(Skip = "BUG: string implements IEnumerable<char>, so the IEnumerable<> check returns true for string before the explicit string exclusion is reached")]
+        [Fact]
         public void IsCollectionProperty_FalseForString()
         {
             Assert.False(typeof(Person).GetProperty("Name").IsCollectionProperty());
@@ -196,7 +196,7 @@ namespace DX.Utils.Tests
             Assert.Null(parsed["Empty"]);
         }
 
-        [Fact(Skip = "BUG: AsQueryParameters URL-encodes each value and then NameValueCollection.ToString() encodes again, so 'a b&c' round-trips as 'a+b%26c'")]
+        [Fact]
         public void AsQueryParameters_ValuesAreEncodedOnce()
         {
             var q = new QueryModel { Q = "a b&c" }.AsQueryParameters();
@@ -212,7 +212,7 @@ namespace DX.Utils.Tests
             Assert.Equal("x", HttpUtility.ParseQueryString(u.Query)["Q"]);
         }
 
-        [Fact(Skip = "BUG: AppendQueryParameters replaces the existing query string instead of appending to it ('?keep=1' is lost)")]
+        [Fact]
         public void AppendQueryParameters_KeepsExistingQuery()
         {
             var u = new Uri("https://example.com/search?keep=1").AppendQueryParameters(new QueryModel { Q = "x" });

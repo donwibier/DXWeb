@@ -35,7 +35,7 @@ namespace DX.Utils.Tests
             Assert.Equal(DateTime.MinValue, DateTime.MinValue.DateMin());
         }
 
-        [Fact(Skip = "BUG: DateMin builds 'new DateTime(y, m, d, 0, 0, 0)' and drops DateTimeKind, so a UTC date comes back as Unspecified (date.Date would preserve it)")]
+        [Fact]
         public void DateMinMax_PreserveKind()
         {
             var utc = new DateTime(2024, 5, 6, 7, 8, 9, DateTimeKind.Utc);
@@ -141,7 +141,7 @@ namespace DX.Utils.Tests
             }
         }
 
-        [Fact(Skip = "BUG: Log timestamp uses 12-hour 'hh' without AM/PM ('{0: dd-MM-yyyy hh:mm:ss}'), so 17:30 is logged as 05:30")]
+        [Fact]
         public void Write_UsesTwentyFourHourClock()
         {
             Log.ClearLog();
@@ -153,7 +153,7 @@ namespace DX.Utils.Tests
             Assert.True(log.Contains(before.ToString(" dd-MM-yyyy HH:mm")) || log.Contains(after.ToString(" dd-MM-yyyy HH:mm")), log);
         }
 
-        [Fact(Skip = "BUG: Log.Write passes logType.GetType() (=RuntimeType) and the Type instead of the logged object to DoLog, so traces read '[RuntimeType/System.InvalidOperationException]' and the exception message is lost")]
+        [Fact]
         public void Exception_TraceContainsTypeNameAndMessage()
         {
             var l = new CapturingListener();
@@ -168,6 +168,25 @@ namespace DX.Utils.Tests
             {
                 Trace.Listeners.Remove(l);
             }
+        }
+
+        [Fact]
+        public void ThreadLog_IsCapped_KeepingNewestEntries()
+        {
+            string log = null;
+            var t = new Thread(() =>
+            {
+                var line = new string('x', 1000);
+                for (int i = 0; i < 3000; i++)
+                    Log.Write(line + i, false);
+                log = Log.GetLog();
+            });
+            t.Start();
+            t.Join();
+            Assert.True(log.Length <= 1024 * 1024, "log length " + log.Length);
+            Assert.Contains(new string('x', 1000) + "2999", log);
+            Assert.DoesNotContain(new string('x', 1000) + "0" + Environment.NewLine, log);
+            Assert.StartsWith(" ", log); // trimmed at a line boundary
         }
 
         [Fact]
