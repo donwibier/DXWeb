@@ -113,7 +113,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Single(await FreshUsers().GetClaimsAsync(user));
         }
 
-        [Fact(Skip = "BUG: XPBaseUserStore.GetUsersForClaimAsync builds criteria with a stray ')' (\"Claims[...])\"), so it throws a CriteriaParserException")]
+        [Fact]
         public async Task Claims_GetUsersForClaim_ReturnsTheUsersWithIt()
         {
             var user = await CreateUserAsync("one@example.com");
@@ -139,9 +139,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Null(await Users.FindByLoginAsync("Microsoft", "google-key"));
         }
 
-        public const string LoginEqualsBug = "BUG: XPBaseUserStore.AddLoginAsync filters with lg.UserId.Equals(user.Id), which XPO turns into an unknown custom function \"Equals\": once any login exists in the table, every further AddLoginAsync throws InvalidOperationException";
-
-        [Fact(Skip = LoginEqualsBug)]
+        [Fact]
         public async Task Logins_FindByProviderKey_PicksTheRightUser()
         {
             var user = await CreateUserAsync("one@example.com");
@@ -153,7 +151,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal(user.Id, (await Users.FindByLoginAsync("Google", "key-1"))?.Id);
         }
 
-        [Fact(Skip = LoginEqualsBug)]
+        [Fact]
         public async Task Logins_TwoProvidersForOneUser()
         {
             var user = await CreateUserAsync();
@@ -205,7 +203,7 @@ namespace DX.Data.Xpo.Identity.Tests
         // ---------- tokens ----------
 
         [Fact]
-        public virtual async Task Tokens_SetGetAndRemove()
+        public async Task Tokens_SetGetAndRemove()
         {
             var user = await CreateUserAsync();
 
@@ -218,7 +216,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task Tokens_AreKeptPerProviderAndName()
+        public async Task Tokens_AreKeptPerProviderAndName()
         {
             var user = await CreateUserAsync();
 
@@ -232,7 +230,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal("ms-access", await users.GetAuthenticationTokenAsync(user, "Microsoft", "access_token"));
         }
 
-        [Fact(Skip = "BUG: SetTokenAsync on an existing token only changes the DTO from FindTokenAsync; XPUserStore never writes it back, so the old value stays")]
+        [Fact]
         public async Task Tokens_SetTwice_KeepsTheNewValue()
         {
             var user = await CreateUserAsync();
@@ -244,7 +242,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task Authenticator_ResetKey_StoresAKey()
+        public async Task Authenticator_ResetKey_StoresAKey()
         {
             var user = await CreateUserAsync();
 
@@ -253,7 +251,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False(string.IsNullOrEmpty(await FreshUsers().GetAuthenticatorKeyAsync(user)));
         }
 
-        [Fact(Skip = "BUG: same as Tokens_SetTwice: a second ResetAuthenticatorKeyAsync keeps the old key, so a leaked authenticator key cannot be rotated")]
+        [Fact]
         public async Task Authenticator_ResetKeyTwice_GivesANewKey()
         {
             var user = await CreateUserAsync();
@@ -266,7 +264,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task RecoveryCodes_GenerateAndCount()
+        public async Task RecoveryCodes_GenerateAndCount()
         {
             var user = await CreateUserAsync();
 
@@ -285,7 +283,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False((await Users.RedeemTwoFactorRecoveryCodeAsync(user, "not-a-code")).Succeeded);
         }
 
-        [Fact(Skip = "BUG: RedeemCodeAsync rewrites the RecoveryCodes token via SetTokenAsync, which XPUserStore never persists: a redeemed recovery code stays valid and can be reused")]
+        [Fact]
         public async Task RecoveryCodes_ARedeemedCode_CannotBeUsedAgain()
         {
             var user = await CreateUserAsync();
@@ -299,7 +297,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False((await next.RedeemTwoFactorRecoveryCodeAsync(reloaded, code)).Succeeded);
         }
 
-        [Fact(Skip = "BUG: same as Tokens_SetTwice: generating new recovery codes keeps the old set, so the new codes do not work and the old ones still do")]
+        [Fact]
         public async Task RecoveryCodes_GenerateAgain_ReplacesTheOldSet()
         {
             var user = await CreateUserAsync();
@@ -320,20 +318,6 @@ namespace DX.Data.Xpo.Identity.Tests
 
     public class ClaimsLoginsTokensTests_AutoMapper : ClaimsLoginsTokensTests
     {
-        public const string TokenNotStoredBug = "BUG (AutoMapper flavour): the XPIdentityMapperProfile maps IdentityUserToken.UserId onto the get-only XpoDxUserToken.UserId alias, so User stays null, validation fails, and XPUserStore.AddUserTokenAsync ignores the failed result: SetAuthenticationTokenAsync reports Success and stores nothing";
-
         public ClaimsLoginsTokensTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Tokens_SetGetAndRemove() => base.Tokens_SetGetAndRemove();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Tokens_AreKeptPerProviderAndName() => base.Tokens_AreKeptPerProviderAndName();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Authenticator_ResetKey_StoresAKey() => base.Authenticator_ResetKey_StoresAKey();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task RecoveryCodes_GenerateAndCount() => base.RecoveryCodes_GenerateAndCount();
     }
 }

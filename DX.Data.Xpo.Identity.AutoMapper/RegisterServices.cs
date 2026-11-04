@@ -126,26 +126,45 @@ namespace DX.Data.Xpo.Identity.AutoMapper
     {
         public XPIdentityMapperProfile()
         {
+            // map onto the identity models through their parameterless constructors and property setters: with
+            // IdentityUser(string userName) / IdentityRole(string roleName), ProjectTo puts UserName / Name in a constructor
+            // call, and XPO cannot translate a Where on such a member (UserManager.Users.Where(u => u.UserName ...))
+            ShouldUseConstructor = ctor => ctor.GetParameters().Length == 0;
+
             CreateMap<TUser, TXPOUser>()
                     //.ForMember(dest => dest.NormalizedName, opt => opt.MapFrom(src => src.NormalizedUserName))
                     .ForMember(dest => dest.RolesList, opt => opt.Ignore())
                     .ForMember(dest => dest.ClaimsList, opt => opt.Ignore())
                     .ForMember(dest => dest.TokenList, opt => opt.Ignore())
-                    .ForMember(dest => dest.LoginsList, opt => opt.Ignore())					
+                    .ForMember(dest => dest.LoginsList, opt => opt.Ignore())
+                    // IdentityUser.LockoutEnd (DateTimeOffset?) is XpoDxUser.LockoutEndDateUtc (DateTime?, UTC): the names differ
+                    .ForMember(nameof(IXPUser<TKey>.LockoutEndDateUtc),
+                        opt => opt.MapFrom(src => src.LockoutEnd.HasValue ? src.LockoutEnd.Value.UtcDateTime : (DateTime?)null))
 				.ReverseMap()
-				    //.ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.NormalizedName))
+                    .ForMember(dest => dest.LockoutEnd, opt => opt.MapFrom(src => src.LockoutEndDateUtc.HasValue
+                        ? new DateTimeOffset(DateTime.SpecifyKind(src.LockoutEndDateUtc.Value, DateTimeKind.Utc))
+                        : (DateTimeOffset?)null))
 			;
 
 			CreateMap<TRole, TXPORole>()                    
                     .ForMember(dest => dest.ClaimsList, opt => opt.Ignore())					
 				.ReverseMap();
 
-			CreateMap<TUserLogin, TXPOLogin>().ReverseMap();
-            CreateMap<TUserClaim, TXPOClaim>()                                    
+            // the XPO login, claim and token have a get-only UserId (an alias of [User.Id]); the interface setter looks up the User
+            CreateMap<TUserLogin, TXPOLogin>()
+                .ForMember(nameof(IXPUserLogin<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
+                .ReverseMap();
+            CreateMap<TUserClaim, TXPOClaim>()
+                .ForMember(nameof(IXPUserClaim<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
                 .ReverseMap()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
             ;
-            CreateMap<TUserToken, TXPOToken>().ReverseMap();
+            CreateMap<TUserToken, TXPOToken>()
+                .ForMember(nameof(IXPUserToken<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
+                .ReverseMap();
             CreateMap<TRoleClaim, TXPORoleClaim>()
                 .ReverseMap()
 					.ForMember(dest => dest.Id, opt => opt.Ignore())

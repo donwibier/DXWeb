@@ -15,9 +15,6 @@ namespace DX.Data.Xpo.Identity.Tests
     /// </summary>
     public class StoreContractTests : IdentityTestBase
     {
-        private const string NotForwarded = "BUG: XPUserStore does not pass the CancellationToken on to the data store (FindById/Name/Email, GetClaims, GetLogins), so a cancelled request still queries";
-        private const string NullDeref = "BUG: no null check: user.Id / role.Id is dereferenced, so null throws NullReferenceException instead of ArgumentNullException";
-
         public StoreContractTests() : base(MapperKind.Mapster) { }
 
         private IUserStore<IdentityUser> UserStore => Scope.ServiceProvider.GetRequiredService<IUserStore<IdentityUser>>();
@@ -71,15 +68,15 @@ namespace DX.Data.Xpo.Identity.Tests
         [InlineData("User.Create")]
         [InlineData("User.Update")]
         [InlineData("User.Delete")]
-        [InlineData("User.FindById", Skip = NotForwarded)]
-        [InlineData("User.FindByName", Skip = NotForwarded)]
-        [InlineData("User.FindByEmail", Skip = NotForwarded)]
-        [InlineData("User.GetClaims", Skip = NotForwarded)]
+        [InlineData("User.FindById")]
+        [InlineData("User.FindByName")]
+        [InlineData("User.FindByEmail")]
+        [InlineData("User.GetClaims")]
         [InlineData("User.AddClaims")]
         [InlineData("User.ReplaceClaim")]
         [InlineData("User.RemoveClaims")]
         [InlineData("User.GetUsersForClaim")]
-        [InlineData("User.GetLogins", Skip = NotForwarded)]
+        [InlineData("User.GetLogins")]
         [InlineData("User.AddLogin")]
         [InlineData("User.RemoveLogin")]
         [InlineData("User.FindByLogin")]
@@ -114,11 +111,11 @@ namespace DX.Data.Xpo.Identity.Tests
         [InlineData("User.Create")]
         [InlineData("User.Update")]
         [InlineData("User.Delete")]
-        [InlineData("User.GetClaims", Skip = NullDeref)]
+        [InlineData("User.GetClaims")]
         [InlineData("User.AddClaims")]
         [InlineData("User.ReplaceClaim")]
         [InlineData("User.RemoveClaims")]
-        [InlineData("User.GetLogins", Skip = NullDeref)]
+        [InlineData("User.GetLogins")]
         [InlineData("User.AddLogin")]
         [InlineData("User.RemoveLogin")]
         [InlineData("User.AddToRole")]
@@ -134,7 +131,7 @@ namespace DX.Data.Xpo.Identity.Tests
         [InlineData("Role.Create")]
         [InlineData("Role.Update")]
         [InlineData("Role.Delete")]
-        [InlineData("Role.GetClaims", Skip = NullDeref)]
+        [InlineData("Role.GetClaims")]
         [InlineData("Role.AddClaim")]
         [InlineData("Role.RemoveClaim")]
         public async Task NullUserOrRole_ThrowsArgumentNullException(string call)
@@ -195,8 +192,8 @@ namespace DX.Data.Xpo.Identity.Tests
             public Task<IdentityUserRole<string>> CallFindUserRoleAsync(string userId, string roleId) => FindUserRoleAsync(userId, roleId, default);
         }
 
-        // Unskipped this does not fail, it kills the test host: verified in a scratch console app ("Stack overflow. Repeated 14141 times")
-        [Fact(Skip = "BUG: XPUserStore.FindUserRoleAsync calls itself instead of _UserStore.FindUserRoleAsync: infinite recursion, StackOverflow (crashes the test host)")]
+        // this used to recurse into itself (StackOverflow, killing the test host)
+        [Fact]
         public async Task FindUserRole_ForAUserInTheRole_ReturnsTheLink()
         {
             var user = await CreateUserAsync();

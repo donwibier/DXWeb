@@ -19,7 +19,7 @@ namespace DX.Data.Xpo.Identity.Tests
 
         // ---------- lockout and access failed ----------
 
-        [Fact(Skip = "BUG: IdentityUser.LockoutEnd is never mapped to XpoDxUser.LockoutEndDateUtc (names differ), so a lockout is lost on reload")]
+        [Fact]
         public async Task Lockout_SetEndDate_IsPersisted()
         {
             var user = await CreateUserAsync();
@@ -32,7 +32,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.True(await FreshUsers().IsLockedOutAsync(reloaded));
         }
 
-        [Fact(Skip = "BUG: as Lockout_SetEndDate_IsPersisted: after MaxFailedAccessAttempts the lockout end is not persisted, so brute-force lockout never takes effect")]
+        [Fact]
         public async Task Lockout_AfterMaxFailedAttempts_TheUserIsLockedOut()
         {
             var user = await CreateUserAsync();
@@ -104,7 +104,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal(user.ConcurrencyStamp, (await ReloadAsync(user)).ConcurrencyStamp);
         }
 
-        [Fact(Skip = "BUG: XPUserStore.UpdateAsync never compares the ConcurrencyStamp, so a stale copy overwrites a newer one instead of failing with ConcurrencyFailure")]
+        [Fact]
         public async Task Update_OfAStaleCopy_FailsWithConcurrencyFailure()
         {
             await CreateUserAsync();
@@ -296,7 +296,7 @@ namespace DX.Data.Xpo.Identity.Tests
         // ---------- delete ----------
 
         [Fact]
-        public virtual async Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers()
+        public async Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers()
         {
             await CreateRoleAsync("Cook");
             var user = await CreateUserAsync("one@example.com");
@@ -307,15 +307,16 @@ namespace DX.Data.Xpo.Identity.Tests
                 await Users.AddClaimAsync(u, new Claim("department", "kitchen"));
                 await Users.SetAuthenticationTokenAsync(u, "Google", "access_token", "token-" + u.UserName);
             }
-            // one login only: a second login in the table trips the AddLoginAsync bug (ClaimsLoginsTokensTests.LoginEqualsBug)
             await Users.AddLoginAsync(user, new UserLoginInfo("Google", "key-one", "Google"));
+            await Users.AddLoginAsync(other, new UserLoginInfo("Google", "key-two", "Google"));
 
             Assert.True((await Users.DeleteAsync(user)).Succeeded);
 
             Assert.Null(await Users.FindByLoginAsync("Google", "key-one"));
             Assert.Equal(1, Host.Count<XpoDxUser>());
             Assert.Equal(1, Host.Count<XpoDxUserClaim>());
-            Assert.Equal(0, Host.Count<XpoDxUserLogin>());
+            Assert.Equal(1, Host.Count<XpoDxUserLogin>());
+            Assert.Equal(other.Id, (await Users.FindByLoginAsync("Google", "key-two"))?.Id);
             Assert.Equal(1, Host.Count<XpoDxUserToken>());
             Assert.Equal(new[] { "two@example.com" }, (await Users.GetUsersInRoleAsync("Cook")).Select(u => u.UserName));
             Assert.Equal("token-two@example.com", await Users.GetAuthenticationTokenAsync(other, "Google", "access_token"));
@@ -382,8 +383,5 @@ namespace DX.Data.Xpo.Identity.Tests
     public class AccountStateTests_AutoMapper : AccountStateTests
     {
         public AccountStateTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = ClaimsLoginsTokensTests_AutoMapper.TokenNotStoredBug)]
-        public override Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers() => base.Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers();
     }
 }

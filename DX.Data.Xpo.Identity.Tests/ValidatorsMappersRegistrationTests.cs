@@ -204,7 +204,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal(source.RefreshTokenExpiryTime, back.RefreshTokenExpiryTime);
         }
 
-        [Fact(Skip = "BUG: XPUserMapper.Assign / CreateModel skip ConcurrencyStamp (part of IXPUser since net8), so it is lost on every save/load")]
+        [Fact]
         public void UserMapper_RoundTrip_KeepsTheConcurrencyStamp()
         {
             var mapper = new XPUserMapper<PlainUser, XpoDxUser>();
@@ -248,7 +248,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Throws<ArgumentNullException>(() => mapper.Assign(new PlainRole(), null));
         }
 
-        [Fact(Skip = "BUG: XPRoleMapper.Assign / CreateModel skip ConcurrencyStamp (part of IXPRole), so it is lost on every save/load")]
+        [Fact]
         public void RoleMapper_RoundTrip_KeepsTheConcurrencyStamp()
         {
             var mapper = new XPRoleMapper<string, PlainRole, XpoDxRole>();

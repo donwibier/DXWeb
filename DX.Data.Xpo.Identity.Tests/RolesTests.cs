@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using DX.Data.Xpo.Identity.Persistent;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DX.Data.Xpo.Identity.Tests
@@ -51,7 +52,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Single(await Users.GetRolesAsync(user));
         }
 
-        [Fact(Skip = "BUG: XPBaseUserStore.AddToRoleAsync silently does nothing for an unknown role, so UserManager.AddToRoleAsync reports Success (the Identity contract is InvalidOperationException)")]
+        [Fact]
         public async Task AddToRole_UnknownRole_Throws()
         {
             var user = await CreateUserAsync();
@@ -206,7 +207,27 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal("stock", Assert.Single(await Roles.GetClaimsAsync(cook)).Value);
         }
 
-        [Fact(Skip = "BUG: XPRoleStore.Roles throws NotImplementedException although the store advertises IQueryableRoleStore (RoleManager.SupportsQueryableRoles is true)")]
+        [Fact]
+        public async Task Role_UpdateOfAStaleCopy_FailsWithConcurrencyFailure()
+        {
+            await CreateRoleAsync("Cook");
+            var first = NewScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var second = NewScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var copy1 = await first.FindByNameAsync("Cook");
+            var copy2 = await second.FindByNameAsync("Cook");
+
+            copy1.Name = "Chef";
+            Assert.True((await first.UpdateAsync(copy1)).Succeeded);
+            copy2.Name = "Baker";
+            var result = await second.UpdateAsync(copy2);
+
+            Assert.False(result.Succeeded);
+            Assert.Contains(result.Errors, e => e.Code == nameof(IdentityErrorDescriber.ConcurrencyFailure));
+            Assert.NotNull(await Roles.FindByNameAsync("Chef"));
+            Assert.Null(await Roles.FindByNameAsync("Baker"));
+        }
+
+        [Fact]
         public async Task RoleManager_Roles_CanBeQueried()
         {
             await CreateRoleAsync("Cook");
@@ -217,7 +238,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task UserManager_Users_CanBeQueried()
+        public async Task UserManager_Users_CanBeQueried()
         {
             await CreateUserAsync("a@example.com");
             await CreateUserAsync("b@example.com");
@@ -236,8 +257,5 @@ namespace DX.Data.Xpo.Identity.Tests
     public class RolesTests_AutoMapper : RolesTests
     {
         public RolesTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = "BUG (AutoMapper flavour): XPAutoMapperUserStore.Query uses ProjectTo, and XPO cannot translate a Where on the projection, so UserManager.Users.Where(u => u.UserName...) throws NotSupportedException")]
-        public override Task UserManager_Users_CanBeQueried() => base.UserManager_Users_CanBeQueried();
     }
 }

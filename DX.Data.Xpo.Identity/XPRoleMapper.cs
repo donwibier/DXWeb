@@ -24,7 +24,8 @@ namespace DX.Data.Xpo.Identity
 			{
 				Id = source.Id,
 				NormalizedName = source.NormalizedName,
-				Name = source.Name
+				Name = source.Name,
+				ConcurrencyStamp = source.ConcurrencyStamp
 			};
 
 		public override TXPORole Assign(TRole source, TXPORole destination)
@@ -37,13 +38,15 @@ namespace DX.Data.Xpo.Identity
 			//destination.Id = source.Id;
 			destination.Name = source.Name;
 			destination.NormalizedName = source.NormalizedName;
+			destination.ConcurrencyStamp = source.ConcurrencyStamp;
 			return destination;
 		}
 		static Dictionary<string, string> _propertyMap = new Dictionary<string, string>
 		{
 			{"Id", "Id"},			
 			{"NormalizedName", "NormalizedName"},
-			{"Name", "Name"}
+			{"Name", "Name"},
+			{"ConcurrencyStamp", "ConcurrencyStamp"}
 		};
 
 		public override string Map(string sourceField)
