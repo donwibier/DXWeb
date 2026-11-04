@@ -45,8 +45,11 @@ namespace DX.Data.Xpo
 	{
 		//private IDataLayer dataLayer;
 		//private readonly static object lockObj = new object();
-		private readonly static ConcurrentDictionary<string, IDataLayer> dataLayers =
-			new ConcurrentDictionary<string, IDataLayer>();
+		// Lazy makes the creation of a data layer atomic: concurrent first use of one name creates it once
+		private readonly static ConcurrentDictionary<string, Lazy<IDataLayer>> dataLayers =
+			new ConcurrentDictionary<string, Lazy<IDataLayer>>();
+		// the names this instance was configured with
+		private readonly HashSet<string> configuredNames = new HashSet<string>();
 
 		private readonly XpoDatabaseOptions options = new XpoDatabaseOptions();
 		public string ConnectionString { get { return options.ConnectionString; } }
@@ -128,6 +131,14 @@ namespace DX.Data.Xpo
 			if (string.IsNullOrEmpty(option.Name))
 				throw new ArgumentNullException("Name");
 			GetDataLayer(option);
+			lock (configuredNames)
+				configuredNames.Add(option.Name);
+		}
+
+		internal bool IsConfiguredDataLayer(string dataLayerName)
+		{
+			lock (configuredNames)
+				return configuredNames.Contains(dataLayerName);
 		}
 
 		public virtual Session GetSession()
@@ -142,11 +153,10 @@ namespace DX.Data.Xpo
 
 		public virtual IDataLayer GetDataLayer(string dataLayerName)
 		{
-			if (dataLayers.TryGetValue(options.Name, out IDataLayer? result))
-			{
-				return result;
-			}
-			throw new Exception("DataLayer was not found!");
+			// an empty name means the default (first) data layer of this database
+			if (string.IsNullOrEmpty(dataLayerName))
+				dataLayerName = options.Name;
+			return GetDataLayer(new XpoDatabaseOptions { Name = dataLayerName });
 		}
 
     public virtual void Execute(Action<XpoDatabase, Session> work, bool transactional = true, bool commit = true)
@@ -218,17 +228,33 @@ namespace DX.Data.Xpo
 
 		public static IDataLayer GetDataLayer(XpoDatabaseOptions options)
 		{
-			if (!dataLayers.TryGetValue(options.Name, out IDataLayer? result))
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
+			if (!dataLayers.TryGetValue(options.Name, out Lazy<IDataLayer>? entry))
 			{
-				if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+				if (string.IsNullOrWhiteSpace(options.ConnectionString))
+					throw new Exception("DataLayer was not found!");
+				var settings = new XpoDatabaseOptions
 				{
-					result = CreateDataLayer(options);
-					dataLayers.AddOrUpdate(options.Name, result, (s, l) => l);
-				}
+					Name = options.Name,
+					ConnectionString = options.ConnectionString,
+					EnableCaching = options.EnableCaching,
+					UpdateSchema = options.UpdateSchema
+				};
+				entry = dataLayers.GetOrAdd(options.Name,
+					new Lazy<IDataLayer>(() => CreateDataLayer(settings), System.Threading.LazyThreadSafetyMode.ExecutionAndPublication));
 			}
-			if (result == null)
-				throw new Exception("DataLayer was not found!");
-			return result;
+			try
+			{
+				return entry.Value;
+			}
+			catch
+			{
+				// do not keep a failed creation around, so a later call can retry (as before)
+				((ICollection<KeyValuePair<string, Lazy<IDataLayer>>>)dataLayers)
+					.Remove(new KeyValuePair<string, Lazy<IDataLayer>>(options.Name, entry));
+				throw;
+			}
 		}
 
 		//public static T Execute<T>(string dataLayerName, Func<Session, T> work, bool transactional = true, bool commit = true)			
@@ -268,7 +294,11 @@ namespace DX.Data.Xpo
 			//Register custom functions etc.
             CriteriaOperator.RegisterCustomFunction(new GeoHaversineFunction());
 			//=====
-            IDataStore dataStore = XpoDefault.GetConnectionProvider(XpoDefault.GetConnectionPoolString(options.ConnectionString), createOption);
+			// every pooled connection to an in-memory store would be a separate, empty database
+			string connectionString = IsInMemoryConnectionString(options.ConnectionString)
+				? options.ConnectionString
+				: XpoDefault.GetConnectionPoolString(options.ConnectionString);
+            IDataStore dataStore = XpoDefault.GetConnectionProvider(connectionString, createOption);
 
 			// Initialize the XPO dictionary
 			dataDictionary.GetDataStoreSchema(GetDataTypes(options.Name));
@@ -295,6 +325,20 @@ namespace DX.Data.Xpo
 
 			return result;
 		}
+		private static bool IsInMemoryConnectionString(string connectionString)
+		{
+			try
+			{
+				var provider = new DevExpress.Xpo.DB.Helpers.ConnectionStringParser(connectionString)
+					.GetPartByName(DataStoreBase.XpoProviderTypeParameterName);
+				return string.Equals(provider?.Trim(), InMemoryDataStore.XpoProviderTypeString, StringComparison.OrdinalIgnoreCase);
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
 		static readonly string xpoName = XPClassInfo.GetShortAssemblyName(typeof(XPDictionary).Assembly);
 		private static Type[] GetDataTypes(string name = "")
 		{

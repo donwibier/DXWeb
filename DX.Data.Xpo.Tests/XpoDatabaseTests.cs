@@ -78,7 +78,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Throws<Exception>(() => XpoDatabase.GetUnitOfWork(NewName()));
         }
 
-        [Fact(Skip = "BUG: XpoDatabase.GetDataLayer(string) (XpoDatabase.cs:145) ignores its argument and always returns the first data layer")]
+        [Fact]
         public void GetDataLayer_ByName_ReturnsThatLayer()
         {
             var first = NewName();
@@ -86,6 +86,29 @@ namespace DX.Data.Xpo.Tests
             var db = new XpoDatabase(new[] { InMemory(first), InMemory(second) });
             Assert.NotSame(db.GetDataLayer(first), db.GetDataLayer(second));
             Assert.Same(XpoDatabase.GetDataLayer(new XpoDatabaseOptions { Name = second }), db.GetDataLayer(second));
+        }
+
+        [Fact]
+        public void GetDataLayer_UnknownName_Throws_EmptyName_ReturnsDefault()
+        {
+            var name = NewName();
+            var db = new XpoDatabase(InMemory(name));
+            Assert.Throws<Exception>(() => db.GetDataLayer(NewName()));
+            Assert.Same(db.GetDataLayer(name), db.GetDataLayer(""));
+            Assert.Same(db.GetDataLayer(name), db.GetDataLayer((string)null));
+        }
+
+        [Fact]
+        public void GetDataLayer_FailedCreation_IsNotCached()
+        {
+            var name = NewName();
+            Assert.ThrowsAny<Exception>(() => XpoDatabase.GetDataLayer(new XpoDatabaseOptions
+            {
+                Name = name,
+                ConnectionString = "XpoProvider=NoSuchProvider;data source=nowhere"
+            }));
+            var db = new XpoDatabase(InMemory(name));
+            Assert.Equal(0, CountProducts(db));
         }
 
         [Fact]
@@ -99,7 +122,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(1, db.Execute(second, (d, s) => s.Query<Product>().Count()));
         }
 
-        [Fact(Skip = "BUG: XpoDatabase.GetDataLayer(options) (XpoDatabase.cs:221-226) is check-then-act; concurrent first use of one name creates several data layers (separate databases) and callers get different ones")]
+        [Fact]
         public async Task ConcurrentFirstUse_OfOneName_YieldsOneDataLayer()
         {
             for (int attempt = 0; attempt < 5; attempt++)
@@ -256,7 +279,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(caller, worker);
         }
 
-        [Fact(Skip = "BUG: same DataStorePool root cause (XpoDatabase.cs:271): parallel ExecuteAsync on an in-memory XpoDatabase throws SchemaCorrectionNeededException / writes to separate databases")]
+        [Fact]
         public async Task ExecuteAsync_ParallelCalls_AllCommit()
         {
             var db = NewDb();
@@ -268,7 +291,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(50, names.Distinct().Count());
         }
 
-        [Fact(Skip = "BUG: XpoDatabase.CreateDataLayer (XpoDatabase.cs:271) wraps an InMemoryDataSet connection in a DataStorePool; every extra pooled connection is a new empty in-memory database, so concurrent Execute fails with SchemaCorrectionNeededException")]
+        [Fact]
         public async Task ExecuteAsync_ConcurrentReads_SeeTheSameDatabase()
         {
             var db = NewDb();
@@ -278,7 +301,7 @@ namespace DX.Data.Xpo.Tests
             Assert.All(counts, c => Assert.Equal(1, c));
         }
 
-        [Fact(Skip = "BUG: constructing an XpoDatabase with DatabaseAndSchema replaces the process-wide XpoDefault.DataLayer (XpoDatabase.cs:286), so new Session()/new UnitOfWork() silently use the last database created")]
+        [Fact(Skip = "BY DESIGN?: constructing an XpoDatabase with DatabaseAndSchema replaces the process-wide XpoDefault.DataLayer (XpoDatabase.cs:319), so new Session()/new UnitOfWork() silently use the last database created. Kept because existing apps may rely on it; owner to decide")]
         public void Ctor_DoesNotReplaceXpoDefaultDataLayer()
         {
             var before = XpoDefault.DataLayer;
@@ -376,6 +399,18 @@ namespace DX.Data.Xpo.Tests
         }
 
         [Fact]
+        public void AddXpoUnitOfWork_UnknownName_FallsBackToDefaultLayer()
+        {
+            var first = NewName();
+            using var sp = new ServiceCollection()
+                .AddXpoDatabases(new[] { InMemory(first), InMemory(NewName()) })
+                .AddXpoUnitOfWork("not-registered").BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var uow = scope.ServiceProvider.GetRequiredService<UnitOfWork>();
+            Assert.Same(XpoDatabase.GetDataLayer(new XpoDatabaseOptions { Name = first }), uow.DataLayer);
+        }
+
+        [Fact]
         public void AddXpoUnitOfWork_IsScoped()
         {
             using var sp = new ServiceCollection().AddXpoDatabase(InMemory(NewName())).AddXpoUnitOfWork("ignored").BuildServiceProvider();
@@ -385,7 +420,7 @@ namespace DX.Data.Xpo.Tests
             Assert.NotSame(s1.ServiceProvider.GetRequiredService<UnitOfWork>(), s2.ServiceProvider.GetRequiredService<UnitOfWork>());
         }
 
-        [Fact(Skip = "BUG: AddXpoUnitOfWork(connectionName) (XpoCoreExtensions.cs:38) ignores connectionName and always binds the first database")]
+        [Fact]
         public void AddXpoUnitOfWork_UsesNamedConnection()
         {
             var first = NewName();
