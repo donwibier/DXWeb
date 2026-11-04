@@ -131,9 +131,14 @@ namespace DX.Data.Xpo.Identity.AutoMapper
                     .ForMember(dest => dest.RolesList, opt => opt.Ignore())
                     .ForMember(dest => dest.ClaimsList, opt => opt.Ignore())
                     .ForMember(dest => dest.TokenList, opt => opt.Ignore())
-                    .ForMember(dest => dest.LoginsList, opt => opt.Ignore())					
+                    .ForMember(dest => dest.LoginsList, opt => opt.Ignore())
+                    // IdentityUser.LockoutEnd (DateTimeOffset?) is XpoDxUser.LockoutEndDateUtc (DateTime?, UTC): the names differ
+                    .ForMember(nameof(IXPUser<TKey>.LockoutEndDateUtc),
+                        opt => opt.MapFrom(src => src.LockoutEnd.HasValue ? src.LockoutEnd.Value.UtcDateTime : (DateTime?)null))
 				.ReverseMap()
-				    //.ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.NormalizedName))
+                    .ForMember(dest => dest.LockoutEnd, opt => opt.MapFrom(src => src.LockoutEndDateUtc.HasValue
+                        ? new DateTimeOffset(DateTime.SpecifyKind(src.LockoutEndDateUtc.Value, DateTimeKind.Utc))
+                        : (DateTimeOffset?)null))
 			;
 
 			CreateMap<TRole, TXPORole>()                    

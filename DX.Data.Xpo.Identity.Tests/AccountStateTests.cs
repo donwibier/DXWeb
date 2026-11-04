@@ -19,7 +19,7 @@ namespace DX.Data.Xpo.Identity.Tests
 
         // ---------- lockout and access failed ----------
 
-        [Fact(Skip = "BUG: IdentityUser.LockoutEnd is never mapped to XpoDxUser.LockoutEndDateUtc (names differ), so a lockout is lost on reload")]
+        [Fact]
         public async Task Lockout_SetEndDate_IsPersisted()
         {
             var user = await CreateUserAsync();
@@ -32,7 +32,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.True(await FreshUsers().IsLockedOutAsync(reloaded));
         }
 
-        [Fact(Skip = "BUG: as Lockout_SetEndDate_IsPersisted: after MaxFailedAccessAttempts the lockout end is not persisted, so brute-force lockout never takes effect")]
+        [Fact]
         public async Task Lockout_AfterMaxFailedAttempts_TheUserIsLockedOut()
         {
             var user = await CreateUserAsync();

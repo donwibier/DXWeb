@@ -127,8 +127,16 @@ namespace DX.Data.Xpo.Identity.Mapster
 				where TXPOToken : XPBaseObject, IXPUserToken<TKey>
 				where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey>
 		{
+			// IdentityUser.LockoutEnd (DateTimeOffset?) is XpoDxUser.LockoutEndDateUtc (DateTime?, UTC): the names differ
 			TypeAdapterConfig<TUser, TXPOUser>.NewConfig()
-					.Ignore(dest => dest.RolesList, dest => dest.ClaimsList, dest => dest.TokenList, dest => dest.LoginsList);
+					.Ignore(dest => dest.RolesList, dest => dest.ClaimsList, dest => dest.TokenList, dest => dest.LoginsList)
+					.Map(nameof(IXPUser<TKey>.LockoutEndDateUtc),
+						src => src.LockoutEnd.HasValue ? src.LockoutEnd.Value.UtcDateTime : (DateTime?)null);
+			TypeAdapterConfig<TXPOUser, TUser>.NewConfig()
+					.Map(dest => dest.LockoutEnd,
+						src => src.LockoutEndDateUtc.HasValue
+							? new DateTimeOffset(DateTime.SpecifyKind(src.LockoutEndDateUtc.Value, DateTimeKind.Utc))
+							: (DateTimeOffset?)null);
 
 			TypeAdapterConfig<TRole, TXPORole>.NewConfig().Ignore(dest => dest.ClaimsList);
 
