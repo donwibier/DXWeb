@@ -23,8 +23,11 @@ namespace DX.Data.Xpo.AutoMapper
         {
             using (var wrk = new Session(DataLayer))
             {
+                var dbItem = XPOGetByKey(key, wrk);
+                if (dbItem == null)
+                    return null!;
                 TModel result = CreateModel();
-                return Mapper.Map(XPOGetByKey(key, wrk), result);
+                return Mapper.Map(dbItem, result);
             }
         }
     }

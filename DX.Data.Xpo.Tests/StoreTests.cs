@@ -429,7 +429,7 @@ namespace DX.Data.Xpo.Tests
         protected override XPDataStore<int, ProductModel, Product> CreateStore(IDataLayer dataLayer, IValidator<Product> validator)
             => new ProductMapsterStore(dataLayer, Mappers.Mapster(), validator);
 
-        [Fact(Skip = "BUG: XPMapsterStore.Query<T>() calls ProjectToType<T>() without Mapper.Config, so it projects with TypeAdapterConfig.GlobalSettings and ignores the injected mapping (Id stays 0)")]
+        [Fact]
         public void Query_UsesInjectedMapsterConfig() => AssertQueryUsesStoreMapping();
 
         [Fact]
@@ -478,7 +478,7 @@ namespace DX.Data.Xpo.Tests
         [Fact]
         public void Query_UsesInjectedAutoMapperConfig() => AssertQueryUsesStoreMapping();
 
-        [Fact(Skip = "BUG: XPAutoMapperStore.GetByKey returns a blank model (Id 0) instead of null for an unknown key; the Mapster store returns null")]
+        [Fact]
         public void GetByKey_UnknownKey_ReturnsNull() => Assert.Null(Store.GetByKey(4242));
     }
 }
