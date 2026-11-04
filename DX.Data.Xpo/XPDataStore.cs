@@ -143,18 +143,6 @@ namespace DX.Data.Xpo
             return result;
         }
 
-        class InsertHelper
-        {
-            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey, TModel> insertedResult)
-            {
-                Model = model;
-                InsertingResult = insertingResult;
-                InsertedResult = insertedResult;
-            }
-            public TModel Model { get; private set; }
-            public ValidationResult InsertingResult { get; private set; }
-            public IDataResult<TKey, TModel> InsertedResult { get; private set; }
-        }
         protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
         {
             var err = new ValidationException("Validation Failed", validationResult.Errors);            
@@ -164,6 +152,8 @@ namespace DX.Data.Xpo
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
 
+        private bool IsEmptyKey(TKey key) => key == null || key.Equals(EmptyKeyValue);
+
         protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             ThrowIfNull(items);
@@ -172,34 +162,36 @@ namespace DX.Data.Xpo
                 async (s, wrk) =>
                 {
                     TModel currentItem = default!;
+                    DataMode dataMode = mode == StoreMode.Update ? DataMode.Update : DataMode.Create;
                     // need to keep the xpo entities together with the model items so we can update 
-                    // the id's of the models afterwards.
-                    Dictionary<TDBModel, InsertHelper> batchPairs = new Dictionary<TDBModel, InsertHelper>();
+                    // the id's (created items) and server side changes (all items) of the models afterwards.
+                    // An updated db object can occur more than once in one batch.
+                    var batchPairs = new Dictionary<TDBModel, List<TModel>>();
                     try
                     {
-                        ValidationResult validationResult = default!;
-                        DataMode dataMode = DataMode.Create;
                         foreach (var item in items)
                         {
                             currentItem = item;
                             var modelKey = ModelKey(item);
                             TDBModel dbItem = null!;
-                            if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                            if (mode == StoreMode.Create || (mode == StoreMode.Store && IsEmptyKey(modelKey)))
                             {
                                 dataMode = DataMode.Create;
                                 dbItem = (Activator.CreateInstance(typeof(TDBModel), wrk) as TDBModel)!;
-                                batchPairs.Add(dbItem, new InsertHelper(item, validationResult, new DataResult<TKey, TModel>()));
                             }
-                            else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+                            else
                             {
                                 dataMode = DataMode.Update;
-                                dbItem = XPOGetByKey(modelKey, wrk)!;
+                                dbItem = IsEmptyKey(modelKey) ? null! : XPOGetByKey(modelKey, wrk)!;
                                 if (dbItem == null)
                                     throw new ValidationException($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
                             }
-                            //Mapper.Map(item, dbItem);
+                            if (!batchPairs.TryGetValue(dbItem, out var models))
+                                batchPairs.Add(dbItem, models = new List<TModel>(1));
+                            models.Add(item);
+
                             ToDBModel(item, dbItem);
-                            validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
+                            var validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
                             if (!validationResult.IsValid)
                                 throw CreateValidationException(item, validationResult);
                             await wrk.SaveAsync(dbItem);
@@ -208,15 +200,16 @@ namespace DX.Data.Xpo
 
                         wrk.ObjectSaved += (s, e) =>
                         {
-                            // sync the model ids with the newly generated xpo id's
-                            if (e.Object is TDBModel xpoItem && batchPairs.ContainsKey(xpoItem))
+                            // sync the model ids with the newly generated xpo id's and
+                            // map back the XPO Item into the model (OnSaving etc.)
+                            if (e.Object is TDBModel xpoItem && batchPairs.TryGetValue(xpoItem, out var models))
                             {
                                 TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
-                                SetModelKey(batchPairs[xpoItem].Model, k);
-                                if (batchPairs[xpoItem].InsertedResult != null)
-                                    batchPairs[xpoItem].InsertedResult.Key = k;
-                                // INFO: We need to map back the XPO Item into the model.							
-                                ToModel(xpoItem, batchPairs[xpoItem].Model);                                
+                                foreach (var model in models)
+                                {
+                                    SetModelKey(model, k);
+                                    ToModel(xpoItem, model);
+                                }
                             }
                         };
                         ValidationException commitFailure = null!;
@@ -237,13 +230,13 @@ namespace DX.Data.Xpo
                             return new DataResult<TKey, TModel> { 
                                 Success = true, 
                                 Mode = dataMode,
-                                Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                                Data = items.ToArray()
                             };
                     }
                     catch (Exception err)
                     {
                         wrk.RollbackTransaction();
-                        return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
+                        return new DataResult<TKey, TModel>(dataMode, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
                     }
                 },
                 true, false);
@@ -307,10 +300,10 @@ namespace DX.Data.Xpo
                     else
                         return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
-                catch (ValidationException err)
+                catch (Exception err)
                 {
                     wrk.RollbackTransaction();
-                    return new DataResult<TKey, TModel>(DataMode.Delete, nameof(TDBModel), err);
+                    return new DataResult<TKey, TModel>(DataMode.Delete, typeof(TDBModel).Name, err);
                 }
             }, true, false);
             return result;
