@@ -46,12 +46,15 @@ namespace DX.Data.EF.Tests
 
         private readonly DbConnection connection;
         private readonly Action<string> log;
+        private readonly Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor interceptor;
 
         public TestDbContext() : this(DefaultConnection) { }
-        public TestDbContext(DbConnection connection, Action<string> log = null)
+        public TestDbContext(DbConnection connection, Action<string> log = null,
+            Microsoft.EntityFrameworkCore.Diagnostics.IInterceptor interceptor = null)
         {
             this.connection = connection;
             this.log = log;
+            this.interceptor = interceptor;
         }
 
         public DbSet<Customer> Customers { get; set; }
@@ -60,6 +63,8 @@ namespace DX.Data.EF.Tests
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite(connection);
+            if (interceptor != null)
+                optionsBuilder.AddInterceptors(interceptor);
             if (log != null)
                 optionsBuilder.LogTo(log, new[] { DbLoggerCategory.Database.Command.Name });
         }
