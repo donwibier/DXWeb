@@ -193,8 +193,13 @@ namespace DX.Data.Xpo.Identity
         }
 
         protected async override Task AddUserTokenAsync(TUserToken token)
-        {			
-			await _TokenStore.CreateAsync(token);
+        {
+            ThrowIfNull(token);
+			var r = await _TokenStore.CreateAsync(token);
+            // the base class has no way to report a failure: do not let SetTokenAsync report success for a token that was not stored
+            if (!r.Success)
+                throw new InvalidOperationException(
+                    $"The token {token.LoginProvider}/{token.Name} could not be stored for user {token.UserId}: {r.Exception?.Message}", r.Exception);
         }
 
         protected async override Task<TRole?> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)

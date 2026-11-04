@@ -296,7 +296,7 @@ namespace DX.Data.Xpo.Identity.Tests
         // ---------- delete ----------
 
         [Fact]
-        public virtual async Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers()
+        public async Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers()
         {
             await CreateRoleAsync("Cook");
             var user = await CreateUserAsync("one@example.com");
@@ -383,8 +383,5 @@ namespace DX.Data.Xpo.Identity.Tests
     public class AccountStateTests_AutoMapper : AccountStateTests
     {
         public AccountStateTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = ClaimsLoginsTokensTests_AutoMapper.TokenNotStoredBug)]
-        public override Task Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers() => base.Delete_CascadesClaimsLoginsTokensAndRoleLinks_ButNotOtherUsers();
     }
 }

@@ -140,12 +140,21 @@ namespace DX.Data.Xpo.Identity.AutoMapper
                     .ForMember(dest => dest.ClaimsList, opt => opt.Ignore())					
 				.ReverseMap();
 
-			CreateMap<TUserLogin, TXPOLogin>().ReverseMap();
-            CreateMap<TUserClaim, TXPOClaim>()                                    
+            // the XPO login, claim and token have a get-only UserId (an alias of [User.Id]); the interface setter looks up the User
+            CreateMap<TUserLogin, TXPOLogin>()
+                .ForMember(nameof(IXPUserLogin<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
+                .ReverseMap();
+            CreateMap<TUserClaim, TXPOClaim>()
+                .ForMember(nameof(IXPUserClaim<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
                 .ReverseMap()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
             ;
-            CreateMap<TUserToken, TXPOToken>().ReverseMap();
+            CreateMap<TUserToken, TXPOToken>()
+                .ForMember(nameof(IXPUserToken<TKey>.UserId), opt => opt.Ignore())
+                .AfterMap((src, dest) => dest.UserId = src.UserId)
+                .ReverseMap();
             CreateMap<TRoleClaim, TXPORoleClaim>()
                 .ReverseMap()
 					.ForMember(dest => dest.Id, opt => opt.Ignore())

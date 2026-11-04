@@ -203,7 +203,7 @@ namespace DX.Data.Xpo.Identity.Tests
         // ---------- tokens ----------
 
         [Fact]
-        public virtual async Task Tokens_SetGetAndRemove()
+        public async Task Tokens_SetGetAndRemove()
         {
             var user = await CreateUserAsync();
 
@@ -216,7 +216,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task Tokens_AreKeptPerProviderAndName()
+        public async Task Tokens_AreKeptPerProviderAndName()
         {
             var user = await CreateUserAsync();
 
@@ -242,7 +242,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task Authenticator_ResetKey_StoresAKey()
+        public async Task Authenticator_ResetKey_StoresAKey()
         {
             var user = await CreateUserAsync();
 
@@ -264,7 +264,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task RecoveryCodes_GenerateAndCount()
+        public async Task RecoveryCodes_GenerateAndCount()
         {
             var user = await CreateUserAsync();
 
@@ -318,20 +318,6 @@ namespace DX.Data.Xpo.Identity.Tests
 
     public class ClaimsLoginsTokensTests_AutoMapper : ClaimsLoginsTokensTests
     {
-        public const string TokenNotStoredBug = "BUG (AutoMapper flavour): the XPIdentityMapperProfile maps IdentityUserToken.UserId onto the get-only XpoDxUserToken.UserId alias, so User stays null, validation fails, and XPUserStore.AddUserTokenAsync ignores the failed result: SetAuthenticationTokenAsync reports Success and stores nothing";
-
         public ClaimsLoginsTokensTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Tokens_SetGetAndRemove() => base.Tokens_SetGetAndRemove();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Tokens_AreKeptPerProviderAndName() => base.Tokens_AreKeptPerProviderAndName();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task Authenticator_ResetKey_StoresAKey() => base.Authenticator_ResetKey_StoresAKey();
-
-        [Fact(Skip = TokenNotStoredBug)]
-        public override Task RecoveryCodes_GenerateAndCount() => base.RecoveryCodes_GenerateAndCount();
     }
 }
