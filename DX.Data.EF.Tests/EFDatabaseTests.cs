@@ -36,7 +36,7 @@ namespace DX.Data.EF.Tests
             Assert.Empty(db.AllCustomers());
         }
 
-        [Fact(Skip = "BUG: transactional:false still opens a transaction and never commits it, so the work's own SaveChanges is rolled back (EFDatabase.cs:28,32 and 55,59)")]
+        [Fact]
         public void Execute_non_transactional_keeps_saved_changes()
         {
             sut.Execute((d, ctx, tx) =>
@@ -45,6 +45,28 @@ namespace DX.Data.EF.Tests
                 ctx.SaveChanges();
             }, transactional: false);
             Assert.Single(db.AllCustomers());
+        }
+
+        [Fact]
+        public void Execute_non_transactional_saves_pending_changes_and_passes_no_transaction()
+        {
+            object seenTx = "unset";
+            var n = sut.Execute((d, ctx, tx) =>
+            {
+                seenTx = tx;
+                ctx.Customers.Add(new Customer { Name = "A" });
+                return 1;
+            }, transactional: false);
+            Assert.Equal(1, n);
+            Assert.Null(seenTx);
+            Assert.Single(db.AllCustomers());
+        }
+
+        [Fact]
+        public void Execute_non_transactional_with_commit_false_discards_pending_changes()
+        {
+            sut.Execute((d, ctx, tx) => { ctx.Customers.Add(new Customer { Name = "A" }); }, transactional: false, commit: false);
+            Assert.Empty(db.AllCustomers());
         }
 
         [Fact]
@@ -132,7 +154,7 @@ namespace DX.Data.EF.Tests
             Assert.Single(db.AllCustomers());
         }
 
-        [Fact(Skip = "BUG: TransactionalExecAsync only commits when ChangeTracker.HasChanges(); work that already called SaveChanges is silently rolled back (EFDataStore.cs:86/101)")]
+        [Fact]
         public async Task TransactionalExec_commits_when_work_already_saved()
         {
             await store.RunInTransaction(async c =>

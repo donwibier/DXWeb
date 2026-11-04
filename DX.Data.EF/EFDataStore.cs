@@ -83,7 +83,8 @@ namespace DX.Data.EF
             using (var dbTrans = await DbContext.Database.BeginTransactionAsync())
             {
                 result = await work(this, dbTrans);
-                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                // Commit whenever the work succeeded, also when it already saved its own changes.
+                if (autoCommit)
                 {
                     await DbContext.SaveChangesAsync();
                     await dbTrans.CommitAsync();
@@ -98,7 +99,8 @@ namespace DX.Data.EF
             using (var dbTrans = await DbContext.Database.BeginTransactionAsync())
             {
                 await work(this, dbTrans);
-                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                // Commit whenever the work succeeded, also when it already saved its own changes.
+                if (autoCommit)
                 {
                     await DbContext.SaveChangesAsync();
                     await dbTrans.CommitAsync();
@@ -116,7 +118,8 @@ namespace DX.Data.EF
             using (var dbTrans = DbContext.Database.BeginTransaction())
             {
                 result = await work(this, dbTrans);
-                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                // Commit whenever the work succeeded, also when it already saved its own changes.
+                if (autoCommit)
                 {
                     await DbContext.SaveChangesAsync();
                     dbTrans.Commit();
@@ -131,7 +134,8 @@ namespace DX.Data.EF
             using (var dbTrans = DbContext.Database.BeginTransaction())
             {
                 await work(this, dbTrans);
-                if (autoCommit && DbContext.ChangeTracker.HasChanges())
+                // Commit whenever the work succeeded, also when it already saved its own changes.
+                if (autoCommit)
                 {
                     await DbContext.SaveChangesAsync();
                     dbTrans.Commit();

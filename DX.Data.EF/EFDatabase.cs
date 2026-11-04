@@ -25,14 +25,18 @@ namespace DX.Data.EF
 		{
 			using (TEFContext ctx = new TEFContext())
 			{
+				if (!transactional)
+				{
+					// No transaction: the work's own SaveChanges calls are final; pending changes are saved when commit is true.
+					work(this, ctx, null);
+					if (commit)
+						ctx.SaveChanges();
+					return;
+				}
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					work(this, ctx, dbTransaction);
-#if (NET6_0_OR_GREATER)
-					if (transactional && commit)
-#else
-					if (transactional && commit && ctx.ChangeTracker.HasChanges())
-#endif				
+					if (commit)
 					{
 						ctx.SaveChanges();
 						dbTransaction.Commit();
@@ -52,14 +56,18 @@ namespace DX.Data.EF
 			T result = default;
 			using (TEFContext ctx = new TEFContext())
 			{
+				if (!transactional)
+				{
+					// No transaction: the work's own SaveChanges calls are final; pending changes are saved when commit is true.
+					result = work(this, ctx, null);
+					if (commit)
+						ctx.SaveChanges();
+					return result;
+				}
 				using (var dbTransaction = ctx.Database.BeginTransaction())
 				{
 					result = work(this, ctx, dbTransaction);
-#if (NET6_0_OR_GREATER)
-					if (transactional && commit)
-#else
-					if (transactional && commit && ctx.ChangeTracker.HasChanges())
-#endif
+					if (commit)
 					{
 						ctx.SaveChanges();
 						dbTransaction.Commit();
