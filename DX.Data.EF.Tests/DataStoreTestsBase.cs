@@ -497,7 +497,7 @@ namespace DX.Data.EF.Tests
         [Fact]
         public Task Delete_then_GetByKey_returns_null() => Check_Delete_then_GetByKey_returns_null();
 
-        [Fact(Skip = "BUG: Query<T>() uses ProjectToType<T>() with TypeAdapterConfig.GlobalSettings instead of the injected Mapper.Config, so custom mapping rules are ignored (EFMapsterDataStore.cs:29)")]
+        [Fact]
         public void Query_honours_custom_mapping_configuration() => Check_Query_honours_custom_mapping_configuration();
     }
 
@@ -506,10 +506,10 @@ namespace DX.Data.EF.Tests
         protected override IQueryableDataStore<int, CustomerDto> CreateStore(TestDbContext ctx, CustomerValidator validator)
             => new AutoMapperCustomerStore(ctx, Mappers.AutoMapper(), validator);
 
-        [Fact(Skip = "BUG: GetByKey for a missing key returns an empty new TModel instead of null, because Mapper.Map(null, CreateModel()) returns the destination (EFAutoMapperDataStore.cs:33)")]
+        [Fact]
         public void GetByKey_missing_key_returns_null() => Check_GetByKey_missing_key_returns_null();
 
-        [Fact(Skip = "BUG: GetByKey after delete returns an empty TModel instead of null (EFAutoMapperDataStore.cs:33)")]
+        [Fact]
         public Task Delete_then_GetByKey_returns_null() => Check_Delete_then_GetByKey_returns_null();
 
         [Fact]
