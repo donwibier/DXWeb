@@ -5,6 +5,16 @@ Abstract XPO-based storage for ASP.NET Core Identity (`Microsoft.AspNetCore.Iden
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** `DevExpress.Xpo` `26.1.*`
 
+## Behaviour changes in 26.1.3.40
+
+- **Security:** updates of existing user tokens are now saved. Before, a redeemed two-factor recovery code stayed valid, and resetting the authenticator key or regenerating recovery codes had no effect.
+- `LockoutEnd` is persisted, so users who reach the failed-attempt limit are now actually locked out.
+- The ConcurrencyStamp is checked: updating a stale copy of a user or role fails with `ConcurrencyFailure` (as the EF Core stores do), and roles get a new stamp on update too.
+- `AddToRoleAsync` with an unknown role or user throws `InvalidOperationException` instead of silently succeeding.
+- If the token store fails, `SetAuthenticationTokenAsync`, `ResetAuthenticatorKeyAsync` and `GenerateNewTwoFactorRecoveryCodesAsync` throw instead of reporting success.
+- Fixed: `AddLoginAsync` (threw once any login existed), `GetUsersForClaimAsync` (always threw), `RoleManager.Roles` (NotImplementedException); cancellation tokens are honoured and null arguments throw `ArgumentNullException`.
+- Performance: adding/removing a role membership writes the link row directly, `RemoveClaimsAsync` filters in the database (on a case-insensitive collation it also removes claims differing only in case), and deleting a user or role on a SQL database no longer loads every member of each role.
+
 ## Install
 
 ```

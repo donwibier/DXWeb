@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>26.1.3.40</Version>
-    <FileVersion>26.1.3.40</FileVersion>
+    <Version>26.1.3.41</Version>
+    <FileVersion>26.1.3.41</FileVersion>
     <Authors>Don Wibier (DevExpress)</Authors>
     <Description>Several C# utility classes and extension methods</Description>
     <Copyright>Copyright (c) 2019 Don Wibier</Copyright>
@@ -16,6 +16,7 @@
     <PackageTags>DXWeb Wibier DevExpress</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
+		26.1.3.41: Bug fixes found by a new unit test suite (DX.Utils.Tests). Fixed: Collection.Clear() and the IList indexer setter recursed into a StackOverflow, Dispose threw on a non-empty collection; Bits.Clear always returned 0 and Has(ref, flag, clear: false) wiped the value; MimeTypes.GetMimeTypes always returned null, so lookup by name/extension/Uri never worked; MimeType rejected '(' and validates the primary type; EnumExtensions.GetDisplay no longer throws for [Display(Name)] without ResourceType, undefined values or flag combinations; Attributes.GetAttributeData honours TAttribute and GetTypesWith is thread safe; RequiredIf has the right default message, sets MemberNames and its '_' fallback is no longer inverted; StripHTMLTags removes multi-line heads, turns &amp;nbsp; into a space and keeps plain '&amp;' text; CopyMaxLength, InsureHtmlParagraph, FormatFileSize (unit boundaries, long.MinValue) and MakeFileNameSEOSafe (names without an extension) fixed; GetConfigOption/ToDictionary no longer throw on duplicate keys; DateMin/DateMax keep DateTimeKind; GetRegExGroupValue returns the default for missing groups; Log uses a 24-hour clock and logs the exception type and message. Performance: StripHTMLTags is linear (100 KB: 1.2 s to 3 ms), MIME definitions are parsed once (about 400x faster), PropertyExtensions caches properties per type without a Task.Run per lookup, GetTypesWith caches its results and scans only assemblies loaded since the last call. Behaviour changes: PropertyExtensions ignores private properties, skips indexers and read-only destination properties; AsQueryParameters encodes values once; AppendQueryParameters keeps the existing query; StripHTMLTags keeps escaped markup (&amp;lt;b&amp;gt;) as text; DetermineMimeType/GetMimeType fall back to the file extension; GetConfigOption with duplicate keys returns the last value.
 		26.1.3.40: Ported CronJobs (CronExpression/CronBuilder/CronSchedule/CronObject) from .NET Framework to
 		net462/net8.0/net9.0/net10.0 (dropped the System.Web dependency, replaced Thread.Abort() with cooperative
 		cancellation). Added CronJobService, a thread-safe runtime job registry (CronJobService.Default singleton,

@@ -4,6 +4,17 @@ General-purpose C# helper classes and extension methods used throughout the DXWe
 
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 
+## Behaviour changes in 26.1.3.41
+
+- `PropertyExtensions` works on public properties only (private ones are ignored), skips indexers, and `Assign` skips destination properties that cannot be written.
+- `AsQueryParameters` URL-encodes values once (they were encoded twice); `AppendQueryParameters` keeps the existing query string.
+- `StripHTMLTags` keeps escaped markup (`&lt;b&gt;`) and plain `&` text as text, removes multi-line `<head>` sections and turns `&nbsp;` into a space.
+- `DetermineMimeType` / `GetMimeType` fall back to the file extension (lookup by name, extension and Uri did not work before).
+- `GetConfigOption` / `ToDictionary` with duplicate keys return the last value instead of throwing.
+- `Attributes.GetTypesWith` caches its results per attribute type and scans only assemblies loaded since the previous call, so plugins and lazy-loaded assemblies are still found.
+- `RequiredIf`'s default message reads "The X field is required." and the result carries the member name; `DateMin`/`DateMax` keep `DateTimeKind`; `Log` timestamps use a 24-hour clock.
+- Fixed crashes: `Collection.Clear()` and the `IList` indexer setter (StackOverflow), `Bits.Clear` (always returned 0), `EnumExtensions.GetDisplay` for `[Display(Name)]` without a resource type, undefined values and flag combinations.
+
 ## Install
 
 ```

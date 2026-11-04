@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>26.1.3.36</Version>
-		<FileVersion>26.1.3.36</FileVersion>
+		<Version>26.1.3.37</Version>
+		<FileVersion>26.1.3.37</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Abstract DX.Data.IDataStore implementation for use with EF with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2020 Don Wibier</Copyright>
@@ -14,6 +14,7 @@
 		<PackageProjectUrl>https://github.com/donwibier/DXWeb/tree/master/DX.Data.EF</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.37: Bug fixes found by a new unit test suite (DX.Data.EF.Tests). Fixed: any batch of two or more items threw (the transaction was committed inside the loop) and left the first items saved; a failed insert or update left entities tracked and poisoned the DbContext; a rejected update leaked its values into later reads and saves; UpdateAsync with an empty key inserted a new row; failures always reported DataMode.Create; an empty batch returned [null]; batch results only held the last item; DeleteAsync threw on database errors (now a failed result); TransactionalExecAsync did not commit work that had already called SaveChanges; EFDatabase.Execute(transactional: false) rolled back the work's own SaveChanges. Performance: one SaveChanges and one commit per batch; batch Update/Delete load all keys in one query; updates write only changed columns; GetByKey reads without tracking. Behaviour changes: batches are all-or-nothing; entities of a failed operation are detached from the context; GetByKey no longer returns tracked instances (it does not see unsaved changes on the context); UPDATE statements contain only the changed columns.
 			26.1.3.36: Added a README.md with technical documentation, now embedded in the package via PackageReadmeFile.
 			26.1.3.35: Rebuilt to align with the DXWeb v26.1.3 release wave and pick up the latest DX.Data/DX.Utils dependency versions (no direct DevExpress dependency in this package).
 			23.2.3.30: Data.DataStore plus Validator and Mapper have been moved and simplified into package DX.Data
