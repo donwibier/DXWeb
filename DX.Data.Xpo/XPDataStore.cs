@@ -180,11 +180,13 @@ namespace DX.Data.Xpo
         /// Loads the objects with the given keys into the session with one round-trip, so the XPOGetByKey calls
         /// that follow are served from the session's identity map. Only done when XPOGetByKey is not overridden,
         /// because an override may interpret the keys differently.
+        /// The caller must keep the returned objects referenced until it is done with the batch: with XPO's default
+        /// (weak) identity map, objects nobody references can be collected, and XPOGetByKey would load them again.
         /// </summary>
-        protected virtual void XPOPrefetchByKeys(IEnumerable<TKey> keys, Session session)
+        protected virtual System.Collections.ICollection XPOPrefetchByKeys(IEnumerable<TKey> keys, Session session)
         {
             if (!UsesDefaultXPOGetByKey())
-                return;
+                return Array.Empty<object>();
             var list = new List<object>();
             var seen = new HashSet<TKey>();
             foreach (var key in keys)
@@ -193,7 +195,8 @@ namespace DX.Data.Xpo
                     list.Add(key!);
             }
             if (list.Count > 1)
-                session.GetObjectsByKey(session.GetClassInfo<TDBModel>(), list, false);
+                return session.GetObjectsByKey(session.GetClassInfo<TDBModel>(), list, false);
+            return Array.Empty<object>();
         }
 
         private bool UsesDefaultXPOGetByKey()
@@ -220,10 +223,11 @@ namespace DX.Data.Xpo
                     // the id's (created items) and server side changes (all items) of the models afterwards.
                     // An updated db object can occur more than once in one batch.
                     var batchPairs = new Dictionary<TDBModel, List<TModel>>();
+                    System.Collections.ICollection? prefetched = null;
                     try
                     {
                         if (mode != StoreMode.Create)
-                            XPOPrefetchByKeys(items.Where(i => i != null).Select(i => ModelKey(i)), wrk);
+                            prefetched = XPOPrefetchByKeys(items.Where(i => i != null).Select(i => ModelKey(i)), wrk);
 
                         foreach (var item in items)
                         {
@@ -252,6 +256,8 @@ namespace DX.Data.Xpo
                                 throw CreateValidationException(item, validationResult);
                             await wrk.SaveAsync(dbItem);
                         }
+                        // the prefetched objects must stay alive until every XPOGetByKey above has run
+                        GC.KeepAlive(prefetched);
 
 
                         wrk.ObjectSaved += (s, e) =>
@@ -351,7 +357,7 @@ namespace DX.Data.Xpo
         {
             try
             {
-                XPOPrefetchByKeys(ids, wrk);
+                var prefetched = XPOPrefetchByKeys(ids, wrk);
                 foreach (var id in ids)
                 {
                     var dbModel = XPOGetByKey(id, wrk);
@@ -365,6 +371,8 @@ namespace DX.Data.Xpo
                         await wrk.DeleteAsync(dbModel);
                     }
                 }
+                // the prefetched objects must stay alive until every XPOGetByKey above has run
+                GC.KeepAlive(prefetched);
                 ValidationException commitFailure = null!;
                 wrk.FailedCommitTransaction += (s, e) =>
                 {

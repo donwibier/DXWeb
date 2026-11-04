@@ -55,7 +55,7 @@ namespace DX.Data.Xpo.Tests
         private int[] Seed(int count) => Enumerable.Range(1, count).Select(i => Db.AddProduct("P" + i, i)).ToArray();
 
         /// <summary>XPO loads its XPObjectType records once per data layer; do that before counting</summary>
-        private void WarmUp()
+        protected void WarmUp()
         {
             using var uow = new UnitOfWork(CountingLayer);
             new Product(uow) { Name = "warm" };
@@ -174,6 +174,56 @@ namespace DX.Data.Xpo.Tests
     {
         protected override XPDataStore<int, ProductModel, Product> CreateStore(IDataLayer dataLayer, IValidator<Product> validator)
             => new ProductMapsterStore(dataLayer, Mappers.Mapster(), validator);
+
+        /// <summary>
+        /// A store whose sessions use XPO's default weak identity map (XpoDatabase switches the process to a strong one,
+        /// so whether a test sees it depends on test order)
+        /// </summary>
+        private sealed class WeakIdentityMapStore : ProductMapsterStore
+        {
+            public WeakIdentityMapStore(IDataLayer dataLayer, IValidator<Product> validator) : base(dataLayer, Mappers.Mapster(), validator) { }
+
+            protected override System.Collections.ICollection XPOPrefetchByKeys(System.Collections.Generic.IEnumerable<int> keys, Session session)
+            {
+                session.IdentityMapBehavior = IdentityMapBehavior.Weak;
+                return base.XPOPrefetchByKeys(keys, session);
+            }
+        }
+
+        /// <summary>Collects garbage while each item is validated, i.e. between the prefetch and the next item's lookup</summary>
+        private sealed class CollectingValidator : AbstractValidator<Product>
+        {
+            public CollectingValidator() => RuleFor(p => p).Custom((p, ctx) => { GC.Collect(); GC.WaitForPendingFinalizers(); GC.Collect(); });
+        }
+
+        [Fact]
+        public async Task UpdateBatch_WithAWeakIdentityMap_KeepsThePrefetchedObjects()
+        {
+            var ids = Enumerable.Range(1, 20).Select(i => Db.AddProduct("P" + i, i)).ToArray();
+            using var store = new WeakIdentityMapStore(CountingLayer, new CollectingValidator());
+            var models = ids.Select(id => new ProductModel { Id = id, Name = "U" + id, Price = 1 }).ToArray();
+            WarmUp();
+            Counter.Reset();
+
+            var result = await store.UpdateAsync(models);
+
+            Assert.True(result.Success, result.Exception?.Message);
+            Assert.Equal(1, Counter.Selects);
+        }
+
+        [Fact]
+        public async Task DeleteBatch_WithAWeakIdentityMap_KeepsThePrefetchedObjects()
+        {
+            var ids = Enumerable.Range(1, 20).Select(i => Db.AddProduct("P" + i, i)).ToArray();
+            using var store = new WeakIdentityMapStore(CountingLayer, new CollectingValidator());
+            WarmUp();
+            Counter.Reset();
+
+            var result = await store.DeleteAsync(ids);
+
+            Assert.True(result.Success, result.Exception?.Message);
+            Assert.Equal(1, Counter.Selects);
+        }
 
         [Fact]
         public async Task OverriddenXPOGetByKey_IsStillUsedForEveryItem()
