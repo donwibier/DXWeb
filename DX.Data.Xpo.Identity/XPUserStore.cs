@@ -177,19 +177,22 @@ namespace DX.Data.Xpo.Identity
             ThrowIfDisposed();
             ThrowIfNull(user);
 
-            user.ConcurrencyStamp = Guid.NewGuid().ToString();
-
-			var r = await _UserStore.UpdateAsync(user);
-			//TODO Do something with result
-            return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
-			//try
-            //{
-            //    await SaveChanges(cancellationToken);
-            //}
-            //catch (DbUpdateConcurrencyException)
-            //{
-            //    return IdentityResult.Failed(ErrorDescriber.ConcurrencyFailure());
-            //}
+            IDataResult<TKey, TUser> r;
+            if (_UserStore is IXPConcurrencyStampStore<TKey, TUser> checkedStore)
+            {
+                // as the EF Core UserStore: a stale ConcurrencyStamp fails, a successful update gets a new stamp
+                r = await checkedStore.UpdateWithConcurrencyCheckAsync(user, cancellationToken);
+            }
+            else
+            {
+                user.ConcurrencyStamp = Guid.NewGuid().ToString();
+                r = await _UserStore.UpdateAsync(user);
+            }
+            if (r.Success)
+                return IdentityResult.Success;
+            return IdentityResult.Failed(r.Exception is XPConcurrencyException
+                ? ErrorDescriber.ConcurrencyFailure()
+                : ErrorDescriber.DefaultError());
         }
 
         protected async override Task AddUserTokenAsync(TUserToken token)

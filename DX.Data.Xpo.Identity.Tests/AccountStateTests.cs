@@ -104,7 +104,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal(user.ConcurrencyStamp, (await ReloadAsync(user)).ConcurrencyStamp);
         }
 
-        [Fact(Skip = "BUG: XPUserStore.UpdateAsync never compares the ConcurrencyStamp, so a stale copy overwrites a newer one instead of failing with ConcurrencyFailure")]
+        [Fact]
         public async Task Update_OfAStaleCopy_FailsWithConcurrencyFailure()
         {
             await CreateUserAsync();

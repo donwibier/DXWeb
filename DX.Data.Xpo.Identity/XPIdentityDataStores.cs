@@ -28,7 +28,8 @@ namespace DX.Data.Xpo.Identity
 {
     public abstract class XPBaseUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
                                     TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
-            XPDataStore<TKey, TUser, TXPOUser>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>
+            XPDataStore<TKey, TUser, TXPOUser>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>,
+            IXPConcurrencyStampStore<TKey, TUser>
                 where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
                 where TUser : IdentityUser<TKey>, new()
@@ -63,6 +64,47 @@ namespace DX.Data.Xpo.Identity
         public override TKey ModelKey(TUser model) => model.Id;
         public override void SetModelKey(TUser model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPOUser model) => model.Id;
+
+        // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
+        private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();
+
+        /// <summary>
+        /// Updates the user if its ConcurrencyStamp still matches the stored one, and gives it a new stamp (as the EF Core
+        /// UserStore does); a stale copy fails with an <see cref="XPConcurrencyException"/> in the result
+        /// </summary>
+        public virtual async Task<IDataResult<TKey, TUser>> UpdateWithConcurrencyCheckAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+
+            var previousStamp = user.ConcurrencyStamp;
+            _checkConcurrencyStamp.Value = true;
+            IDataResult<TKey, TUser> result;
+            try
+            {
+                result = await UpdateAsync(user);
+            }
+            finally
+            {
+                _checkConcurrencyStamp.Value = false;
+            }
+            if (!result.Success)
+                user.ConcurrencyStamp = previousStamp;
+            return result;
+        }
+
+        protected override TXPOUser ToDBModel(TUser source, TXPOUser target)
+        {
+            // runs in the update's transaction with target freshly loaded: compare and renew the stamp here
+            if (_checkConcurrencyStamp.Value && !target.Session.IsNewObject(target))
+            {
+                if (!string.Equals(target.ConcurrencyStamp, source.ConcurrencyStamp, StringComparison.Ordinal))
+                    throw new XPConcurrencyException($"{typeof(TUser).Name} {ModelKey(source)} was changed since it was loaded (ConcurrencyStamp mismatch)");
+                source.ConcurrencyStamp = Guid.NewGuid().ToString();
+            }
+            return base.ToDBModel(source, target);
+        }
 
 		//     public virtual async Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
 		//     {
@@ -465,7 +507,7 @@ namespace DX.Data.Xpo.Identity
 	}
 
 	public abstract class XPBaseRoleStore<TKey, TRole, TRoleClaim, TXPORole, TXPOClaim> : XPDataStore<TKey, TRole, TXPORole>, 
-            IQueryableRoleStore<TKey, TRole>
+            IQueryableRoleStore<TKey, TRole>, IXPConcurrencyStampStore<TKey, TRole>
         where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
         where TRole : IdentityRole<TKey>, new()
@@ -485,6 +527,47 @@ namespace DX.Data.Xpo.Identity
         public override TKey ModelKey(TRole model) => model.Id;
         public override void SetModelKey(TRole model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPORole model) => model.Id;
+
+        // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
+        private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();
+
+        /// <summary>
+        /// Updates the role if its ConcurrencyStamp still matches the stored one, and gives it a new stamp (as the EF Core
+        /// RoleStore does); a stale copy fails with an <see cref="XPConcurrencyException"/> in the result
+        /// </summary>
+        public virtual async Task<IDataResult<TKey, TRole>> UpdateWithConcurrencyCheckAsync(TRole role, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(role);
+
+            var previousStamp = role.ConcurrencyStamp;
+            _checkConcurrencyStamp.Value = true;
+            IDataResult<TKey, TRole> result;
+            try
+            {
+                result = await UpdateAsync(role);
+            }
+            finally
+            {
+                _checkConcurrencyStamp.Value = false;
+            }
+            if (!result.Success)
+                role.ConcurrencyStamp = previousStamp;
+            return result;
+        }
+
+        protected override TXPORole ToDBModel(TRole source, TXPORole target)
+        {
+            // runs in the update's transaction with target freshly loaded: compare and renew the stamp here
+            if (_checkConcurrencyStamp.Value && !target.Session.IsNewObject(target))
+            {
+                if (!string.Equals(target.ConcurrencyStamp, source.ConcurrencyStamp, StringComparison.Ordinal))
+                    throw new XPConcurrencyException($"{typeof(TRole).Name} {ModelKey(source)} was changed since it was loaded (ConcurrencyStamp mismatch)");
+                source.ConcurrencyStamp = Guid.NewGuid().ToString();
+            }
+            return base.ToDBModel(source, target);
+        }
 
 		public async Task<TRole?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
 		{

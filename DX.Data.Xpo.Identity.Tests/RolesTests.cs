@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using DX.Data.Xpo.Identity.Persistent;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DX.Data.Xpo.Identity.Tests
@@ -204,6 +205,26 @@ namespace DX.Data.Xpo.Identity.Tests
             await Roles.RemoveClaimAsync(cook, new Claim("permission", "kitchen"));
 
             Assert.Equal("stock", Assert.Single(await Roles.GetClaimsAsync(cook)).Value);
+        }
+
+        [Fact]
+        public async Task Role_UpdateOfAStaleCopy_FailsWithConcurrencyFailure()
+        {
+            await CreateRoleAsync("Cook");
+            var first = NewScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var second = NewScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var copy1 = await first.FindByNameAsync("Cook");
+            var copy2 = await second.FindByNameAsync("Cook");
+
+            copy1.Name = "Chef";
+            Assert.True((await first.UpdateAsync(copy1)).Succeeded);
+            copy2.Name = "Baker";
+            var result = await second.UpdateAsync(copy2);
+
+            Assert.False(result.Succeeded);
+            Assert.Contains(result.Errors, e => e.Code == nameof(IdentityErrorDescriber.ConcurrencyFailure));
+            Assert.NotNull(await Roles.FindByNameAsync("Chef"));
+            Assert.Null(await Roles.FindByNameAsync("Baker"));
         }
 
         [Fact(Skip = "BUG: XPRoleStore.Roles throws NotImplementedException although the store advertises IQueryableRoleStore (RoleManager.SupportsQueryableRoles is true)")]

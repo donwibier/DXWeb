@@ -71,9 +71,22 @@ namespace DX.Data.Xpo.Identity
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             ThrowIfNull(role);
-            //TODO: Check appropriate error
-            var r = await _RoleStore.UpdateAsync(role);
-            return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
+            DX.Data.IDataResult<TKey, TRole> r;
+            if (_RoleStore is IXPConcurrencyStampStore<TKey, TRole> checkedStore)
+            {
+                // as the EF Core RoleStore: a stale ConcurrencyStamp fails, a successful update gets a new stamp
+                r = await checkedStore.UpdateWithConcurrencyCheckAsync(role, cancellationToken);
+            }
+            else
+            {
+                role.ConcurrencyStamp = Guid.NewGuid().ToString();
+                r = await _RoleStore.UpdateAsync(role);
+            }
+            if (r.Success)
+                return IdentityResult.Success;
+            return IdentityResult.Failed(r.Exception is XPConcurrencyException
+                ? ErrorDescriber.ConcurrencyFailure()
+                : ErrorDescriber.DefaultError());
         }
 
         public async override Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
