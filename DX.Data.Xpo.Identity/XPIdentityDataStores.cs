@@ -65,6 +65,16 @@ namespace DX.Data.Xpo.Identity
         public override void SetModelKey(TUser model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPOUser model) => model.Id;
 
+        /// <summary>
+        /// Removes the role links ahead of the delete (inside its database transaction), so deleting does not load every
+        /// member of each role
+        /// </summary>
+        protected override Task BeforeDeleteAsync(TXPOUser dbModel, Session session)
+        {
+            XPManyToManyLink.DeleteLinksBeforeDelete(session, dbModel);
+            return base.BeforeDeleteAsync(dbModel, session);
+        }
+
         // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
         private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();
 
@@ -550,6 +560,16 @@ namespace DX.Data.Xpo.Identity
         public override TKey ModelKey(TRole model) => model.Id;
         public override void SetModelKey(TRole model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPORole model) => model.Id;
+
+        /// <summary>
+        /// Removes the role links ahead of the delete (inside its database transaction), so deleting does not load every
+        /// member of each role
+        /// </summary>
+        protected override Task BeforeDeleteAsync(TXPORole dbModel, Session session)
+        {
+            XPManyToManyLink.DeleteLinksBeforeDelete(session, dbModel);
+            return base.BeforeDeleteAsync(dbModel, session);
+        }
 
         // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
         private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();

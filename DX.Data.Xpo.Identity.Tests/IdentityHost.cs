@@ -21,7 +21,7 @@ namespace DX.Data.Xpo.Identity.Tests
     {
         private readonly ServiceProvider _services;
 
-        public IdentityHost(MapperKind kind, Action<IdentityOptions> configure = null)
+        public IdentityHost(MapperKind kind, Action<IdentityOptions> configure = null, string connectionString = null)
         {
             // XpoDatabase keeps its data layers by name for the whole process: a name per host gets a fresh database
             var name = "Identity" + Guid.NewGuid().ToString("N");
@@ -31,7 +31,7 @@ namespace DX.Data.Xpo.Identity.Tests
             services.AddSingleton(new XpoDatabase(o =>
             {
                 o.Name = name;
-                o.ConnectionString = InMemoryDataStore.GetConnectionStringInMemory(true);
+                o.ConnectionString = connectionString ?? InMemoryDataStore.GetConnectionStringInMemory(true);
                 o.UpdateSchema = AutoCreateOption.DatabaseAndSchema;
             }));
             var builder = services.AddIdentityCore<IdentityUser>(o =>

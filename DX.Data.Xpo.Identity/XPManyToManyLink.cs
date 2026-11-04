@@ -1,4 +1,4 @@
-using DevExpress.Data.Filtering;
+﻿using DevExpress.Data.Filtering;
 using DevExpress.Xpo;
 using DevExpress.Xpo.Metadata;
 using System;
@@ -52,6 +52,50 @@ namespace DX.Data.Xpo.Identity
 				found = new XPManyToManyLink(member.IntermediateClass, ownerReferences[0], otherReferences[0]);
 			}
 			return found;
+		}
+
+		/// <summary>
+		/// The many-to-many associations of <paramref name="ownerType"/> that XPO keeps in an intermediate table, one per
+		/// collection (an association whose owner side cannot be told apart, e.g. one to its own type, is left out)
+		/// </summary>
+		public static IEnumerable<XPManyToManyLink> ForOwner(Session session, Type ownerType)
+		{
+			var owner = session.GetClassInfo(ownerType);
+			foreach (XPMemberInfo member in owner.CollectionProperties)
+			{
+				if (!member.IsManyToMany || member.IntermediateClass == null || member.CollectionElementType == null)
+					continue;
+				var references = member.IntermediateClass.ObjectProperties.Cast<XPMemberInfo>().Where(m => m.ReferenceType != null).ToList();
+				var ownerReferences = references.Where(m => owner.IsAssignableTo(m.ReferenceType)).ToList();
+				var otherReferences = references.Where(m => member.CollectionElementType.IsAssignableTo(m.ReferenceType)).ToList();
+				if (ownerReferences.Count != 1 || otherReferences.Count != 1 || ownerReferences[0] == otherReferences[0])
+					continue;
+				yield return new XPManyToManyLink(member.IntermediateClass, ownerReferences[0], otherReferences[0]);
+			}
+		}
+
+		/// <summary>
+		/// Before <paramref name="owner"/> is deleted in an <see cref="ExplicitUnitOfWork"/>: deletes its links and flushes
+		/// them (inside the database transaction), so XPO's clean-up of the associations on delete finds none and does not
+		/// load every object on the other side (all users of a role). In any other session it does nothing: flushing there
+		/// would make the links' deletion permanent even if the delete fails.
+		/// </summary>
+		public static void DeleteLinksBeforeDelete(Session session, object owner)
+		{
+			if (!(session is ExplicitUnitOfWork))
+				return;
+			var key = session.GetKeyValue(owner);
+			bool any = false;
+			foreach (var link in ForOwner(session, owner.GetType()))
+			{
+				var links = link.Links(session, link.OwnerIs(key));
+				if (links.Count == 0)
+					continue;
+				session.Delete(links.Cast<object>().ToList());
+				any = true;
+			}
+			if (any)
+				session.FlushChanges();
 		}
 
 		/// <summary>Adds the link (in the session; committed with it)</summary>

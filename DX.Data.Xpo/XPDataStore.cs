@@ -327,43 +327,77 @@ namespace DX.Data.Xpo
         {
             ThrowIfNull(ids);
 
-            var result = await TransactionalExecAsync(async (s, wrk) =>
+            // on a pooled database, the delete runs in a database level transaction on a connection of its own, so
+            // BeforeDeleteAsync can flush work (e.g. removing association links) that is still rolled back on failure
+            using (var exclusive = XPExclusiveConnection.TryAcquire(DataLayer))
             {
-                try
+                if (exclusive != null)
                 {
-                    XPOPrefetchByKeys(ids, wrk);
-                    foreach (var id in ids)
-                    {
-                        var dbModel = XPOGetByKey(id, wrk);
-                        if (dbModel != null)
-                        {
-                            var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
-                            if (!validationResult.IsValid)
-                                throw new ValidationException(validationResult.Errors);
+                    using (var wrk = new ExplicitUnitOfWork(exclusive.DataLayer))
+                        return await DeleteInAsync(wrk, ids);
+                }
+            }
+            return await TransactionalExecAsync((s, wrk) => DeleteInAsync(wrk, ids), true, false);
+        }
 
-                            await wrk.DeleteAsync(dbModel);
-                        }
+        /// <summary>
+        /// Called for each object just before it is deleted, in the session of the delete. When that session is an
+        /// <see cref="ExplicitUnitOfWork"/> it holds a database level transaction: changes flushed here are rolled back
+        /// with the delete if it fails.
+        /// </summary>
+        protected virtual Task BeforeDeleteAsync(TDBModel dbModel, Session session) => Task.FromResult(0);
+
+        private async Task<IDataResult<TKey, TModel>> DeleteInAsync(Session wrk, TKey[] ids)
+        {
+            try
+            {
+                XPOPrefetchByKeys(ids, wrk);
+                foreach (var id in ids)
+                {
+                    var dbModel = XPOGetByKey(id, wrk);
+                    if (dbModel != null)
+                    {
+                        var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, this);
+                        if (!validationResult.IsValid)
+                            throw new ValidationException(validationResult.Errors);
+
+                        await BeforeDeleteAsync(dbModel, wrk);
+                        await wrk.DeleteAsync(dbModel);
                     }
-                    ValidationException commitFailure = null!;
-                    wrk.FailedCommitTransaction += (s, e) =>
-                    {
-                        commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
-                        e.Handled = true;
-                    };
-
-                    await wrk.CommitTransactionAsync();
-                    if (commitFailure != null)
-                        return new DataResult<TKey, TModel> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
-                    else
-                        return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
-                catch (Exception err)
+                ValidationException commitFailure = null!;
+                wrk.FailedCommitTransaction += (s, e) =>
                 {
-                    wrk.RollbackTransaction();
-                    return new DataResult<TKey, TModel>(DataMode.Delete, typeof(TDBModel).Name, err);
+                    commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
+                    e.Handled = true;
+                };
+
+                await wrk.CommitTransactionAsync();
+                if (commitFailure != null)
+                {
+                    RollbackQuietly(wrk);
+                    return new DataResult<TKey, TModel> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
                 }
-            }, true, false);
-            return result;
+                return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
+            }
+            catch (Exception err)
+            {
+                RollbackQuietly(wrk);
+                return new DataResult<TKey, TModel>(DataMode.Delete, typeof(TDBModel).Name, err);
+            }
+        }
+
+        private static void RollbackQuietly(Session wrk)
+        {
+            try
+            {
+                if (wrk.InTransaction)
+                    wrk.RollbackTransaction();
+            }
+            catch
+            {
+                // the failure being reported is the one that matters
+            }
         }
 
         protected void ThrowIfDisposed()
