@@ -272,8 +272,11 @@ namespace DX.Data.Xpo
 			// set XpoDefault.Session to null to prevent accidental use of XPO default session
 			XpoDefault.Session = null;
 			//ReflectionClassInfo.SuppressSuspiciousMemberInheritanceCheck = true;
-			// Needed to run in Medium Trust Security Context
+#if NETFRAMEWORK
+			// Needed to run in Medium Trust Security Context (.NET Framework only); fast accessors
+			// load objects considerably faster, so leave them on everywhere else
 			XpoDefault.UseFastAccessors = false;
+#endif
 			XpoDefault.IdentityMapBehavior = IdentityMapBehavior.Strong;
 
 			// autocreate option in connectionstring
