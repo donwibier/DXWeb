@@ -72,10 +72,12 @@ namespace DX.Data.Xpo.Identity.Mapster
 		{
 			var services = builder.Services;
 			services.AddTransient<IMapper, Mapper>();
-			// Mapster config
-			services.RegisterXPIdentityMapsterConfiguration<TKey, TUser, TRole,
+			// The identity mapping rules go in a TypeAdapterConfig of their own (a copy of the application mapper's config,
+			// with the rules added), not in the process-wide TypeAdapterConfig.GlobalSettings: rewriting those on every
+			// registration broke mapping that was going on at the same time ("TypeAdapter.Adapt was already called")
+			var identityMappers = new XPIdentityMapsterMappers(config => config.ApplyXPIdentityMapsterConfiguration<TKey, TUser, TRole,
 						TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
-						TXPOUser, TXPORole, TXPOUserLogin, TXPOUserClaim, TXPOUserToken, TXPORoleClaim>();
+						TXPOUser, TXPORole, TXPOUserLogin, TXPOUserClaim, TXPOUserToken, TXPORoleClaim>());
 
 			// Default IDatalayer for Identity
 			services.AddSingleton<IDataLayer>(sp => {
@@ -86,17 +88,17 @@ namespace DX.Data.Xpo.Identity.Mapster
 
 			services.RegisterXPIdentityValidators<TKey, TXPOUser, TXPOUserClaim, TXPOUserLogin, TXPOUserToken, TXPORole, TXPORoleClaim>();
 
-			services.AddScoped<IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>,
+			services.AddScoped<IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>>(sp => identityMappers.Create<
 				XPMapsterUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
-										TXPOUser, TXPORole, TXPOUserLogin, TXPOUserClaim, TXPOUserToken>>();
+										TXPOUser, TXPORole, TXPOUserLogin, TXPOUserClaim, TXPOUserToken>>(sp));
 
-			services.AddScoped<IQueryableRoleStore<TKey, TRole>, XPMapsterRoleStore<TKey, TRole, TRoleClaim, TXPORole, TXPORoleClaim>>();
+			services.AddScoped<IQueryableRoleStore<TKey, TRole>>(sp => identityMappers.Create<XPMapsterRoleStore<TKey, TRole, TRoleClaim, TXPORole, TXPORoleClaim>>(sp));
 
 
-			services.AddScoped<IQueryableUserLoginStore<TKey, TUserLogin>, XPMapsterUserLoginStore<TKey, TUserLogin, TXPOUserLogin>>();
-			services.AddScoped<IQueryableUserClaimStore<TKey, TUserClaim>, XPMapsterUserClaimStore<TKey, TUserClaim, TXPOUserClaim>>();
-			services.AddScoped<IQueryableUserTokenStore<TKey, TUserToken>, XPMapsterUserTokenStore<TKey, TUserToken, TXPOUserToken>>();
-			services.AddScoped<IQueryableRoleClaimStore<TKey, TRoleClaim>, XPMapsterRoleClaimStore<TKey, TRoleClaim, TXPORoleClaim>>();
+			services.AddScoped<IQueryableUserLoginStore<TKey, TUserLogin>>(sp => identityMappers.Create<XPMapsterUserLoginStore<TKey, TUserLogin, TXPOUserLogin>>(sp));
+			services.AddScoped<IQueryableUserClaimStore<TKey, TUserClaim>>(sp => identityMappers.Create<XPMapsterUserClaimStore<TKey, TUserClaim, TXPOUserClaim>>(sp));
+			services.AddScoped<IQueryableUserTokenStore<TKey, TUserToken>>(sp => identityMappers.Create<XPMapsterUserTokenStore<TKey, TUserToken, TXPOUserToken>>(sp));
+			services.AddScoped<IQueryableRoleClaimStore<TKey, TRoleClaim>>(sp => identityMappers.Create<XPMapsterRoleClaimStore<TKey, TRoleClaim, TXPORoleClaim>>(sp));
 
 			RegisterIdentityServices.AddStores<TKey>(builder.Services, connectionName,
 				builder.UserType ?? typeof(TUser), typeof(TUserClaim), typeof(TUserLogin), typeof(TUserToken), typeof(TUserRole),
@@ -107,8 +109,47 @@ namespace DX.Data.Xpo.Identity.Mapster
 			return builder;
 		}
 	}
+	/// <summary>
+	/// The mapper of one AddXpoMapsterIdentityStores registration: a copy of the application mapper's TypeAdapterConfig
+	/// (TypeAdapterConfig.GlobalSettings for the default Mapper) with the identity rules added, built on first use
+	/// </summary>
+	internal sealed class XPIdentityMapsterMappers
+	{
+		private readonly Action<TypeAdapterConfig> _configure;
+		private readonly object _lock = new object();
+		private TypeAdapterConfig? _source;
+		private IMapper? _mapper;
+
+		public XPIdentityMapsterMappers(Action<TypeAdapterConfig> configure) => _configure = configure;
+
+		public IMapper For(IMapper applicationMapper)
+		{
+			var source = applicationMapper.Config;
+			lock (_lock)
+			{
+				if (_mapper == null || !ReferenceEquals(_source, source))
+				{
+					var config = source.Clone();
+					_configure(config);
+					_mapper = new Mapper(config);
+					_source = source;
+				}
+				return _mapper;
+			}
+		}
+
+		public TStore Create<TStore>(IServiceProvider sp)
+			=> ActivatorUtilities.CreateInstance<TStore>(sp, For(sp.GetRequiredService<IMapper>()));
+	}
+
 	public static class XPIdentityMapsterConfig
 	{
+		/// <summary>
+		/// Adds the identity mapping rules to Mapster's process-wide TypeAdapterConfig.GlobalSettings.
+		/// AddXpoMapsterIdentityStores no longer calls this: it keeps the rules in a TypeAdapterConfig of its own
+		/// (see <see cref="ApplyXPIdentityMapsterConfiguration"/>). Call this only if your own code maps the identity
+		/// types through GlobalSettings, and not while other code is mapping.
+		/// </summary>
 		public static void RegisterXPIdentityMapsterConfiguration<TKey, TUser, TRole, TUserClaim, TUserRole, 
 			TUserLogin, TUserToken, TRoleClaim, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken, TXPORoleClaim>
 			(this IServiceCollection services)
@@ -127,37 +168,88 @@ namespace DX.Data.Xpo.Identity.Mapster
 				where TXPOToken : XPBaseObject, IXPUserToken<TKey>
 				where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey>
 		{
+			Configure<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
+				TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken, TXPORoleClaim>(TypeAdapterConfig.GlobalSettings, true);
+		}
+
+		/// <summary>
+		/// Adds the identity mapping rules to <paramref name="config"/> (merged with any rules it already has for these types)
+		/// </summary>
+		public static TypeAdapterConfig ApplyXPIdentityMapsterConfiguration<TKey, TUser, TRole, TUserClaim, TUserRole,
+			TUserLogin, TUserToken, TRoleClaim, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken, TXPORoleClaim>
+			(this TypeAdapterConfig config)
+				where TKey : IEquatable<TKey>
+				where TUser : IdentityUser<TKey>
+				where TRole : IdentityRole<TKey>
+				where TUserClaim : IdentityUserClaim<TKey>, new()
+				where TUserRole : IdentityUserRole<TKey>, new()
+				where TUserLogin : IdentityUserLogin<TKey>, new()
+				where TUserToken : IdentityUserToken<TKey>, new()
+				where TRoleClaim : IdentityRoleClaim<TKey>, new()
+				where TXPOUser : XPBaseObject, IXPUser<TKey>
+				where TXPORole : XPBaseObject, IXPRole<TKey>
+				where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
+				where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
+				where TXPOToken : XPBaseObject, IXPUserToken<TKey>
+				where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey>
+		{
+			if (config == null)
+				throw new ArgumentNullException(nameof(config));
+			Configure<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
+				TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken, TXPORoleClaim>(config, false);
+			return config;
+		}
+
+		private static void Configure<TKey, TUser, TRole, TUserClaim, TUserRole,
+			TUserLogin, TUserToken, TRoleClaim, TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken, TXPORoleClaim>
+			(TypeAdapterConfig config, bool replace)
+				where TKey : IEquatable<TKey>
+				where TUser : IdentityUser<TKey>
+				where TRole : IdentityRole<TKey>
+				where TUserClaim : IdentityUserClaim<TKey>, new()
+				where TUserRole : IdentityUserRole<TKey>, new()
+				where TUserLogin : IdentityUserLogin<TKey>, new()
+				where TUserToken : IdentityUserToken<TKey>, new()
+				where TRoleClaim : IdentityRoleClaim<TKey>, new()
+				where TXPOUser : XPBaseObject, IXPUser<TKey>
+				where TXPORole : XPBaseObject, IXPRole<TKey>
+				where TXPOLogin : XPBaseObject, IXPUserLogin<TKey>
+				where TXPOClaim : XPBaseObject, IXPUserClaim<TKey>
+				where TXPOToken : XPBaseObject, IXPUserToken<TKey>
+				where TXPORoleClaim : XPBaseObject, IXPRoleClaim<TKey>
+		{
+			TypeAdapterSetter<TSource, TDestination> For<TSource, TDestination>()
+				=> replace ? config.NewConfig<TSource, TDestination>() : config.ForType<TSource, TDestination>();
+
 			// IdentityUser.LockoutEnd (DateTimeOffset?) is XpoDxUser.LockoutEndDateUtc (DateTime?, UTC): the names differ
-			TypeAdapterConfig<TUser, TXPOUser>.NewConfig()
+			For<TUser, TXPOUser>()
 					.Ignore(dest => dest.RolesList, dest => dest.ClaimsList, dest => dest.TokenList, dest => dest.LoginsList)
 					.Map(nameof(IXPUser<TKey>.LockoutEndDateUtc),
 						src => src.LockoutEnd.HasValue ? src.LockoutEnd.Value.UtcDateTime : (DateTime?)null);
-			TypeAdapterConfig<TXPOUser, TUser>.NewConfig()
+			For<TXPOUser, TUser>()
 					.Map(dest => dest.LockoutEnd,
 						src => src.LockoutEndDateUtc.HasValue
 							? new DateTimeOffset(DateTime.SpecifyKind(src.LockoutEndDateUtc.Value, DateTimeKind.Utc))
 							: (DateTimeOffset?)null);
 
-			TypeAdapterConfig<TRole, TXPORole>.NewConfig().Ignore(dest => dest.ClaimsList);
+			For<TRole, TXPORole>().Ignore(dest => dest.ClaimsList);
 
-			
-
-			TypeAdapterConfig<TXPORoleClaim, TRoleClaim>.NewConfig()
+			For<TXPORoleClaim, TRoleClaim>()
 				.Ignore(dest => dest.Id)
-                .AfterMapping((src, dest) => dest.RoleId = src.RoleId); ;
+                .AfterMapping((src, dest) => dest.RoleId = src.RoleId);
 
 			// as the role claims: the XPO claim's key is a string, IdentityUserClaim.Id an int
-			TypeAdapterConfig<TXPOClaim, TUserClaim>.NewConfig()
+			For<TXPOClaim, TUserClaim>()
 				.Ignore(dest => dest.Id)
 				.AfterMapping((src, dest) => dest.UserId = src.UserId);
 
-            TypeAdapterConfig<TUserClaim, TXPOClaim>.NewConfig()
+            For<TUserClaim, TXPOClaim>()
 			    .Ignore(dest => dest.UserId)
 				.AfterMapping((src, dest) => dest.UserId = src.UserId);
-            TypeAdapterConfig<TUserToken, TXPOToken>.NewConfig()
+            For<TUserToken, TXPOToken>()
 				.Ignore(dest => dest.UserId)
 				.AfterMapping((src, dest) => dest.UserId = src.UserId);
-            TypeAdapterConfig<TUserLogin, TXPOLogin>.NewConfig()
+            For<TUserLogin, TXPOLogin>()
                 .Ignore(dest => dest.UserId)
                 .AfterMapping((src, dest) => dest.UserId = src.UserId);
         }

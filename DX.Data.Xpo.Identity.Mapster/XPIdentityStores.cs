@@ -42,7 +42,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 			}
 		}
 
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 	}
@@ -62,7 +62,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 
 		public IMapper Mapper { get; }
 
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 
 		public override TRole GetByKey(TKey key)
@@ -86,7 +86,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 		}
 
 		public IMapper Mapper { get; }
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 
 		public override TUserLogin GetByKey(TKey key)
@@ -111,7 +111,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 			Mapper = mapper;
 		}
 		public IMapper Mapper { get; }
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 
 		public override TUserClaim GetByKey(TKey key)
@@ -135,7 +135,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 		}
 
 		public IMapper Mapper { get; }
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 
 		public override TUserToken GetByKey(TKey key)
@@ -159,7 +159,7 @@ namespace DX.Data.Xpo.Identity.Mapster
 		}
 
 		public IMapper Mapper { get; }
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
 
 		public override TRoleClaim GetByKey(TKey key)
