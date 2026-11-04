@@ -210,10 +210,71 @@ namespace DX.Utils.Tests
             Assert.Equal(Hue.Blue, Conversion.ParseEnum<Hue>("2"));
         }
 
-        [Fact(Skip = "BY DESIGN?: Enum.TryParse accepts any numeric string, so '99' yields (Hue)99 rather than the default. Changing it (Enum.IsDefined) would reject valid [Flags] combinations and numeric values existing callers may round-trip")]
-        public void UndefinedNumeric_ReturnsDefault()
+        [Fact]
+        public void UndefinedNumeric_IsAccepted_AsEnumTryParseDoes()
         {
-            Assert.Equal(Hue.Green, Conversion.ParseEnum<Hue>("99", Hue.Green));
+            Assert.Equal((Hue)99, Conversion.ParseEnum<Hue>("99", Hue.Green));
+        }
+
+        [Theory]
+        [InlineData("99")]
+        [InlineData("-1")]
+        [InlineData("Purple")]
+        [InlineData("")]
+        [InlineData(null)]
+        public void DefinedOnly_UndefinedOrInvalid_ReturnsDefault(string value)
+        {
+            Assert.Equal(Hue.Green, Conversion.ParseEnum<Hue>(value, Hue.Green, definedOnly: true));
+        }
+
+        [Theory]
+        [InlineData("Blue", Hue.Blue)]
+        [InlineData("2", Hue.Blue)]
+        [InlineData("Red", Hue.Red)]
+        public void DefinedOnly_DefinedValue_IsParsed(string value, Hue expected)
+        {
+            Assert.Equal(expected, Conversion.ParseEnum<Hue>(value, Hue.Green, definedOnly: true));
+        }
+
+        [Theory]
+        [InlineData("Read, Write", Perm.Read | Perm.Write)]
+        [InlineData("7", Perm.Read | Perm.Write | Perm.Exec)]
+        [InlineData("None", Perm.None)]
+        public void DefinedOnly_FlagsCombination_IsAccepted(string value, Perm expected)
+        {
+            Assert.Equal(expected, Conversion.ParseEnum<Perm>(value, Perm.Exec, definedOnly: true));
+        }
+
+        [Fact]
+        public void DefinedOnly_FlagsWithAnUndefinedBit_ReturnsDefault()
+        {
+            Assert.Equal(Perm.Exec, Conversion.ParseEnum<Perm>("8", Perm.Exec, definedOnly: true));
+            Assert.Equal(Perm.Exec, Conversion.ParseEnum<Perm>("9", Perm.Exec, definedOnly: true));
+        }
+
+        [Fact]
+        public void DefinedOnly_IgnoreCase()
+        {
+            Assert.Equal(Hue.Green, Conversion.ParseEnum<Hue>("blue", Hue.Green, definedOnly: true));
+            Assert.Equal(Hue.Blue, Conversion.ParseEnum<Hue>("blue", Hue.Green, definedOnly: true, ignoreCase: true));
+            Assert.Equal(Hue.Blue, Conversion.ParseEnum<Hue>("blue", Hue.Green, definedOnly: false, ignoreCase: true));
+        }
+
+        public enum Big : ulong { Low = 1, High = 0x8000000000000000 }
+
+        [Flags]
+        public enum BigFlags : ulong { Low = 1, High = 0x8000000000000000 }
+
+        [Flags]
+        public enum Signed : sbyte { A = 1, Neg = -128 }
+
+        [Fact]
+        public void DefinedOnly_HandlesUnsignedAndSignedUnderlyingTypes()
+        {
+            Assert.Equal(Big.High, Conversion.ParseEnum<Big>("High", Big.Low, definedOnly: true));
+            Assert.Equal(BigFlags.Low | BigFlags.High, Conversion.ParseEnum<BigFlags>("Low, High", BigFlags.Low, definedOnly: true));
+            Assert.Equal(Signed.A | Signed.Neg, Conversion.ParseEnum<Signed>("A, Neg", Signed.A, definedOnly: true));
+            Assert.Equal(Signed.A, Conversion.ParseEnum<Signed>("2", Signed.A, definedOnly: true));
         }
     }
 
