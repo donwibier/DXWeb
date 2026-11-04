@@ -52,7 +52,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Single(await Users.GetRolesAsync(user));
         }
 
-        [Fact(Skip = "BUG: XPBaseUserStore.AddToRoleAsync silently does nothing for an unknown role, so UserManager.AddToRoleAsync reports Success (the Identity contract is InvalidOperationException)")]
+        [Fact]
         public async Task AddToRole_UnknownRole_Throws()
         {
             var user = await CreateUserAsync();
@@ -227,7 +227,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Null(await Roles.FindByNameAsync("Baker"));
         }
 
-        [Fact(Skip = "BUG: XPRoleStore.Roles throws NotImplementedException although the store advertises IQueryableRoleStore (RoleManager.SupportsQueryableRoles is true)")]
+        [Fact]
         public async Task RoleManager_Roles_CanBeQueried()
         {
             await CreateRoleAsync("Cook");

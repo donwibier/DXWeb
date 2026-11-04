@@ -103,32 +103,46 @@ namespace DX.Data.Xpo.Identity
 
         public async override Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         {
-			return await _UserStore.FindByEmailAsync(normalizedEmail);			
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+			return await _UserStore.FindByEmailAsync(normalizedEmail, cancellationToken);
         }
 
         public async override Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
-			return await _UserStore.FindByIdAsync(userId);
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+			return await _UserStore.FindByIdAsync(userId, cancellationToken);
         }
 
 		protected async Task<TUser?> FindByIdAsync(TKey userId, CancellationToken cancellationToken = default)
-		{			
-			return await _UserStore.FindByIdAsync(userId);
+		{
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+			return await _UserStore.FindByIdAsync(userId, cancellationToken);
 		}
 
 		public async override Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
         {
-			return await _UserStore.FindByUserNameAsync(normalizedUserName);			
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+			return await _UserStore.FindByUserNameAsync(normalizedUserName, cancellationToken);
         }
 
         public async override Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default)
-        {			
-			return await _ClaimStore.GetUserClaimsAsync(user.Id);
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+			return await _ClaimStore.GetUserClaimsAsync(user.Id, cancellationToken);
 		}
 
         public async override Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default)
         {
-			return await _LoginStore.GetLoginsAsync(user.Id);			
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+			return await _LoginStore.GetLoginsAsync(user.Id, cancellationToken);
 		}
 
         public override async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
@@ -235,7 +249,7 @@ namespace DX.Data.Xpo.Identity
 
         protected async override Task<TRole?> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-			return await _RoleStore.FindByNameAsync(normalizedRoleName);
+			return await _RoleStore.FindByNameAsync(normalizedRoleName, cancellationToken);
         }
 
         protected async override Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken = default)
@@ -265,7 +279,7 @@ namespace DX.Data.Xpo.Identity
 
 		protected async override Task<TUserRole?> FindUserRoleAsync(TKey userId, TKey roleId, CancellationToken cancellationToken = default)
 		{
-			return await FindUserRoleAsync(userId, roleId, cancellationToken);
+			return await _UserStore.FindUserRoleAsync(userId, roleId, cancellationToken);
 		}
 
 		protected async override Task RemoveUserTokenAsync(TUserToken token)
@@ -409,7 +423,7 @@ namespace DX.Data.Xpo.Identity
 		protected static Type XPOLoginType { get { return typeof(TXPOLogin); } }
 		protected static Type XPOClaimType { get { return typeof(TXPOClaim); } }
 
-		public IQueryable<TUser> Users => throw new NotImplementedException();
+		public IQueryable<TUser> Users => _UserStore.Query();
 
 		protected static TXPOUser XPOCreateUser(Session s) { return (Activator.CreateInstance(typeof(TXPOUser), s) as TXPOUser)!; }
 		protected static TXPORole XPOCreateRole(Session s) { return (Activator.CreateInstance(typeof(TXPORole), s) as TXPORole)!; }
@@ -571,7 +585,8 @@ namespace DX.Data.Xpo.Identity
 		{
 			ThrowIfDisposed();
 			ThrowIfNull(user);
-			await SetSecurityStampAsync(user, stamp);
+			user.SecurityStamp = stamp;
+			await _UserStore.SetSecurityStampAsync(user, stamp);
 		}
 
 		public async Task<string> GetSecurityStampAsync(TUser user)

@@ -186,18 +186,19 @@ namespace DX.Data.Xpo.Identity
             //    return;
 
             await TransactionalExecAsync(async (s, w) => {
+                var userKey = ModelKey(user);
+                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("NormalizedName == ?", normalizedRoleName), cancellationToken);
+                // as the EF Core UserStore: an unknown role is an error, not a silent no-op
+                if (role == null)
+                    throw new InvalidOperationException($"Role {normalizedRoleName} does not exist.");
+
                 //check if user already in role
-                if ((await w.FindObjectAsync<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", ModelKey(user), normalizedRoleName))) == null)
+                if ((await w.FindObjectAsync<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", userKey, normalizedRoleName), cancellationToken)) == null)
                 {
-                    var role = w.FindObject(typeof(TXPORole),
-                        CriteriaOperator.Parse("(NormalizedName == ?)", normalizedRoleName)) as TXPORole;
-                    if (role != null)
-                    {
-                        //user not in role
-                        var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user));
-                        usr.RolesList.Add(role);
-                        //return;
-                    }
+                    var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                    if (usr == null)
+                        throw new InvalidOperationException($"User {userKey} does not exist.");
+                    usr.RolesList.Add(role);
                 }
             });
         }
@@ -367,12 +368,9 @@ namespace DX.Data.Xpo.Identity
             var result = await TransactionalExecAsync(async (s, w) => {
 
                 TUserRole r = null!;
-                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("Id == ? AND Users[Id == ?]", roleId, userId));
+                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("Id == ? AND Users[Id == ?]", roleId, userId), cancellationToken);
                 if (role != null)
-                {                    
                     r = new TUserRole() { UserId = userId, RoleId = role.Id };
-                    MapTo(role, r);                    
-                }
                 return r;
             });
             return result!;
@@ -387,7 +385,7 @@ namespace DX.Data.Xpo.Identity
             await TransactionalExecAsync(async (s, w) => {                
                 var tk = await w.FindObjectAsync<TXPOToken>(
                                             CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ? AND [Value] == ?", 
-                                                    token.UserId, token.LoginProvider, token.Name, token.Value));
+                                                    token.UserId, token.LoginProvider, token.Name, token.Value), cancellationToken);
                 if (tk != null)
                 {
                     tk.SetMemberValue("User", null);
@@ -843,10 +841,16 @@ namespace DX.Data.Xpo.Identity
 			ThrowIfDisposed();
 			ThrowIfNull(roleId);
 
+			return LoadRoleClaimsAsync(roleId, cancellationToken);
+		}
+
+		async Task<List<Claim>> LoadRoleClaimsAsync(TKey roleId, CancellationToken cancellationToken)
+		{
 			using (var wrk = new Session(DataLayer))
 			{
 				var results = new XPCollection<TXPORoleClaim>(wrk, CriteriaOperator.Parse("[Role.Id] == ?", roleId));
-				return Task.FromResult(results.Select(cl => new Claim(cl.ClaimType, cl.ClaimValue)).ToList());
+				await results.LoadAsync(cancellationToken);
+				return results.Select(cl => new Claim(cl.ClaimType, cl.ClaimValue)).ToList();
 			}
 		}
 

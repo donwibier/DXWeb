@@ -49,7 +49,7 @@ namespace DX.Data.Xpo.Identity
 #endif
         }
 
-        public override IQueryable<TRole> Roles => throw new NotImplementedException();
+        public override IQueryable<TRole> Roles => _RoleStore.Query();
 
         public async override Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
@@ -112,6 +112,9 @@ namespace DX.Data.Xpo.Identity
 
         public async override Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(role);
 			var results = await _ClaimStore.GetRoleClaimsAsync(role.Id, cancellationToken);
 			return results;			
         }
