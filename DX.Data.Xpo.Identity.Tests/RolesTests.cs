@@ -238,7 +238,7 @@ namespace DX.Data.Xpo.Identity.Tests
         }
 
         [Fact]
-        public virtual async Task UserManager_Users_CanBeQueried()
+        public async Task UserManager_Users_CanBeQueried()
         {
             await CreateUserAsync("a@example.com");
             await CreateUserAsync("b@example.com");
@@ -257,8 +257,5 @@ namespace DX.Data.Xpo.Identity.Tests
     public class RolesTests_AutoMapper : RolesTests
     {
         public RolesTests_AutoMapper() : base(MapperKind.AutoMapper) { }
-
-        [Fact(Skip = "BUG (AutoMapper flavour): XPAutoMapperUserStore.Query uses ProjectTo, and XPO cannot translate a Where on the projection, so UserManager.Users.Where(u => u.UserName...) throws NotSupportedException")]
-        public override Task UserManager_Users_CanBeQueried() => base.UserManager_Users_CanBeQueried();
     }
 }

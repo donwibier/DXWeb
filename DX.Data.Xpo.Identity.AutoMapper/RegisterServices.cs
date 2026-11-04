@@ -126,6 +126,11 @@ namespace DX.Data.Xpo.Identity.AutoMapper
     {
         public XPIdentityMapperProfile()
         {
+            // map onto the identity models through their parameterless constructors and property setters: with
+            // IdentityUser(string userName) / IdentityRole(string roleName), ProjectTo puts UserName / Name in a constructor
+            // call, and XPO cannot translate a Where on such a member (UserManager.Users.Where(u => u.UserName ...))
+            ShouldUseConstructor = ctor => ctor.GetParameters().Length == 0;
+
             CreateMap<TUser, TXPOUser>()
                     //.ForMember(dest => dest.NormalizedName, opt => opt.MapFrom(src => src.NormalizedUserName))
                     .ForMember(dest => dest.RolesList, opt => opt.Ignore())
