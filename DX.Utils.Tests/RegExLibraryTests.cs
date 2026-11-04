@@ -15,7 +15,7 @@ namespace DX.Utils.Tests
             Assert.Equal("key", RegExLibrary.GetRegExGroupValue(m.Groups, "k", "default"));
         }
 
-        [Fact(Skip = "BUG: GroupCollection[name] never returns null (it returns an unsuccessful empty Group), so defaultValue is never used for missing/unmatched groups")]
+        [Fact]
         public void GetRegExGroupValue_MissingGroup_ReturnsDefault()
         {
             var m = Regex.Match("key=", "(?<k>\\w+)=(?<v>\\w+)?");

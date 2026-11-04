@@ -44,6 +44,8 @@ namespace DX.Utils.MimeDetection
 			// Checks validity of the parts
 			if (parts.Length != 2)
 				throw new MimeTypeException("Invalid Content Type " + name);
+			if (!IsValid(parts[0]))
+				throw new MimeTypeException("Invalid Primary Type " + parts[0]);
 			
 			Name = $"{parts[0]}{SEPARATOR}{PrepType(parts[1])}";
 			PrimaryType = parts[0];
@@ -93,7 +95,7 @@ namespace DX.Utils.MimeDetection
 			while (i < len)
 			{
 				char c = type[i];
-				if (c <= '\x001A' || SPECIALS.IndexOf(c) > 0)
+				if (c <= '\x001A' || SPECIALS.IndexOf(c) >= 0)
 					return true;
 				i++;
 			}
@@ -181,7 +183,8 @@ namespace DX.Utils.MimeDetection
 			if ((index != -1) && (index < url.Length - 1))
 			{
 				// There's an extension, so try to find if it matches mines
-				match = _Extensions.Contains(url.Substring(index + 1));
+				string ext = url.Substring(index + 1);
+				match = _Extensions.Any(e => string.Equals(e, ext, StringComparison.OrdinalIgnoreCase));
 			}
 			return match;
 		}

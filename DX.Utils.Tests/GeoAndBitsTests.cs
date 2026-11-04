@@ -103,14 +103,14 @@ namespace DX.Utils.Tests
             Assert.True(Bits.Has(-1, int.MinValue));
         }
 
-        [Fact(Skip = "BUG: Bits.Clear / BitClear return 'flag & ~flag' (always 0) instead of 'value & ~flag'")]
+        [Fact]
         public void Clear_OnlyClearsTheFlag()
         {
             Assert.Equal(0b0011, Bits.Clear(0b0111, 0b0100));
             Assert.Equal(0b0011, 0b0111.BitClear(0b0100));
         }
 
-        [Fact(Skip = "BUG: Bits.Has(ref value, flag, clear) ignores 'clear' and, via broken Clear, wipes every bit of value to 0")]
+        [Fact]
         public void HasRef_WithClear_ClearsOnlyThatFlag_AndWithoutClear_LeavesValue()
         {
             int v = 0b0111;
