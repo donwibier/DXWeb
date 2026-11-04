@@ -79,7 +79,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(42, Assert.Single(Db.AllCustomers()).Id);
         }
 
-        [Fact(Skip = "BUG: any batch of 2+ items throws InvalidOperationException - the transaction is committed inside the loop (EFDataStore.cs:229), the 2nd commit fails and the catch's RollbackAsync rethrows (EFDataStore.cs:240); first rows stay persisted")]
+        [Fact]
         public async Task Create_batch_inserts_all_items()
         {
             var items = new[] { Dto("A"), Dto("B"), Dto("C") };
@@ -90,7 +90,7 @@ namespace DX.Data.EF.Tests
             Assert.All(items, i => Assert.NotEqual(0, i.Id));
         }
 
-        [Fact(Skip = "BUG: any batch of 2+ items throws (EFDataStore.cs:229/240) - same root cause as Create_batch_inserts_all_items")]
+        [Fact]
         public async Task Update_batch_updates_all_items()
         {
             var a = Db.Seed("A");
@@ -103,7 +103,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(new[] { 10, 20 }, Db.AllCustomers().Select(c => c.Score));
         }
 
-        [Fact(Skip = "BUG (latent, masked by the batch-commit bug): success result Data holds only the last item, not all items (EFDataStore.cs:235)")]
+        [Fact]
         public async Task Create_batch_result_contains_all_items()
         {
             var items = new[] { Dto("A"), Dto("B"), Dto("C") };
@@ -111,7 +111,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(items, r.Data);
         }
 
-        [Fact(Skip = "BUG: batch is not atomic - transaction is committed after every item, so a later failure cannot roll back and RollbackAsync on the committed transaction throws (EFDataStore.cs:229/240)")]
+        [Fact]
         public async Task Create_batch_with_one_invalid_item_is_atomic_and_returns_failure()
         {
             var r = await Store.CreateAsync(Dto("A"), Dto("", score: 1));
@@ -120,12 +120,51 @@ namespace DX.Data.EF.Tests
             Assert.Empty(Db.AllCustomers());
         }
 
-        [Fact(Skip = "BUG: empty batch returns Data = [null] instead of an empty array (EFDataStore.cs:184/235)")]
+        [Fact]
         public async Task Create_empty_batch_returns_empty_data()
         {
             var r = await Store.CreateAsync();
             Assert.True(r.Success);
             Assert.NotNull(r.Data);
+            Assert.Empty(r.Data);
+        }
+
+        [Fact]
+        public async Task Create_batch_db_error_rolls_back_and_reports_failing_item()
+        {
+            Db.Seed("Alice");
+            var dup = Dto("Alice");
+            var r = await Store.CreateAsync(Dto("A"), dup, Dto("B"));
+
+            Assert.False(r.Success);
+            Assert.Equal(DataMode.Create, r.Mode);
+            Assert.Same(dup, Assert.Single(r.Data));
+            Assert.Equal(new[] { "Alice" }, Db.AllCustomers().Select(c => c.Name));
+            Assert.False(Ctx.ChangeTracker.HasChanges());
+
+            Assert.True((await Store.CreateAsync(Dto("C"))).Success);
+            Assert.Equal(new[] { "Alice", "C" }, Db.AllCustomers().Select(c => c.Name));
+        }
+
+        [Fact]
+        public async Task Store_mixed_batch_creates_and_updates_and_returns_all_items()
+        {
+            var a = Db.Seed("Alice", score: 1);
+            var items = new[] { new CustomerDto { Id = a.Id, Name = "Alice", Email = "a@test", Score = 4 }, Dto("Bob") };
+            var r = await Store.StoreAsync(items);
+
+            Assert.True(r.Success, r.Exception?.Message);
+            Assert.Equal(items, r.Data);
+            Assert.NotEqual(0, items[1].Id);
+            Assert.Equal(new[] { 4, 1 }, Db.AllCustomers().Select(c => c.Score));
+        }
+
+        [Fact]
+        public async Task Update_empty_batch_returns_update_mode_and_empty_data()
+        {
+            var r = await Store.UpdateAsync();
+            Assert.True(r.Success);
+            Assert.Equal(DataMode.Update, r.Mode);
             Assert.Empty(r.Data);
         }
 
@@ -151,7 +190,7 @@ namespace DX.Data.EF.Tests
             Assert.Single(Db.AllCustomers());
         }
 
-        [Fact(Skip = "BUG: failed insert leaves the entity in the change tracker as Added, so every later SaveChanges on the same store/DbContext fails again (EFDataStore.cs:203-204/237-244)")]
+        [Fact]
         public async Task Create_after_failed_insert_on_same_store_succeeds()
         {
             Db.Seed("Alice");
@@ -225,7 +264,7 @@ namespace DX.Data.EF.Tests
             Assert.Empty(Db.AllCustomers());
         }
 
-        [Fact(Skip = "BUG: failed Update/Store results always report Mode = Create (EFDataStore.cs:244)")]
+        [Fact]
         public async Task Update_failure_reports_update_mode()
         {
             var r = await Store.UpdateAsync(Dto("Ghost", id: 999));
@@ -233,7 +272,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(DataMode.Update, r.Mode);
         }
 
-        [Fact(Skip = "BUG: UpdateAsync with an empty (default) key silently inserts a new row instead of failing (EFDataStore.cs:194)")]
+        [Fact]
         public async Task Update_with_empty_key_does_not_insert()
         {
             var r = await Store.UpdateAsync(Dto("New"));
@@ -252,7 +291,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(1, Assert.Single(Db.AllCustomers()).Score);
         }
 
-        [Fact(Skip = "BUG: rejected update leaves invalid values on the tracked entity; GetByKey then returns them (EFDataStore.cs:219-223)")]
+        [Fact]
         public async Task Update_rejected_by_validation_does_not_leak_into_GetByKey()
         {
             var seeded = Db.Seed("Alice", score: 1);
@@ -261,7 +300,7 @@ namespace DX.Data.EF.Tests
             Assert.Equal(1, Store.GetByKey(seeded.Id).Score);
         }
 
-        [Fact(Skip = "BUG: rejected update's invalid values stay tracked and get persisted by the next successful save on the same DbContext (EFDataStore.cs:219-223)")]
+        [Fact]
         public async Task Update_rejected_by_validation_is_not_persisted_by_later_save()
         {
             var seeded = Db.Seed("Alice", score: 1);
@@ -348,7 +387,19 @@ namespace DX.Data.EF.Tests
             Assert.Equal(2, Db.AllCustomers().Count);
         }
 
-        [Fact(Skip = "BUG: non-validation errors in DeleteAsync (e.g. FK constraint) escape as exceptions instead of a failed DataResult (EFDataStore.cs:308)")]
+        [Fact]
+        public async Task Delete_after_rejected_delete_on_same_store_succeeds()
+        {
+            var a = Db.Seed("Alice");
+            var p = Db.Seed("Protected One");
+            Assert.False((await Store.DeleteAsync(a.Id, p.Id)).Success);
+            Assert.False(Ctx.ChangeTracker.HasChanges());
+
+            Assert.True((await Store.DeleteAsync(a.Id)).Success);
+            Assert.Equal("Protected One", Assert.Single(Db.AllCustomers()).Name);
+        }
+
+        [Fact]
         public async Task Delete_fk_violation_returns_failed_result()
         {
             var a = Db.Seed("Alice");
@@ -361,7 +412,10 @@ namespace DX.Data.EF.Tests
             var r = await Store.DeleteAsync(a.Id);
 
             Assert.False(r.Success);
+            Assert.Equal(DataMode.Delete, r.Mode);
+            Assert.Equal(nameof(Customer), Assert.Single(r.Exception.Errors).PropertyName);
             Assert.Single(Db.AllCustomers());
+            Assert.False(Ctx.ChangeTracker.HasChanges());
         }
 
         // Mapper-specific outcome: declared as facts in the derived classes.

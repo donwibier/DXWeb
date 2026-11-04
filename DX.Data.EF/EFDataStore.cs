@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 #else
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 #endif
 
 namespace DX.Data.EF
@@ -178,74 +179,151 @@ namespace DX.Data.EF
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
 
+        bool IsEmptyKey(TKey key) => key == null || key.Equals(EmptyKeyValue);
+
+        /// <summary>One item of a batch, with the entity it maps to and the operation applied to it.</summary>
+        class PendingItem
+        {
+            public PendingItem(TModel item, TDBModel entity, DataMode mode)
+            {
+                Item = item;
+                Entity = entity;
+                Mode = mode;
+            }
+            public TModel Item { get; }
+            public TDBModel Entity { get; }
+            public DataMode Mode { get; }
+        }
+
+        /// <summary>
+        /// Stops tracking the entities touched by a failed operation, so their (rolled back) changes
+        /// are not retried by the next SaveChanges on the same DbContext.
+        /// </summary>
+        void DetachEntities(IEnumerable<TDBModel> entities)
+        {
+            foreach (var entity in entities)
+            {
+                var entry = DbContext.Entry(entity);
+                if (entry.State != EntityState.Detached)
+                    entry.State = EntityState.Detached;
+            }
+        }
+
+        /// <summary>Returns the pending item whose entity caused a DbUpdateException, if it can be determined.</summary>
+        static PendingItem FindFailedItem(Exception err, List<PendingItem> pending)
+        {
+            var updateException = err as DbUpdateException;
+            if (updateException == null || updateException.Entries == null)
+                return null;
+            var failed = updateException.Entries
+                .Select(e => pending.FirstOrDefault(p => ReferenceEquals(p.Entity, e.Entity)))
+                .Where(p => p != null)
+                .Distinct()
+                .ToList();
+            return failed.Count == 1 ? failed[0] : null;
+        }
+
+#if (NETCOREAPP)
+        static async Task RollbackQuietlyAsync(IDbContextTransaction transaction)
+        {
+            try { await transaction.RollbackAsync(); }
+            catch { /* keep the original error; disposing the transaction ends it anyway */ }
+        }
+#else
+        static Task RollbackQuietlyAsync(DbContextTransaction transaction)
+        {
+            try { transaction.Rollback(); }
+            catch { /* keep the original error; disposing the transaction ends it anyway */ }
+            return Task.CompletedTask;
+        }
+#endif
+
         protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
 
+            var defaultMode = mode == StoreMode.Update ? DataMode.Update : DataMode.Create;
+            if (items.Length == 0)
+                return new DataResult<TKey, TModel> { Success = true, Mode = defaultMode, Data = new TModel[0] };
+
             var result = await TransactionalExecAsync(async (s, wrk) =>
             {
                 TModel currentItem = default!;
+                DataMode dataMode = defaultMode;
+                var pending = new List<PendingItem>(items.Length);
                 try
                 {
-
-                    ValidationResult validationResult = default!;
-                    DataMode dataMode = DataMode.Create;
                     foreach (var item in items)
                     {
                         currentItem = item;
-                        var modelKey = ModelKey(item);                            
-                        if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                        var modelKey = ModelKey(item);
+                        var emptyKey = IsEmptyKey(modelKey);
+                        if (mode == StoreMode.Create || (emptyKey && mode == StoreMode.Store))
                         {
                             dataMode = DataMode.Create;
                             var newDBItem = new TDBModel();
                             ToDBModel(item, newDBItem);
-                            validationResult = await ValidateDBModelAsync(newDBItem, DataMode.Create, s);
+                            var validationResult = await ValidateDBModelAsync(newDBItem, DataMode.Create, s);
                             if (!validationResult.IsValid)
                                 throw CreateValidationException(item, validationResult);
+                            pending.Add(new PendingItem(item, newDBItem, DataMode.Create));
 #if (NETCOREAPP)
-                            var r = await DbContext.Set<TDBModel>().AddAsync(newDBItem);
-                            await DbContext.SaveChangesAsync();
-                            ToModel(r.Entity, item); //reload changes in item
+                            await DbContext.Set<TDBModel>().AddAsync(newDBItem);
 #else
-                            var r = DbContext.Set<TDBModel>().Add(newDBItem);
-                            await DbContext.SaveChangesAsync();
-                            SetModelKey(item, DBModelKey(newDBItem));
+                            DbContext.Set<TDBModel>().Add(newDBItem);
 #endif
                         }
-                        else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+                        else
                         {
-                            dataMode = DataMode.Update;                                
+                            dataMode = DataMode.Update;
+                            if (emptyKey)
+                                throw new InvalidOperationException($"Unable to update {typeof(TDBModel).Name}: the item has no key value");
+
                             var dbModel = EFGetByKey(modelKey);
                             if (dbModel == null)
                                 throw new Exception($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
 
+                            // Registered before mutating, so a rejected item is detached (reverted) in the catch below.
+                            pending.Add(new PendingItem(item, dbModel, DataMode.Update));
                             ToDBModel(item, dbModel);
 
-                            validationResult = await ValidateDBModelAsync(dbModel, DataMode.Update, s);
+                            var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Update, s);
                             if (!validationResult.IsValid)
                                 throw CreateValidationException(item, validationResult);
 
                             DbContext.Entry(dbModel).State = EntityState.Modified;
-                            await DbContext.SaveChangesAsync();                                
                         }
-#if (NETCOREAPP)
-                        await wrk.CommitAsync();
-#else
-                        wrk.Commit();
-#endif
                     }
 
-                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode, Data = new[] { currentItem } };
+                    // One SaveChanges and one commit for the whole batch.
+                    await DbContext.SaveChangesAsync();
+                    foreach (var p in pending.Where(p => p.Mode == DataMode.Create))
+                    {
+#if (NETCOREAPP)
+                        ToModel(p.Entity, p.Item); //reload changes in item
+#else
+                        SetModelKey(p.Item, DBModelKey(p.Entity));
+#endif
+                    }
+#if (NETCOREAPP)
+                    await wrk.CommitAsync();
+#else
+                    wrk.Commit();
+#endif
+                    return new DataResult<TKey, TModel> { Success = true, Mode = dataMode, Data = items.ToArray() };
                 }
                 catch (Exception err)
                 {
-#if (NETCOREAPP)
-                    await wrk.RollbackAsync();
-#else
-                    wrk.Rollback();
-#endif
-                    return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
+                    await RollbackQuietlyAsync(wrk);
+                    DetachEntities(pending.Select(p => p.Entity));
+                    var failed = FindFailedItem(err, pending);
+                    if (failed != null)
+                    {
+                        currentItem = failed.Item;
+                        dataMode = failed.Mode;
+                    }
+                    return new DataResult<TKey, TModel>(dataMode, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
                 }
             }, false);
             return result;
@@ -282,26 +360,32 @@ namespace DX.Data.EF
         {
             if (ids == null)
                 throw new ArgumentNullException(nameof(ids));
+            if (ids.Length == 0)
+                return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
 
             var result = await TransactionalExecAsync(async (s, t) =>
             {
+                var deleted = new List<TDBModel>();
                 try
                 {
                     foreach (var id in ids)
                     {
+                        if (id == null)
+                            continue;
                         var dbModel = EFGetByKey(id);
-                        if (dbModel != null)
+                        if (dbModel != null && !deleted.Any(d => ReferenceEquals(d, dbModel)))
                         {
                             var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
                             if (!validationResult.IsValid)
                                 throw new ValidationException(validationResult.Errors);
 
+                            deleted.Add(dbModel);
                             DbContext.Entry(dbModel).State = EntityState.Deleted;
-                            await DbContext.SaveChangesAsync();
                         }
                     }
 
-                    await s.DbContext.SaveChangesAsync();
+                    // One SaveChanges and one commit for the whole batch.
+                    await DbContext.SaveChangesAsync();
 #if (NETCOREAPP)
                     await t.CommitAsync();
 #else
@@ -309,12 +393,14 @@ namespace DX.Data.EF
 #endif
                     return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
-                catch (ValidationException err)
+                catch (Exception err)
                 {
-                    return new DataResult<TKey, TModel>(DataMode.Delete, nameof(TDBModel), err);
+                    await RollbackQuietlyAsync(t);
+                    DetachEntities(deleted);
+                    return new DataResult<TKey, TModel>(DataMode.Delete, typeof(TDBModel).Name, err);
                 }
             }, false);
             return result;
-        }		
+        }
 	}
 }
