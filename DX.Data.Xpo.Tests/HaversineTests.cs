@@ -97,7 +97,7 @@ namespace DX.Data.Xpo.Tests
         private static double EvaluateOnObject(Session s, CriteriaOperator op, Product p)
             => Convert.ToDouble(new ExpressionEvaluator(s.GetClassInfo<Product>().GetEvaluatorContextDescriptor(), op).Evaluate(p));
 
-        [Fact(Skip = "BUG: GeoHaversineOperators.HaversineOperator (XpoHaversine.cs:64) uses Min(1, x) with an int 1; XPO compares as int, so any central angle >= 60 degrees (> ~6670 km) evaluates to pi*R = 20002 km")]
+        [Fact]
         public void CriteriaDistanceKM_LongDistances()
         {
             var db = new InMemoryDb();
@@ -108,7 +108,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(GeoHaversine.DistanceKM(-33.8688, 151.2093, 35.6762, 139.6503), EvaluateOnObject(uow, op, tokyo), 6);
         }
 
-        [Fact(Skip = "BUG: GeoInRangeKM misses points more than ~6670 km away because of the int Min(1, x) in HaversineOperator (XpoHaversine.cs:64)")]
+        [Fact]
         public void GeoInRangeKM_FindsFarAwayPointsInRange()
         {
             var db = new InMemoryDb();
