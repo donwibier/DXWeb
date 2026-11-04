@@ -72,13 +72,13 @@ namespace DX.Utils.Tests
             Assert.Throws<MimeTypeException>(() => new MimeType("im:age", "png"));
         }
 
-        [Fact(Skip = "BUG: HasCtrlOrSpecials uses 'SPECIALS.IndexOf(c) > 0', so '(' (index 0 of SPECIALS) is never rejected")]
+        [Fact]
         public void Ctor_OpenParenthesis_IsRejected()
         {
             Assert.Throws<MimeTypeException>(() => new MimeType("text/a(b"));
         }
 
-        [Fact(Skip = "BUG: single-argument ctor never validates the primary type, so '/plain' (empty primary) and 'te;xt/plain' are accepted")]
+        [Fact]
         public void Ctor_InvalidPrimary_IsRejected()
         {
             Assert.Throws<MimeTypeException>(() => new MimeType("/plain"));
@@ -105,7 +105,7 @@ namespace DX.Utils.Tests
             Assert.False(t.Matches("report.doc"));
         }
 
-        [Fact(Skip = "BUG: MimeType.Matches(string) compares extensions case-sensitively, so 'REPORT.PDF' does not match application/pdf")]
+        [Fact]
         public void Matches_ByExtension_IsCaseInsensitive()
         {
             Assert.True(new MimeTypes().ForName("application/pdf").Matches("REPORT.PDF"));
@@ -164,7 +164,7 @@ namespace DX.Utils.Tests
             Assert.Null(types.GetMimeType("trailingdot."));
         }
 
-        [Theory(Skip = "BUG: MimeTypes.GetMimeTypes (MimeTypes.cs:289) always returns null, so lookup by file name/extension never finds anything")]
+        [Theory]
         [InlineData("report.pdf", "application/pdf")]
         [InlineData("photo.PNG", "image/png")]
         [InlineData("/a/b/archive.zip", "application/zip")]
@@ -175,7 +175,7 @@ namespace DX.Utils.Tests
             Assert.Equal(expected, t.Name);
         }
 
-        [Fact(Skip = "BUG: MimeTypes.GetMimeTypes always returns null, so GetMimeType(Uri) never finds anything")]
+        [Fact]
         public void GetMimeType_ByUri()
         {
             Assert.Equal("application/pdf", new MimeTypes().GetMimeType(new Uri("https://x.com/files/a.pdf?x=1")).Name);
@@ -203,10 +203,17 @@ namespace DX.Utils.Tests
             Assert.Null(MimeTypes.GetMimeTypeFromBytes("x.pdf", null));
         }
 
-        [Fact(Skip = "BUG: extension fallback is broken (GetMimeTypes returns null), so DetermineMimeType('notes.txt', textBytes) returns '' instead of 'text/plain'")]
+        [Fact]
         public void DetermineMimeType_FallsBackToExtension()
         {
             Assert.Equal("text/plain", MimeTypes.DetermineMimeType("notes.txt", Samples.Text));
+        }
+
+        [Fact]
+        public void DetermineMimeType_ExtensionLookup_IsCultureInvariant()
+        {
+            using (new CultureScope("tr-TR"))
+                Assert.Equal("image/tiff", MimeTypes.DetermineMimeType("SCAN.TIFF", Samples.Text));
         }
 
         [Fact]

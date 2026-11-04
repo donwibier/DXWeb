@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -29,28 +30,53 @@ namespace DX.Utils
         //ValueField = "Key";
         //TextField = "Value";
         */
+        // Per enum value: either a literal display text, or the static resource property to read
+        // on every call (resource values depend on the current UI culture, so only the lookup is cached).
+        sealed class DisplayInfo
+        {
+            public string Text;
+            public PropertyInfo ResourceProperty;
+        }
+
+        static readonly ConcurrentDictionary<Enum, DisplayInfo> displayCache = new ConcurrentDictionary<Enum, DisplayInfo>();
+
         public static string GetDisplay(this Enum value)
         {
             if (value == null)
             {
                 throw new ArgumentNullException("value");
             }
-            DisplayAttribute[] attributes = (DisplayAttribute[])value.GetType().GetField(value.ToString()).GetCustomAttributes(typeof(DisplayAttribute), false);
-            if (attributes.Count() == 0)
-                return string.Format("{0}", value);
-            else if (attributes.Count() > 1)
+            if (!displayCache.TryGetValue(value, out DisplayInfo info))
+            {
+                FieldInfo field = value.GetType().GetField(value.ToString());
+                if (field == null)
+                    return value.ToString(); // undefined or combined [Flags] value: not cached (unbounded set)
+                info = displayCache.GetOrAdd(value, ResolveDisplay(value, field));
+            }
+            if (info.ResourceProperty == null)
+                return info.Text;
+            object result = info.ResourceProperty.GetValue(info.ResourceProperty.DeclaringType, null);
+            return (result != null) ? result.ToString() : string.Empty;
+        }
+
+        static DisplayInfo ResolveDisplay(Enum value, FieldInfo field)
+        {
+            DisplayAttribute[] attributes = (DisplayAttribute[])field.GetCustomAttributes(typeof(DisplayAttribute), false);
+            if (attributes.Length == 0)
+                return new DisplayInfo { Text = string.Format("{0}", value) };
+            else if (attributes.Length > 1)
             {
                 throw new ArgumentOutOfRangeException();
             }
-            string resourceId = string.IsNullOrEmpty(attributes[0].Name) ? value.ToString(): attributes[0].Name;
+            string resourceId = string.IsNullOrEmpty(attributes[0].Name) ? value.ToString() : attributes[0].Name;
             Type type = attributes[0].ResourceType;
-            PropertyInfo nameProperty = type.GetProperty(resourceId, BindingFlags.Static | BindingFlags.Public);
-            
-            if (nameProperty == null)
-                return value.ToString();
+            if (type == null)
+                return new DisplayInfo { Text = resourceId }; // plain [Display(Name = "...")]
 
-            object result = nameProperty.GetValue(nameProperty.DeclaringType, null);
-            return (result != null) ? result.ToString() : string.Empty;
+            PropertyInfo nameProperty = type.GetProperty(resourceId, BindingFlags.Static | BindingFlags.Public);
+            if (nameProperty == null)
+                return new DisplayInfo { Text = value.ToString() };
+            return new DisplayInfo { ResourceProperty = nameProperty };
         }
 
         //public static string GetDisplayName(this Enum enumValue)

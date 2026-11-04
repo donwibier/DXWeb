@@ -210,7 +210,7 @@ namespace DX.Utils.Tests
             Assert.Equal(Hue.Blue, Conversion.ParseEnum<Hue>("2"));
         }
 
-        [Fact(Skip = "BUG: an undefined numeric value ('99') is returned as (Hue)99 instead of the documented default on conversion error")]
+        [Fact(Skip = "BY DESIGN?: Enum.TryParse accepts any numeric string, so '99' yields (Hue)99 rather than the default. Changing it (Enum.IsDefined) would reject valid [Flags] combinations and numeric values existing callers may round-trip")]
         public void UndefinedNumeric_ReturnsDefault()
         {
             Assert.Equal(Hue.Green, Conversion.ParseEnum<Hue>("99", Hue.Green));
@@ -284,7 +284,7 @@ namespace DX.Utils.Tests
                 Assert.True(Conversion.GetConfigOption("ID=5", "id", out string v) && v == "5");
         }
 
-        [Fact(Skip = "BUG: ToDictionary throws ArgumentException on duplicate keys, e.g. a trailing '; ;' or a key repeated with different case")]
+        [Fact]
         public void DuplicateOrBlankEntries_DoNotThrow()
         {
             Assert.True(Conversion.GetConfigOption("a=1; ; ;b=2", "b", out string v));

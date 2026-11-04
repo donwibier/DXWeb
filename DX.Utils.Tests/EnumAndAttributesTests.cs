@@ -29,8 +29,29 @@ namespace DX.Utils.Tests
     [Flags]
     public enum Opts { None = 0, A = 1, B = 2 }
 
+    public static class MutableResources
+    {
+        public static string Label { get; set; } = "first";
+    }
+
+    public enum Labelled
+    {
+        [Display(Name = "Label", ResourceType = typeof(MutableResources))]
+        Value
+    }
+
     public class EnumExtensionsTests
     {
+        [Fact]
+        public void GetDisplay_ResourceValue_IsReadOnEveryCall()
+        {
+            // only the resource lookup is cached; the (culture dependent) value must not be
+            MutableResources.Label = "first";
+            Assert.Equal("first", Labelled.Value.GetDisplay());
+            MutableResources.Label = "second";
+            Assert.Equal("second", Labelled.Value.GetDisplay());
+        }
+
         [Fact]
         public void GetDisplay_FromResource()
         {
@@ -61,13 +82,13 @@ namespace DX.Utils.Tests
             Assert.Throws<ArgumentNullException>(() => ((Enum)null).GetDisplay());
         }
 
-        [Fact(Skip = "BUG: [Display(Name=\"...\")] without ResourceType (the common case) throws NullReferenceException instead of returning the Name")]
+        [Fact]
         public void GetDisplay_DisplayNameWithoutResourceType_ReturnsName()
         {
             Assert.Equal("Nicely named", TripState.Literal.GetDisplay());
         }
 
-        [Fact(Skip = "BUG: GetDisplay throws NullReferenceException for undefined values or combined [Flags] values (GetField(value.ToString()) returns null)")]
+        [Fact]
         public void GetDisplay_UndefinedOrCombinedValue_ReturnsToString()
         {
             Assert.Equal("A, B", (Opts.A | Opts.B).GetDisplay());
@@ -119,14 +140,14 @@ namespace DX.Utils.Tests
             Assert.DoesNotContain(typeof(DecoratedChild), direct);
         }
 
-        [Fact(Skip = "BUG: GetAttributeData ignores TAttribute: it casts the first attribute of any type for every attribute found -> InvalidCastException / wrong data")]
+        [Fact]
         public void GetAttributeData_ReturnsDataOfRequestedAttributeOnly()
         {
             var cats = Attributes.GetAttributeData<CategoryAttribute, string>(typeof(Decorated), false, a => a.Category).ToList();
             Assert.Equal(new[] { "cat" }, cats);
         }
 
-        [Fact(Skip = "BUG: Attributes.typeDictionary is a plain static Dictionary written without a lock; concurrent first calls throw InvalidOperationException (corrupted state) / KeyNotFoundException")]
+        [Fact]
         public void GetTypesWith_ConcurrentFirstCalls_DoNotThrow()
         {
             var field = typeof(Attributes).GetField("typeDictionary", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
@@ -180,7 +201,6 @@ namespace DX.Utils.Tests
 
     public class RequiredIfAttributeTests
     {
-        // RequiredIf returns results without MemberNames (see bug test below), so match on the message text.
         static bool About(ValidationResult r, string member) => r.ErrorMessage.Contains(member);
 
         static List<ValidationResult> Validate(object model)
@@ -238,21 +258,21 @@ namespace DX.Utils.Tests
                 r => About(r, nameof(RequiredIfModel.CompanyName)));
         }
 
-        [Fact(Skip = "BUG: RequiredIfAttribute never passes DefaultErrorMessageFormatString to the base ctor, so the message is 'The field X is invalid.' instead of 'The X field is required.'")]
+        [Fact]
         public void DefaultErrorMessage_SaysRequired()
         {
             var r = Validate(new RequiredIfModel { Kind = "Company", FirstName = "x" }).First(x => About(x, nameof(RequiredIfModel.CompanyName)));
             Assert.Equal("The CompanyName field is required.", r.ErrorMessage);
         }
 
-        [Fact(Skip = "BUG: RequiredIfAttribute.IsValid returns ValidationResult without memberNames, so EditForm/Blazor validators can't attach the error to the field")]
+        [Fact]
         public void ValidationResult_CarriesMemberName()
         {
-            var r = Validate(new RequiredIfModel { Kind = "Company", FirstName = "x" }).Single();
+            var r = Validate(new RequiredIfModel { Kind = "Company", FirstName = "x" }).Single(x => About(x, nameof(RequiredIfModel.CompanyName)));
             Assert.Equal(new[] { nameof(RequiredIfModel.CompanyName) }, r.MemberNames);
         }
 
-        [Fact(Skip = "BUG: the '_'-prefixed fallback path in IsValid inverts the check ('!Validate'), so 'Parent_Kind' reports errors exactly when the condition is NOT met")]
+        [Fact]
         public void UnderscoreFallback_BehavesLikeDirectProperty()
         {
             Assert.Contains(Validate(new RequiredIfModel { Kind = "Company", CompanyName = "c" }), r => About(r, nameof(RequiredIfModel.VatNumber)));

@@ -19,7 +19,11 @@ namespace DX.Utils
         public enum LogType { None = 0, Warning = 5, Error = 10 };
 
         [ThreadStatic]
-        private static StringBuilder threadLogger = new StringBuilder();
+        private static StringBuilder threadLogger;
+
+        // Upper bound (in chars) of the per-thread log buffer. When exceeded, the oldest half is
+        // discarded so long-lived (pool) threads cannot grow the buffer without limit.
+        private const int MaxThreadLogLength = 1024 * 1024;
 
 
         public static void Exception(Exception err)
@@ -44,10 +48,11 @@ namespace DX.Utils
         {
             try
             {
-                string line = String.Format("{0: dd-MM-yyyy hh:mm:ss}: {1}", DateTime.Now, logText);
+                string line = String.Format("{0: dd-MM-yyyy HH:mm:ss}: {1}", DateTime.Now, logText);
                 if (threadLogger == null)
                     threadLogger = new StringBuilder();
                 threadLogger.AppendLine(line);
+                TrimThreadLog();
                 if (traceWrite)
                     Trace.WriteLine(line);
 
@@ -56,10 +61,10 @@ namespace DX.Utils
                 switch (persistentLogType)
                 {
                     case LogType.Warning:
-                        DoLog(logType == null ? typeof(Log) : logType.GetType(), logType, LogType.Warning, logText);
+                        DoLog(logType, persistentLogObject, LogType.Warning, logText);
                         break;
                     case LogType.Error:
-                        DoLog(logType == null ? typeof(Log) : logType.GetType(), logType, LogType.Error, logText);
+                        DoLog(logType, persistentLogObject, LogType.Error, logText);
                         break;
                     default:
                         break;
@@ -96,6 +101,19 @@ namespace DX.Utils
             {
                 DoLogException(err);
             }
+        }
+
+        private static void TrimThreadLog()
+        {
+            if (threadLogger.Length <= MaxThreadLogLength)
+                return;
+            // Keep roughly the newest half, starting at a line boundary when possible.
+            int start = threadLogger.Length - MaxThreadLogLength / 2;
+            string tail = threadLogger.ToString(start, threadLogger.Length - start);
+            int nl = tail.IndexOf('\n');
+            if (nl >= 0 && nl < tail.Length - 1)
+                tail = tail.Substring(nl + 1);
+            threadLogger = new StringBuilder(tail, MaxThreadLogLength);
         }
 
         private static void DoLogException(Exception err)

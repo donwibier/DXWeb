@@ -118,7 +118,7 @@ namespace DX.Utils.Tests
             new Collection<TestItem>().Dispose();
         }
 
-        [Fact(Skip = "BUG: Collection.Dispose enumerates List while each item's Dispose removes itself -> InvalidOperationException 'Collection was modified'")]
+        [Fact]
         public void Dispose_NonEmpty_DisposesAllItems()
         {
             var c = new Collection<TestItem>();
@@ -131,8 +131,7 @@ namespace DX.Utils.Tests
             Assert.Null(b.Collection);
         }
 
-        // Verified in a scratch console app: StackOverflow (process crash), so this can never be run unskipped in-suite.
-        [Fact(Skip = "BUG: BaseCollection.OnClear calls base.List.Clear() which re-enters CollectionBase.Clear -> OnClear -> infinite recursion / StackOverflow (crashes the test host)")]
+        [Fact]
         public void Clear_EmptiesCollectionAndReleasesItems()
         {
             var c = new Collection<TestItem>();
@@ -143,8 +142,7 @@ namespace DX.Utils.Tests
             Assert.Null(a.Collection);
         }
 
-        // Verified in a scratch console app: StackOverflow (process crash), so this can never be run unskipped in-suite.
-        [Fact(Skip = "BUG: BaseCollection.OnSet assigns base.List[index] which re-enters IList.set_Item -> OnSet -> infinite recursion / StackOverflow (crashes the test host)")]
+        [Fact]
         public void IListIndexerSet_ReplacesItem()
         {
             var c = new Collection<TestItem>();

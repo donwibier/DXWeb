@@ -63,7 +63,7 @@ namespace DX.Utils.Tests
             Assert.Equal("body", Strings.StripHTMLTags("<html><head><title>T</title></head><body>body</body></html>"));
         }
 
-        [Fact(Skip = "BUG: <head> removal regex lacks (?s), so a multi-line <head> (the normal case) leaks its <title> text into the output")]
+        [Fact]
         public void MultiLineHead_IsRemovedIncludingTitle()
         {
             Assert.Equal("body", Strings.StripHTMLTags("<html><head>\n<title>Secret title</title>\n</head><body>body</body></html>"));
@@ -121,22 +121,80 @@ namespace DX.Utils.Tests
             Assert.Equal(expected, Strings.StripHTMLTags(input));
         }
 
-        [Fact(Skip = "BUG: the &nbsp; replacement (Strings.cs:120) was corrupted into a no-op \" \"->\" \", so &nbsp; is deleted by the catch-all and words get glued together")]
+        [Fact]
         public void Nbsp_BecomesSpace()
         {
             Assert.Equal("a b", Strings.StripHTMLTags("a&nbsp;b"));
         }
 
-        [Fact(Skip = "BUG: &lt;/&gt; are decoded before tags are stripped, so escaped text like '5 &lt; 6 and 7 &gt; 3' is treated as a tag and deleted")]
+        [Fact]
         public void EscapedAngleBrackets_ArePreservedAsText()
         {
             Assert.Equal("5 < 6 and 7 > 3", Strings.StripHTMLTags("5 &lt; 6 and 7 &gt; 3"));
         }
 
-        [Fact(Skip = "BUG: catch-all '&(.{2,6});' deletes plain text between a bare '&' and a later ';' (e.g. 'Tom & Jerry; fun')")]
+        [Fact]
         public void BareAmpersand_InPlainText_IsPreserved()
         {
             Assert.Equal("Tom & Jerry; fun", Strings.StripHTMLTags("Tom & Jerry; fun"));
+        }
+
+        [Fact]
+        public void KnownEntities_AreCaseInsensitive()
+        {
+            Assert.Equal("(c) a b", Strings.StripHTMLTags("&COPY; a&NBSP;b"));
+        }
+
+        [Fact]
+        public void UnknownEntities_AreRemoved()
+        {
+            Assert.Equal("ab", Strings.StripHTMLTags("a&hellip;&#8217;&#x2019;b"));
+        }
+
+        [Fact]
+        public void TagRemoval_DoesNotDependOnCurrentCulture()
+        {
+            using (new CultureScope("tr-TR"))
+                Assert.Equal("ab", Strings.StripHTMLTags("a<SCRIPT>var i = 1;</SCRIPT>b"));
+        }
+
+        // Reference: the original (quadratic) collapsing loop, which the linear implementation must reproduce.
+        static string LegacyCollapse(string result)
+        {
+            string breaks = "\r\r\r";
+            string tabs = "\t\t\t\t\t";
+            for (int index = 0; index < result.Length; index++)
+            {
+                result = result.Replace(breaks, "\r\r");
+                result = result.Replace(tabs, "\t\t\t\t");
+                breaks = breaks + "\r";
+                tabs = tabs + "\t";
+            }
+            return result;
+        }
+
+        [Fact]
+        public void BreakAndTabRuns_CollapseExactlyLikeTheLegacyLoop()
+        {
+            for (int n = 0; n <= 300; n++)
+            {
+                // "\n" -> "\r" and "<td>" -> "\t" happen before the collapsing step
+                Assert.Equal(LegacyCollapse("a" + new string('\r', n) + "b"), Strings.StripHTMLTags("a" + new string('\n', n) + "b"));
+                Assert.Equal(LegacyCollapse("a" + new string('\t', n) + "b"),
+                    Strings.StripHTMLTags("a" + string.Concat(System.Linq.Enumerable.Repeat("<td>", n)) + "b"));
+            }
+        }
+
+        [Fact]
+        public void LongInput_IsEquivalentToConcatenatedParts()
+        {
+            // 200 KB of markup: completes quickly (the former loop was O(n^2)) and every
+            // repeated block is stripped exactly like a single block.
+            const string block = "<div><p>Lorem <b>ipsum</b> &copy; dolor<br>sit amet&nbsp;x</p>\n<ul><li>a</li></ul></div>";
+            string single = Strings.StripHTMLTags(block);
+            var html = string.Concat(System.Linq.Enumerable.Repeat(block, 2500));
+            var result = Strings.StripHTMLTags(html);
+            Assert.Equal(string.Join("\r\r", System.Linq.Enumerable.Repeat(single, 2500)), result);
         }
 
         [Fact]
@@ -252,7 +310,7 @@ namespace DX.Utils.Tests
             Assert.Equal("a", "<b>a</b>".StripHTMLTags());
         }
 
-        [Fact(Skip = "BUG: uses 'input.Length < maxLen', so an input exactly maxLen long is 'truncated' and gets the suffix (doc: length <= maxLen returns input)")]
+        [Fact]
         public void ExactlyMaxLength_ReturnsInputWithoutSuffix()
         {
             Assert.Equal("abc", Strings.CopyMaxLength("abc", 3, false, "..."));
@@ -286,7 +344,7 @@ namespace DX.Utils.Tests
             Assert.Equal("<P>hello</P>", Strings.InsureHtmlParagraph("<P>hello</P>"));
         }
 
-        [Fact(Skip = "BUG: already well-formed '<p>a</p><p>b</p>' gets a stray '</p>' inserted: '<p>a</p></p><p>b</p>'")]
+        [Fact]
         public void TwoWrappedParagraphs_AreUnchanged()
         {
             Assert.Equal("<p>a</p><p>b</p>", Strings.InsureHtmlParagraph("<p>a</p><p>b</p>"));
@@ -298,7 +356,7 @@ namespace DX.Utils.Tests
             Assert.Equal("<p>a</p><p>b</p>", Strings.InsureHtmlParagraph("<p>a</p>b"));
         }
 
-        [Fact(Skip = "BUG: an unclosed paragraph followed by another <p> gets a duplicate '<p>' inserted: 'a<p>b' -> '<p>a</p><p><p>b</p>'")]
+        [Fact]
         public void UnclosedParagraphs_AreClosedWithoutDuplicates()
         {
             Assert.Equal("<p>a</p><p>b</p>", Strings.InsureHtmlParagraph("a<p>b"));
@@ -359,7 +417,7 @@ namespace DX.Utils.Tests
                 Assert.Equal("5.000 Tb", Strings.FormatFileSize(5_000_000_000_000_000));
         }
 
-        [Theory(Skip = "BUG: thresholds use '>' instead of '>=', so exactly 1000 / 1,000,000 / ... bytes are shown as '1,000 bytes' / '1,000 Kb' instead of '1 Kb' / '1 Mb'")]
+        [Theory]
         [InlineData(1000L, "1 Kb")]
         [InlineData(1_000_000L, "1 Mb")]
         [InlineData(1_000_000_000L, "1 Gb")]
@@ -369,7 +427,7 @@ namespace DX.Utils.Tests
                 Assert.Equal(expected, Strings.FormatFileSize(size));
         }
 
-        [Fact(Skip = "BUG: long.MinValue * -1 overflows back to long.MinValue, producing a double minus sign: '--9,223,372,036,854,775,808 bytes'")]
+        [Fact]
         public void MinValue_DoesNotProduceDoubleMinus()
         {
             using (new CultureScope("en-US"))
@@ -437,7 +495,7 @@ namespace DX.Utils.Tests
             Assert.Equal(expected, Strings.MakeFileNameSEOSafe(input));
         }
 
-        [Fact(Skip = "BUG: a file name without an extension is returned untouched instead of being made SEO safe ('My Résumé' stays 'My Résumé')")]
+        [Fact]
         public void MakeFileNameSEOSafe_NoExtension_IsStillCleaned()
         {
             Assert.Equal("My-Resume", Strings.MakeFileNameSEOSafe("My Résumé"));

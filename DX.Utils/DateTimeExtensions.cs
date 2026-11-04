@@ -13,7 +13,7 @@ namespace DX.Utils
 		/// <returns></returns>
 		public static DateTime DateMin(this DateTime date)
 		{
-			var result = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
+			var result = date.Date; // preserves DateTimeKind
 			return result;
 		}
 		/// <summary>

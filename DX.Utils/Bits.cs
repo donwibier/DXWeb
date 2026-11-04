@@ -14,7 +14,7 @@ namespace DX.Utils
 		}
 		public static int BitClear(this int value, int flag)
 		{
-			return flag & (~flag);
+			return value & (~flag);
 		}
 
 		public static int BitToggle(this int value, int flag)
@@ -35,7 +35,7 @@ namespace DX.Utils
 		}
 		public static int Clear(int value, int flag)
 		{
-			return flag & (~flag);
+			return value & (~flag);
 		}
 
 		public static int Toggle(int value, int flag)
@@ -51,7 +51,7 @@ namespace DX.Utils
 		public static bool Has(ref int value, int flag, bool clear)
 		{
 			bool result = (Has(value, flag));
-			if (result)
+			if (result && clear)
 				value = Clear(value, flag);
 			return result;
 		}
