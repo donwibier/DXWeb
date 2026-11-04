@@ -198,7 +198,12 @@ namespace DX.Data.Xpo.Identity
                     var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
                     if (usr == null)
                         throw new InvalidOperationException($"User {userKey} does not exist.");
-                    usr.RolesList.Add(role);
+                    // through the link table: usr.RolesList.Add(role) makes XPO load every user of the role
+                    var link = XPManyToManyLink.Find(w, typeof(TXPOUser), typeof(TXPORole));
+                    if (link != null)
+                        link.Add(w, usr, role);
+                    else
+                        usr.RolesList.Add(role);
                 }
             });
         }
@@ -279,21 +284,29 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNull(claims);
 
+            var claimList = claims.ToList();
+            if (claimList.Count == 0)
+                return;
+
             await TransactionalExecAsync(async (s, w) => {
                 // the key as a value for the criteria
                 var userKey = ModelKey(user);
 
-                //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var userClaims = new XPCollection<TXPOClaim>(w, new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey))
-                        .Where(uc => claims.Any(cl => cl.Type == uc.ClaimType && cl.Value == uc.ClaimValue))
-                        .ToList();
-                foreach (var uc in userClaims)
+                // only the claims to remove are loaded: (type, value) pairs in the query, as ReplaceClaimAsync does
+                var claimMatches = claimList.Select(cl => CriteriaOperator.And(
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.ClaimType), cl.Type),
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.ClaimValue), cl.Value)));
+                var userClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.And(
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey),
+                        CriteriaOperator.Or(claimMatches)));
+                await userClaims.LoadAsync(cancellationToken);
+                var toDelete = userClaims.ToList();
+                foreach (var uc in toDelete)
                 {
                     uc.SetMemberValue("User", null);
                     //uc.InitializeUserClaim(null!, null!); //need to set XPUser prop to null;
                 }
-                await w.DeleteAsync(userClaims, cancellationToken);
+                await w.DeleteAsync(toDelete, cancellationToken);
             });
         }
 
@@ -306,11 +319,23 @@ namespace DX.Data.Xpo.Identity
 
             await TransactionalExecAsync(async (s, w) => {
 
-                //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var r = usr.RolesList.Cast<TXPORole>().FirstOrDefault(r => r.NormalizedName == normalizedRoleName);
-                if (r != null)
-                    usr.RolesList.Remove(r);
+                var userKey = ModelKey(user);
+                // through the link table: usr.RolesList.Remove(role) makes XPO load every user of the role
+                var link = XPManyToManyLink.Find(w, typeof(TXPOUser), typeof(TXPORole));
+                if (link != null)
+                {
+                    var links = link.Links(w, CriteriaOperator.And(link.OwnerIs(userKey),
+                        new BinaryOperator(link.OtherReference.Name + "." + nameof(IXPRole<TKey>.NormalizedName), normalizedRoleName)));
+                    await links.LoadAsync(cancellationToken);
+                    await w.DeleteAsync(links.Cast<object>().ToList(), cancellationToken);
+                }
+                else
+                {
+                    var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                    var r = usr?.RolesList.Cast<TXPORole>().FirstOrDefault(r => r.NormalizedName == normalizedRoleName);
+                    if (r != null)
+                        usr!.RolesList.Remove(r);
+                }
             });
         }
 
