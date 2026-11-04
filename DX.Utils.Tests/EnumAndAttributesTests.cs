@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using Xunit;
 
 namespace DX.Utils.Tests
@@ -115,6 +117,9 @@ namespace DX.Utils.Tests
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class DXUtilsTestMarkerAttribute : Attribute { }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class DXUtilsLateLoadMarkerAttribute : Attribute { }
+
     [DXUtilsTestMarker]
     public class Marked1 { }
     [DXUtilsTestMarker]
@@ -129,6 +134,24 @@ namespace DX.Utils.Tests
             Assert.Contains(typeof(Marked1), types);
             Assert.Contains(typeof(Marked2), types);
             Assert.DoesNotContain(typeof(Decorated), types);
+        }
+
+        [Fact]
+        public void GetTypesWith_FindsTypesInAssembliesLoadedAfterTheFirstCall()
+        {
+            // the first call caches the result for the assemblies loaded so far
+            Assert.Empty(Attributes.GetTypesWith<DXUtilsLateLoadMarkerAttribute>(false));
+
+            // then an assembly with a marked type is loaded, as a plugin or a lazy-loaded Blazor assembly would be
+            var assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("DXUtilsLateLoad" + Guid.NewGuid().ToString("N")), AssemblyBuilderAccess.Run);
+            var type = assembly.DefineDynamicModule("Main").DefineType("LateLoaded", TypeAttributes.Public | TypeAttributes.Class);
+            type.SetCustomAttribute(new CustomAttributeBuilder(typeof(DXUtilsLateLoadMarkerAttribute).GetConstructor(Type.EmptyTypes), new object[0]));
+            var created = type.CreateType();
+
+            var types = Attributes.GetTypesWith<DXUtilsLateLoadMarkerAttribute>(false).ToList();
+            Assert.Equal(new[] { created }, types);
+            // and the result stays cached while no new assembly loads
+            Assert.Same(Attributes.GetTypesWith<DXUtilsLateLoadMarkerAttribute>(false), Attributes.GetTypesWith<DXUtilsLateLoadMarkerAttribute>(false));
         }
 
         [Fact]
