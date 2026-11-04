@@ -5,6 +5,12 @@ Wires up `DX.Data.Xpo.Identity`'s abstract stores with [Mapster](https://github.
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** transitive, via `DX.Data.Xpo` (`26.1.*`)
 
+## Behaviour changes in 26.1.3.40
+
+- `AddXpoMapsterIdentityStores` no longer writes the identity mapping rules into `TypeAdapterConfig.GlobalSettings`. The stores use a mapper of their own: a copy of your application's Mapster config with the identity rules added, built when the first store is created (later changes to `GlobalSettings` are not seen by the stores).
+- If your own code maps identity types through `GlobalSettings` and relied on those rules, call `RegisterXPIdentityMapsterConfiguration()` yourself, or use `ApplyXPIdentityMapsterConfiguration(config)` to add them to a config of your own.
+- `LockoutEnd` is mapped to `LockoutEndDateUtc`, so lockouts are persisted. See the DX.Data.Xpo.Identity release notes for the security fix this version includes.
+
 ## Install
 
 ```

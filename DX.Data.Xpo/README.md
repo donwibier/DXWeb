@@ -5,6 +5,17 @@ XPO (DevExpress eXpressPersistent Objects) database configuration and the abstra
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** `DevExpress.Xpo` `26.1.*`
 
+## Behaviour changes in 26.1.3.40
+
+- `XPDataStore.UpdateAsync` with a default key fails instead of inserting a new row.
+- Update/Store results contain every item, in input order (they held only inserted items), with values saved by `OnSaving` copied back. A failed result's `Mode` is the mode of the failing item.
+- `DeleteAsync` returns a failed result instead of throwing for non-validation errors.
+- On a pooled (SQL) database `DeleteAsync` runs in a database level transaction on a connection of its own (`ExplicitUnitOfWork`). Override `protected virtual Task BeforeDeleteAsync(TDBModel dbModel, Session session)` to do work just before each object is deleted; changes it flushes are rolled back if the delete fails. In-memory and caching data layers keep using a normal `UnitOfWork`.
+- Batch Update/Store/Delete load all keys in one query instead of one per item.
+- `XpoDatabase.GetDataLayer(name)` honours the name (and throws for an unknown one); first use of a name from several threads creates one data layer; in-memory stores are no longer wrapped in a connection pool; `AddXpoUnitOfWork(connectionName)` uses the named connection.
+- `XpoDefault.UseFastAccessors = false` is only applied on .NET Framework.
+- `GeoHaversine` criteria are correct for distances over about 6,670 km (they returned about 20,002 km).
+
 ## Install
 
 ```

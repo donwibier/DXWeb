@@ -13,7 +13,10 @@ namespace DX.Utils
         }
         public static string GetRegExGroupValue(GroupCollection groups, string groupName, string defaultValue)
         {
-            return (groups[groupName] != null) ? groups[groupName].Value : defaultValue;
+            // GroupCollection[name] never returns null: missing or unmatched groups come back as an
+            // unsuccessful, empty Group, so check Success instead.
+            Group group = groups[groupName];
+            return (group != null && group.Success) ? group.Value : defaultValue;
         }
 
         /// <summary>

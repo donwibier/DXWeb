@@ -1,0 +1,190 @@
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using DevExpress.Xpo;
+using FluentValidation;
+using FluentValidation.Results;
+using Xunit;
+
+namespace DX.Data.Xpo.Tests
+{
+    public class DataResultTests
+    {
+        [Fact]
+        public void Default_IsNotSuccessfulAndEmpty()
+        {
+            var r = new DataResult<int, ProductModel>();
+            Assert.False(r.Success);
+            Assert.Equal(0, r.Key);
+            Assert.Null(r.Exception);
+            Assert.Null(r.Data);
+        }
+
+        [Fact]
+        public void NullError_MeansSuccess()
+        {
+            var r = new DataResult<int, ProductModel>(DataMode.Update, "Name", null);
+            Assert.True(r.Success);
+            Assert.Equal(DataMode.Update, r.Mode);
+            Assert.Null(r.Exception);
+        }
+
+        [Fact]
+        public void ValidationException_IsKeptAsIs()
+        {
+            var ve = new ValidationException(new[] { new ValidationFailure("Name", "required") });
+            var r = new DataResult<int, ProductModel>(DataMode.Create, "X", ve);
+            Assert.False(r.Success);
+            Assert.Same(ve, r.Exception);
+        }
+
+        [Fact]
+        public void OtherException_IsWrappedWithPropertyName()
+        {
+            var r = new DataResult<int, ProductModel>(DataMode.Delete, "Prop", new InvalidOperationException("outer"));
+            var f = Assert.Single(r.Exception.Errors);
+            Assert.Equal("Prop", f.PropertyName);
+            Assert.Equal("outer", f.ErrorMessage);
+        }
+
+        [Fact]
+        public void OtherException_UsesInnerExceptionMessage()
+        {
+            var r = new DataResult<int, ProductModel>(DataMode.Delete, "Prop",
+                new InvalidOperationException("outer", new ArgumentException("inner")));
+            Assert.Equal("inner", Assert.Single(r.Exception.Errors).ErrorMessage);
+        }
+
+        [Fact]
+        public void KeyOnlyResult_IsObjectTyped()
+        {
+            IDataResult<string, object> r = new DataResult<string> { Key = "k", Data = new object[] { 1 } };
+            Assert.Equal("k", r.Key);
+            Assert.Single(r.Data);
+        }
+    }
+
+    public class PredicateBuilderTests
+    {
+        private static readonly ProductModel[] Items =
+        {
+            new ProductModel { Id = 1, Name = "A", Price = 1 },
+            new ProductModel { Id = 2, Name = "B", Price = 5 },
+            new ProductModel { Id = 3, Name = "C", Price = 10 },
+        };
+
+        private static int[] Ids(Expression<Func<ProductModel, bool>> e) => Items.Where(e.Compile()).Select(i => i.Id).ToArray();
+
+        [Fact]
+        public void TrueAndFalse()
+        {
+            Assert.Equal(new[] { 1, 2, 3 }, Ids(PredicateBuilder.True<ProductModel>()));
+            Assert.Empty(Ids(PredicateBuilder.False<ProductModel>()));
+        }
+
+        [Fact]
+        public void And_WithDifferentParameterInstances_Compiles()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Expression<Func<ProductModel, bool>> b = x => x.Price < 10;
+            Assert.Equal(new[] { 2 }, Ids(a.And(b)));
+        }
+
+        [Fact]
+        public void Or_WithDifferentParameterInstances_Compiles()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Name == "A";
+            Expression<Func<ProductModel, bool>> b = x => x.Name == "C";
+            Assert.Equal(new[] { 1, 3 }, Ids(a.Or(b)));
+        }
+
+        [Fact]
+        public void Chained_FromTrueAndFalse()
+        {
+            var and = PredicateBuilder.True<ProductModel>().And(p => p.Price >= 5).And(q => q.Name != "C");
+            Assert.Equal(new[] { 2 }, Ids(and));
+            var or = PredicateBuilder.False<ProductModel>().Or(p => p.Id == 1).Or(q => q.Id == 3);
+            Assert.Equal(new[] { 1, 3 }, Ids(or));
+            var mixed = PredicateBuilder.True<ProductModel>().And(PredicateBuilder.False<ProductModel>().Or(p => p.Id == 2));
+            Assert.Equal(new[] { 2 }, Ids(mixed));
+        }
+
+        [Fact]
+        public void Composed_ExpressionHasSingleParameter()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Expression<Func<ProductModel, bool>> b = x => x.Price < 10;
+            var c = a.And(b);
+            Assert.Single(c.Parameters);
+            Assert.Same(a.Parameters[0], c.Parameters[0]);
+        }
+
+        [Fact]
+        public void Composed_InlinesSecondOperandWithoutInvoke()
+        {
+            // a query provider (XPO, EF) can only translate the composed predicate when the second operand is
+            // inlined with the parameter replaced, rather than wrapped in Expression.Invoke
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Expression<Func<ProductModel, bool>> b = x => x.Price < 10;
+            foreach (var composed in new[] { a.And(b), a.Or(b) })
+            {
+                var body = (BinaryExpression)composed.Body;
+                Assert.NotEqual(ExpressionType.Invoke, body.Right.NodeType);
+                var right = (BinaryExpression)body.Right;
+                Assert.Same(a.Parameters[0], ((MemberExpression)right.Left).Expression);
+            }
+        }
+
+        [Fact]
+        public void Composed_ReplacesParameterInsideNestedLambdas()
+        {
+            var allowed = new[] { 1, 3 };
+            Expression<Func<ProductModel, bool>> a = p => p.Price >= 1;
+            Expression<Func<ProductModel, bool>> b = x => allowed.Any(id => id == x.Id);
+            Assert.Equal(new[] { 1, 3 }, Ids(a.And(b)));
+        }
+
+        [Fact]
+        public void Composed_WithItself_Works()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Assert.Equal(new[] { 2, 3 }, Ids(a.And(a)));
+        }
+
+        [Fact]
+        public void Composed_NullSecondOperand_Throws()
+        {
+            Expression<Func<ProductModel, bool>> a = p => p.Price > 1;
+            Assert.Throws<ArgumentNullException>(() => a.And(null));
+            Assert.Throws<ArgumentNullException>(() => a.Or(null));
+        }
+
+        [Fact]
+        public void ComposedPredicate_TranslatesInXpoQuery()
+        {
+            var db = new InMemoryDb();
+            db.AddProduct("A", 1m);
+            db.AddProduct("B", 5m);
+            db.AddProduct("C", 10m);
+            Expression<Func<Product, bool>> a = p => p.Price > 1;
+            Expression<Func<Product, bool>> b = x => x.Price < 10;
+            using var uow = db.NewUnitOfWork();
+            var names = uow.Query<Product>().Where(a.And(b)).Select(p => p.Name).ToList();
+            Assert.Equal(new[] { "B" }, names);
+        }
+
+        [Fact]
+        public void SameParameterInstances_TranslatableInXpo()
+        {
+            var db = new InMemoryDb();
+            db.AddProduct("A", 1m);
+            db.AddProduct("B", 20m);
+            var p = Expression.Parameter(typeof(Product), "p");
+            var a = Expression.Lambda<Func<Product, bool>>(Expression.GreaterThan(Expression.Property(p, nameof(Product.Price)), Expression.Constant(0m)), p);
+            var b = Expression.Lambda<Func<Product, bool>>(Expression.LessThan(Expression.Property(p, nameof(Product.Price)), Expression.Constant(10m)), p);
+            using var uow = db.NewUnitOfWork();
+            Assert.Equal("A", Assert.Single(uow.Query<Product>().Where(a.And(b)).ToList()).Name);
+            Assert.Equal(2, uow.Query<Product>().Where(a.Or(b)).Count());
+        }
+    }
+}

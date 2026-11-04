@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>26.1.3.39</Version>
-		<FileVersion>26.1.3.39</FileVersion>
+		<Version>26.1.3.40</Version>
+		<FileVersion>26.1.3.40</FileVersion>
 		<Authors>Don Wibier (DevExpress)</Authors>
 		<Description>Several XPO Related Helper classes and abstract DX.Data.IDataStore implementation for use with XPO with FluentValidation and no Mapping logic</Description>
 		<Copyright>Copyright (c) 2024 Don Wibier</Copyright>
@@ -17,6 +17,7 @@
 		<PackageTags>DXWeb Wibier DevExpress XPO ORM Microsoft Identity Advantage SQL Anywhere Sybase DB2 Interbase/Firebird MS-Access Oracle Pervasive PostgreSQL SQLite VistaDB MS-SQL MySQL</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageReleaseNotes>
+			26.1.3.40: Bug fixes found by a new unit test suite (DX.Data.Xpo.Tests). Fixed: GeoHaversine criteria returned about 20,002 km for any distance over about 6,670 km (Min(1, x) compared as int); XPDataStore.UpdateAsync with a default key inserted a new row (now fails); Update/Store results only contained inserted items (now every item, in order, with values saved by OnSaving copied back); failures always reported DataMode.Create; DeleteAsync threw on non-validation errors (now a failed result); XpoDatabase.GetDataLayer(name) ignored its argument; concurrent first use of a data layer name created several data layers; in-memory stores were wrapped in a connection pool (each pooled connection an empty database); AddXpoUnitOfWork(connectionName) ignored the name. Performance: batch Update/Store/Delete load all keys in one query instead of one per item; new objects are created through a cached constructor delegate; XpoDefault.UseFastAccessors is only turned off on .NET Framework. New: DeleteAsync runs in a database level transaction on a connection of its own when the data layer is pooled (SQL databases), with a protected virtual BeforeDeleteAsync hook whose flushed work is rolled back with a failed delete. Behaviour changes: UpdateAsync with a default key fails; Update/Store results contain all items; a failed result's Mode can be Update; DeleteAsync returns failed results instead of throwing; GetDataLayer with an unknown name throws.
 			26.1.3.39: System.Security.Cryptography.Xml 8.0.4 -> 8.0.5: DevExpress.Xpo 26.1.6 asks for 8.0.5, so 8.0.4 was a downgrade (NU1605) that broke every fresh restore.
 			26.1.3.38: Override transitive System.Security.Cryptography.Xml 8.0.3 -> 8.0.4 (pulled in via DevExpress.Xpo)
 				to resolve NU1903 (GHSA-8q5v-6pqq-x66h, -cvvh-rhrc-wg4q, -g8r8-53c2-pm3f, -mmjf-rqrv-855v, -23rf-6693-g89p).

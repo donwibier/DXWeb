@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DX.Utils
@@ -19,12 +21,30 @@ namespace DX.Utils
 
     public class Attributes
     {
-        private static readonly Dictionary<string, IEnumerable<Type>> typeDictionary = new Dictionary<string, IEnumerable<Type>>();
+        // Materialised results per (attribute type, inherit); thread safe. Each entry remembers which assemblies it has
+        // scanned, so an assembly loaded later (plugins, lazy-loaded Blazor assemblies) is scanned on the next call
+        private static readonly ConcurrentDictionary<string, TypeScan> typeDictionary = new ConcurrentDictionary<string, TypeScan>();
+
+        // bumped on every assembly load in this AppDomain: entries with an older version look for new assemblies
+        private static int assemblyVersion;
+
+        static Attributes()
+        {
+            AppDomain.CurrentDomain.AssemblyLoad += (s, e) => Interlocked.Increment(ref assemblyVersion);
+        }
+
+        private sealed class TypeScan
+        {
+            public readonly object Lock = new object();
+            public readonly HashSet<Assembly> Scanned = new HashSet<Assembly>();
+            public volatile IEnumerable<Type> Types = Array.AsReadOnly(new Type[0]);
+            public volatile int Version = -1;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Gets the types withs in this collection. </summary>
         ///
-        /// <remarks>   Don, 3-2-2016. </remarks>
+        /// <remarks>   Don, 3-2-2016. Results are cached; assemblies loaded after an earlier call are picked up. </remarks>
         ///
         /// <typeparam name="TAttribute">   Type of the attribute. </typeparam>
         /// <param name="inherit">  true to inherit. </param>
@@ -38,15 +58,41 @@ namespace DX.Utils
                               where TAttribute : System.Attribute
         {
             string key = String.Format("{0}${1}", typeof(TAttribute).AssemblyQualifiedName, inherit);
+            var scan = typeDictionary.GetOrAdd(key, k => new TypeScan());
 
-            if (!typeDictionary.ContainsKey(key))
+            // read the version before listing assemblies: a load during the scan bumps it, so the next call rescans
+            int version = Volatile.Read(ref assemblyVersion);
+            if (scan.Version == version)
+                return scan.Types;
+
+            lock (scan.Lock)
             {
-                typeDictionary[key] = from a in AppDomain.CurrentDomain.GetAssemblies()
-                                      from t in a.GetTypes()
-                                      where t.IsDefined(typeof(TAttribute), inherit)
-                                      select t;
+                if (scan.Version != version)
+                {
+                    var found = new List<Type>(scan.Types);
+                    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        if (!scan.Scanned.Add(assembly))
+                            continue;
+                        found.AddRange(GetLoadableTypes(assembly).Where(t => t.IsDefined(typeof(TAttribute), inherit)));
+                    }
+                    scan.Types = found.AsReadOnly();
+                    scan.Version = version;
+                }
+                return scan.Types;
             }
-            return typeDictionary[key];
+        }
+
+        private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,9 +114,8 @@ namespace DX.Utils
         public static IEnumerable<TResult> GetAttributeData<TAttribute, TResult>(Type type, bool inherit, AttributeDataResult<TAttribute, TResult> result)
             where TAttribute : System.Attribute
         {
-            var res = from a in Attribute.GetCustomAttributes(type, inherit)
-                      where typeof(Attribute).IsAssignableFrom(typeof(TAttribute))                            
-                      select (TResult)result((TAttribute)Attribute.GetCustomAttributes(type).FirstOrDefault<Attribute>());
+            var res = from a in Attribute.GetCustomAttributes(type, typeof(TAttribute), inherit)
+                      select result((TAttribute)a);
             return res;
         }
 
@@ -102,6 +147,7 @@ namespace DX.Utils
         public RequiredIfComparison Comparison { get; private set; }
         public object Value { get; private set; }
         public RequiredIfAttribute(string otherProperty, RequiredIfComparison comparison, object value)
+            : base(DefaultErrorMessageFormatString)
         {
             if (string.IsNullOrEmpty(otherProperty))
             {
@@ -140,7 +186,7 @@ namespace DX.Utils
 
                     if (Validate(propertyValue))
                     {
-                        return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                        return CreateFailure(validationContext);
                     }
                 }
                 catch (Exception)
@@ -152,14 +198,22 @@ namespace DX.Utils
                         var property = validationContext.ObjectInstance.GetType().GetProperty(prop.Last());
                         var propertyValue = property.GetValue(validationContext.ObjectInstance, null);
 
-                        if (!Validate(propertyValue))
+                        if (Validate(propertyValue))
                         {
-                            return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+                            return CreateFailure(validationContext);
                         }
                     }
                 }
             }
             return ValidationResult.Success;
+        }
+
+        private ValidationResult CreateFailure(ValidationContext validationContext)
+        {
+            string message = FormatErrorMessage(validationContext.DisplayName);
+            return string.IsNullOrEmpty(validationContext.MemberName)
+                ? new ValidationResult(message)
+                : new ValidationResult(message, new[] { validationContext.MemberName });
         }
     }
 #endif

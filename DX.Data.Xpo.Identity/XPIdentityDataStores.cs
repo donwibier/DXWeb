@@ -28,7 +28,8 @@ namespace DX.Data.Xpo.Identity
 {
     public abstract class XPBaseUserStore<TKey, TUser, TRole, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim,
                                     TXPOUser, TXPORole, TXPOLogin, TXPOClaim, TXPOToken> :
-            XPDataStore<TKey, TUser, TXPOUser>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>
+            XPDataStore<TKey, TUser, TXPOUser>, IQueryableUserStore<TKey, TUser, TUserRole, TUserToken>,
+            IXPConcurrencyStampStore<TKey, TUser>
                 where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
                 where TUser : IdentityUser<TKey>, new()
@@ -63,6 +64,57 @@ namespace DX.Data.Xpo.Identity
         public override TKey ModelKey(TUser model) => model.Id;
         public override void SetModelKey(TUser model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPOUser model) => model.Id;
+
+        /// <summary>
+        /// Removes the role links ahead of the delete (inside its database transaction), so deleting does not load every
+        /// member of each role
+        /// </summary>
+        protected override Task BeforeDeleteAsync(TXPOUser dbModel, Session session)
+        {
+            XPManyToManyLink.DeleteLinksBeforeDelete(session, dbModel);
+            return base.BeforeDeleteAsync(dbModel, session);
+        }
+
+        // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
+        private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();
+
+        /// <summary>
+        /// Updates the user if its ConcurrencyStamp still matches the stored one, and gives it a new stamp (as the EF Core
+        /// UserStore does); a stale copy fails with an <see cref="XPConcurrencyException"/> in the result
+        /// </summary>
+        public virtual async Task<IDataResult<TKey, TUser>> UpdateWithConcurrencyCheckAsync(TUser user, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+
+            var previousStamp = user.ConcurrencyStamp;
+            _checkConcurrencyStamp.Value = true;
+            IDataResult<TKey, TUser> result;
+            try
+            {
+                result = await UpdateAsync(user);
+            }
+            finally
+            {
+                _checkConcurrencyStamp.Value = false;
+            }
+            if (!result.Success)
+                user.ConcurrencyStamp = previousStamp;
+            return result;
+        }
+
+        protected override TXPOUser ToDBModel(TUser source, TXPOUser target)
+        {
+            // runs in the update's transaction with target freshly loaded: compare and renew the stamp here
+            if (_checkConcurrencyStamp.Value && !target.Session.IsNewObject(target))
+            {
+                if (!string.Equals(target.ConcurrencyStamp, source.ConcurrencyStamp, StringComparison.Ordinal))
+                    throw new XPConcurrencyException($"{typeof(TUser).Name} {ModelKey(source)} was changed since it was loaded (ConcurrencyStamp mismatch)");
+                source.ConcurrencyStamp = Guid.NewGuid().ToString();
+            }
+            return base.ToDBModel(source, target);
+        }
 
 		//     public virtual async Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
 		//     {
@@ -112,15 +164,16 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(login);
 
             await TransactionalExecAsync(async (s, w) => {
+                var userKey = ModelKey(user);
                 //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                //get current assigned claims
-                var dbLogins = new XPCollection<TXPOLogin>(w, 
-                                    CriteriaOperator.FromLambda<TXPOLogin>(lg => lg.UserId.Equals(user.Id) && 
-                                                                                lg.ProviderKey == login.ProviderKey &&
-                                                                                lg.LoginProvider == login.LoginProvider));
+                var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                // is this login already assigned? (a criteria string: TKey has no == XPO could translate, and
+                // lg.UserId.Equals(..) becomes an unknown custom function "Equals")
+                var existing = await w.FindObjectAsync<TXPOLogin>(
+                                    CriteriaOperator.Parse("UserId == ? AND ProviderKey == ? AND LoginProvider == ?",
+                                                            userKey, login.ProviderKey, login.LoginProvider), cancellationToken);
 
-                if (usr != null && dbLogins.Count() == 0)
+                if (usr != null && existing == null)
                 {
                     var newLogin = Activator.CreateInstance(typeof(TXPOLogin), w) as TXPOLogin;
                     newLogin!.InitializeUserLogin(usr, login);
@@ -143,18 +196,24 @@ namespace DX.Data.Xpo.Identity
             //    return;
 
             await TransactionalExecAsync(async (s, w) => {
+                var userKey = ModelKey(user);
+                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("NormalizedName == ?", normalizedRoleName), cancellationToken);
+                // as the EF Core UserStore: an unknown role is an error, not a silent no-op
+                if (role == null)
+                    throw new InvalidOperationException($"Role {normalizedRoleName} does not exist.");
+
                 //check if user already in role
-                if ((await w.FindObjectAsync<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", ModelKey(user), normalizedRoleName))) == null)
+                if ((await w.FindObjectAsync<TXPOUser>(CriteriaOperator.Parse("Id == ? AND (Roles[NormalizedName == ?].Count() > 0)", userKey, normalizedRoleName), cancellationToken)) == null)
                 {
-                    var role = w.FindObject(typeof(TXPORole),
-                        CriteriaOperator.Parse("(NormalizedName == ?)", normalizedRoleName)) as TXPORole;
-                    if (role != null)
-                    {
-                        //user not in role
-                        var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user));
+                    var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                    if (usr == null)
+                        throw new InvalidOperationException($"User {userKey} does not exist.");
+                    // through the link table: usr.RolesList.Add(role) makes XPO load every user of the role
+                    var link = XPManyToManyLink.Find(w, typeof(TXPOUser), typeof(TXPORole));
+                    if (link != null)
+                        link.Add(w, usr, role);
+                    else
                         usr.RolesList.Add(role);
-                        //return;
-                    }
                 }
             });
         }
@@ -186,7 +245,7 @@ namespace DX.Data.Xpo.Identity
             var result = await TransactionalExecAsync(async (s, w) => {
 
                 var users = new XPCollection<TXPOUser>(w,
-                    CriteriaOperator.Parse("Claims[ClaimType == ? AND ClaimValue ==?])", claim.Type, claim.Value),                     
+                    CriteriaOperator.Parse("Claims[ClaimType == ? AND ClaimValue == ?]", claim.Type, claim.Value),                     
                     new SortProperty(nameof(IXPUser<TKey>.UserName), SortingDirection.Ascending));
                 await users.LoadAsync(cancellationToken);
 
@@ -235,21 +294,29 @@ namespace DX.Data.Xpo.Identity
             ThrowIfNull(user);
             ThrowIfNull(claims);
 
+            var claimList = claims.ToList();
+            if (claimList.Count == 0)
+                return;
+
             await TransactionalExecAsync(async (s, w) => {
                 // the key as a value for the criteria
                 var userKey = ModelKey(user);
 
-                //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var userClaims = new XPCollection<TXPOClaim>(w, new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey))
-                        .Where(uc => claims.Any(cl => cl.Type == uc.ClaimType && cl.Value == uc.ClaimValue))
-                        .ToList();
-                foreach (var uc in userClaims)
+                // only the claims to remove are loaded: (type, value) pairs in the query, as ReplaceClaimAsync does
+                var claimMatches = claimList.Select(cl => CriteriaOperator.And(
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.ClaimType), cl.Type),
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.ClaimValue), cl.Value)));
+                var userClaims = new XPCollection<TXPOClaim>(w, CriteriaOperator.And(
+                        new BinaryOperator(nameof(IXPUserClaim<TKey>.UserId), userKey),
+                        CriteriaOperator.Or(claimMatches)));
+                await userClaims.LoadAsync(cancellationToken);
+                var toDelete = userClaims.ToList();
+                foreach (var uc in toDelete)
                 {
                     uc.SetMemberValue("User", null);
                     //uc.InitializeUserClaim(null!, null!); //need to set XPUser prop to null;
                 }
-                await w.DeleteAsync(userClaims, cancellationToken);
+                await w.DeleteAsync(toDelete, cancellationToken);
             });
         }
 
@@ -262,11 +329,23 @@ namespace DX.Data.Xpo.Identity
 
             await TransactionalExecAsync(async (s, w) => {
 
-                //get user
-                var usr = await w.GetObjectByKeyAsync<TXPOUser>(ModelKey(user), cancellationToken);
-                var r = usr.RolesList.Cast<TXPORole>().FirstOrDefault(r => r.NormalizedName == normalizedRoleName);
-                if (r != null)
-                    usr.RolesList.Remove(r);
+                var userKey = ModelKey(user);
+                // through the link table: usr.RolesList.Remove(role) makes XPO load every user of the role
+                var link = XPManyToManyLink.Find(w, typeof(TXPOUser), typeof(TXPORole));
+                if (link != null)
+                {
+                    var links = link.Links(w, CriteriaOperator.And(link.OwnerIs(userKey),
+                        new BinaryOperator(link.OtherReference.Name + "." + nameof(IXPRole<TKey>.NormalizedName), normalizedRoleName)));
+                    await links.LoadAsync(cancellationToken);
+                    await w.DeleteAsync(links.Cast<object>().ToList(), cancellationToken);
+                }
+                else
+                {
+                    var usr = await w.GetObjectByKeyAsync<TXPOUser>(userKey, cancellationToken);
+                    var r = usr?.RolesList.Cast<TXPORole>().FirstOrDefault(r => r.NormalizedName == normalizedRoleName);
+                    if (r != null)
+                        usr!.RolesList.Remove(r);
+                }
             });
         }
 
@@ -324,12 +403,9 @@ namespace DX.Data.Xpo.Identity
             var result = await TransactionalExecAsync(async (s, w) => {
 
                 TUserRole r = null!;
-                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("Id == ? AND Users[Id == ?]", roleId, userId));
+                var role = await w.FindObjectAsync<TXPORole>(CriteriaOperator.Parse("Id == ? AND Users[Id == ?]", roleId, userId), cancellationToken);
                 if (role != null)
-                {                    
                     r = new TUserRole() { UserId = userId, RoleId = role.Id };
-                    MapTo(role, r);                    
-                }
                 return r;
             });
             return result!;
@@ -344,7 +420,7 @@ namespace DX.Data.Xpo.Identity
             await TransactionalExecAsync(async (s, w) => {                
                 var tk = await w.FindObjectAsync<TXPOToken>(
                                             CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ? AND [Value] == ?", 
-                                                    token.UserId, token.LoginProvider, token.Name, token.Value));
+                                                    token.UserId, token.LoginProvider, token.Name, token.Value), cancellationToken);
                 if (tk != null)
                 {
                     tk.SetMemberValue("User", null);
@@ -464,7 +540,7 @@ namespace DX.Data.Xpo.Identity
 	}
 
 	public abstract class XPBaseRoleStore<TKey, TRole, TRoleClaim, TXPORole, TXPOClaim> : XPDataStore<TKey, TRole, TXPORole>, 
-            IQueryableRoleStore<TKey, TRole>
+            IQueryableRoleStore<TKey, TRole>, IXPConcurrencyStampStore<TKey, TRole>
         where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
         where TRole : IdentityRole<TKey>, new()
@@ -484,6 +560,57 @@ namespace DX.Data.Xpo.Identity
         public override TKey ModelKey(TRole model) => model.Id;
         public override void SetModelKey(TRole model, TKey key) => model.Id = key;
         protected override TKey DBModelKey(TXPORole model) => model.Id;
+
+        /// <summary>
+        /// Removes the role links ahead of the delete (inside its database transaction), so deleting does not load every
+        /// member of each role
+        /// </summary>
+        protected override Task BeforeDeleteAsync(TXPORole dbModel, Session session)
+        {
+            XPManyToManyLink.DeleteLinksBeforeDelete(session, dbModel);
+            return base.BeforeDeleteAsync(dbModel, session);
+        }
+
+        // set (for the current async flow only) while UpdateWithConcurrencyCheckAsync runs
+        private readonly AsyncLocal<bool> _checkConcurrencyStamp = new AsyncLocal<bool>();
+
+        /// <summary>
+        /// Updates the role if its ConcurrencyStamp still matches the stored one, and gives it a new stamp (as the EF Core
+        /// RoleStore does); a stale copy fails with an <see cref="XPConcurrencyException"/> in the result
+        /// </summary>
+        public virtual async Task<IDataResult<TKey, TRole>> UpdateWithConcurrencyCheckAsync(TRole role, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(role);
+
+            var previousStamp = role.ConcurrencyStamp;
+            _checkConcurrencyStamp.Value = true;
+            IDataResult<TKey, TRole> result;
+            try
+            {
+                result = await UpdateAsync(role);
+            }
+            finally
+            {
+                _checkConcurrencyStamp.Value = false;
+            }
+            if (!result.Success)
+                role.ConcurrencyStamp = previousStamp;
+            return result;
+        }
+
+        protected override TXPORole ToDBModel(TRole source, TXPORole target)
+        {
+            // runs in the update's transaction with target freshly loaded: compare and renew the stamp here
+            if (_checkConcurrencyStamp.Value && !target.Session.IsNewObject(target))
+            {
+                if (!string.Equals(target.ConcurrencyStamp, source.ConcurrencyStamp, StringComparison.Ordinal))
+                    throw new XPConcurrencyException($"{typeof(TRole).Name} {ModelKey(source)} was changed since it was loaded (ConcurrencyStamp mismatch)");
+                source.ConcurrencyStamp = Guid.NewGuid().ToString();
+            }
+            return base.ToDBModel(source, target);
+        }
 
 		public async Task<TRole?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
 		{
@@ -673,7 +800,7 @@ namespace DX.Data.Xpo.Identity
 	}
 
 	public abstract class XPBaseUserTokenStore<TKey, TUserToken, TXPOUserToken> : XPDataStore<TKey, TUserToken, TXPOUserToken>,
-			IQueryableUserTokenStore<TKey, TUserToken>
+			IQueryableUserTokenStore<TKey, TUserToken>, IXPUserTokenValueStore<TKey>
 		where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
 		where TUserToken : IdentityUserToken<TKey>, new()
@@ -701,6 +828,33 @@ namespace DX.Data.Xpo.Identity
 
 			var results = await FindAsync(CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ?", userId, loginProvider, name));
 			return results.FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Changes the value of the user's token (loginProvider, name) in the database
+		/// </summary>
+		/// <returns>false if the user has no such token</returns>
+		public virtual async Task<bool> SetTokenValueAsync(TKey userId, string loginProvider, string name, string? value, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			ThrowIfNull(userId);
+			ThrowIfNullOrEmpty(loginProvider);
+			ThrowIfNullOrEmpty(name);
+
+			var result = await TransactionalExecAsync(async (s, w) =>
+			{
+				var tokens = new XPCollection<TXPOUserToken>(w,
+					CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ?", userId, loginProvider, name));
+				await tokens.LoadAsync(cancellationToken);
+				foreach (var tk in tokens)
+				{
+					tk.Value = value!;
+					await w.SaveAsync(tk, cancellationToken);
+				}
+				return tokens.Count > 0;
+			});
+			return result;
 		}
 
 	}
@@ -732,10 +886,16 @@ namespace DX.Data.Xpo.Identity
 			ThrowIfDisposed();
 			ThrowIfNull(roleId);
 
+			return LoadRoleClaimsAsync(roleId, cancellationToken);
+		}
+
+		async Task<List<Claim>> LoadRoleClaimsAsync(TKey roleId, CancellationToken cancellationToken)
+		{
 			using (var wrk = new Session(DataLayer))
 			{
 				var results = new XPCollection<TXPORoleClaim>(wrk, CriteriaOperator.Parse("[Role.Id] == ?", roleId));
-				return Task.FromResult(results.Select(cl => new Claim(cl.ClaimType, cl.ClaimValue)).ToList());
+				await results.LoadAsync(cancellationToken);
+				return results.Select(cl => new Claim(cl.ClaimType, cl.ClaimValue)).ToList();
 			}
 		}
 

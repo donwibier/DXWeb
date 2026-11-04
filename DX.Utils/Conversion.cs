@@ -314,9 +314,11 @@ namespace DX.Utils
 			if (configPairs == null || configPairs.Length == 0)
 				return false;
 
-			var connStringParts = configPairs.Select(t => t.Split(configOptionValueSeparators, 2))
-					.ToDictionary(t => t.Length > 0 ? t[0].Trim() : string.Empty, 
-								  t => t.Length > 1 ? t[1].Trim() : string.Empty, StringComparer.InvariantCultureIgnoreCase);
+			// Duplicate keys (e.g. blank '; ;' entries or a key repeated with different case) must not
+			// throw; like connection strings, the last occurrence wins.
+			var connStringParts = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+			foreach (var t in configPairs.Select(p => p.Split(configOptionValueSeparators, 2)))
+				connStringParts[t.Length > 0 ? t[0].Trim() : string.Empty] = t.Length > 1 ? t[1].Trim() : string.Empty;
 
 			return connStringParts.TryGetValue(configOption, out result);
 		}

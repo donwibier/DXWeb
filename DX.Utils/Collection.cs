@@ -190,7 +190,8 @@ namespace DX.Utils
                 if (item is CollectionItem)
                     ((CollectionItem)item).collection = null;
             }
-            base.List.Clear();
+            // CollectionBase.Clear() empties the inner list after OnClear returns; calling
+            // List.Clear() here would re-enter OnClear and recurse forever.
             base.OnClear();
         }
 
@@ -232,7 +233,8 @@ namespace DX.Utils
                     item.collection = null;
             }
             item = EnsureItemNotNull(newValue);
-            base.List[index] = item;
+            // CollectionBase stores newValue in the inner list after OnSet returns; assigning
+            // List[index] here would re-enter OnSet and recurse forever.
             SetCollection(item);
         }
 
@@ -425,7 +427,8 @@ namespace DX.Utils
         {
             if (disposing)
             {
-                foreach (CollectionItem item in List)
+                // Iterate over a snapshot: each item's Dispose removes it from this collection.
+                foreach (CollectionItem item in InnerList.ToArray())
                     ((IDisposable)item).Dispose();
             }
         }

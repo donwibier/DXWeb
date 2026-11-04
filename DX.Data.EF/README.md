@@ -5,6 +5,15 @@ Abstract `DX.Data.IDataStore` implementation backed by Entity Framework (EF Core
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** none — this package works with a plain EF Core `DbContext` and has nothing to do with XPO.
 
+## Behaviour changes in 26.1.3.37
+
+- Batches are all-or-nothing: one `SaveChanges` and one commit per batch (before, any batch of two or more items threw after the first items were saved).
+- Entities touched by a failed operation are detached from the `DbContext`, so a failure no longer poisons later saves.
+- `GetByKey` reads without tracking: it no longer returns tracked instances and does not see unsaved changes made directly on the context.
+- UPDATE statements contain only the changed columns; an unchanged item issues no UPDATE.
+- `UpdateAsync` with an empty key fails instead of inserting; batch results hold every item; an empty batch returns no items; `DeleteAsync` returns a failed result for database errors.
+- `EFDatabase.Execute(..., transactional: false)` keeps the work's own `SaveChanges`; `TransactionalExecAsync` commits even when the work already saved.
+
 ## Install
 
 ```

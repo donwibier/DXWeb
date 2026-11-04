@@ -143,18 +143,6 @@ namespace DX.Data.Xpo
             return result;
         }
 
-        class InsertHelper
-        {
-            public InsertHelper(TModel model, ValidationResult insertingResult, IDataResult<TKey, TModel> insertedResult)
-            {
-                Model = model;
-                InsertingResult = insertingResult;
-                InsertedResult = insertedResult;
-            }
-            public TModel Model { get; private set; }
-            public ValidationResult InsertingResult { get; private set; }
-            public IDataResult<TKey, TModel> InsertedResult { get; private set; }
-        }
         protected virtual ValidationException CreateValidationException(TModel model, ValidationResult validationResult)
         {
             var err = new ValidationException("Validation Failed", validationResult.Errors);            
@@ -164,6 +152,64 @@ namespace DX.Data.Xpo
         protected enum StoreMode { Create, Update, Store }
         protected TKey EmptyKeyValue => default!;
 
+        private bool IsEmptyKey(TKey key) => key == null || key.Equals(EmptyKeyValue);
+
+        // public TDBModel(Session session) constructor, compiled once per TDBModel; null when there is none
+        // (CreateDBModel then falls back to Activator so the exception is the same as before)
+        private static readonly Lazy<Func<Session, TDBModel>?> dbModelFactory = new Lazy<Func<Session, TDBModel>?>(() =>
+        {
+            var ctor = typeof(TDBModel).GetConstructor(new[] { typeof(Session) });
+            if (ctor == null || typeof(TDBModel).IsAbstract)
+                return null;
+            var p = System.Linq.Expressions.Expression.Parameter(typeof(Session), "session");
+            return System.Linq.Expressions.Expression.Lambda<Func<Session, TDBModel>>(
+                System.Linq.Expressions.Expression.New(ctor, p), p).Compile();
+        });
+
+        private static TDBModel CreateDBModel(Session session)
+        {
+            var factory = dbModelFactory.Value;
+            if (factory != null)
+                return factory(session);
+            return (Activator.CreateInstance(typeof(TDBModel), session) as TDBModel)!;
+        }
+
+        private bool? _usesDefaultXPOGetByKey;
+
+        /// <summary>
+        /// Loads the objects with the given keys into the session with one round-trip, so the XPOGetByKey calls
+        /// that follow are served from the session's identity map. Only done when XPOGetByKey is not overridden,
+        /// because an override may interpret the keys differently.
+        /// The caller must keep the returned objects referenced until it is done with the batch: with XPO's default
+        /// (weak) identity map, objects nobody references can be collected, and XPOGetByKey would load them again.
+        /// </summary>
+        protected virtual System.Collections.ICollection XPOPrefetchByKeys(IEnumerable<TKey> keys, Session session)
+        {
+            if (!UsesDefaultXPOGetByKey())
+                return Array.Empty<object>();
+            var list = new List<object>();
+            var seen = new HashSet<TKey>();
+            foreach (var key in keys)
+            {
+                if (!IsEmptyKey(key) && seen.Add(key))
+                    list.Add(key!);
+            }
+            if (list.Count > 1)
+                return session.GetObjectsByKey(session.GetClassInfo<TDBModel>(), list, false);
+            return Array.Empty<object>();
+        }
+
+        private bool UsesDefaultXPOGetByKey()
+        {
+            if (_usesDefaultXPOGetByKey == null)
+            {
+                var m = GetType().GetMethod(nameof(XPOGetByKey), BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, new[] { typeof(TKey), typeof(Session) }, null);
+                _usesDefaultXPOGetByKey = m != null && m.DeclaringType == typeof(XPDataStore<TKey, TModel, TDBModel>);
+            }
+            return _usesDefaultXPOGetByKey.Value;
+        }
+
         protected async virtual Task<IDataResult<TKey, TModel>> StoreAsync(StoreMode mode, params TModel[] items)
         {
             ThrowIfNull(items);
@@ -172,51 +218,60 @@ namespace DX.Data.Xpo
                 async (s, wrk) =>
                 {
                     TModel currentItem = default!;
+                    DataMode dataMode = mode == StoreMode.Update ? DataMode.Update : DataMode.Create;
                     // need to keep the xpo entities together with the model items so we can update 
-                    // the id's of the models afterwards.
-                    Dictionary<TDBModel, InsertHelper> batchPairs = new Dictionary<TDBModel, InsertHelper>();
+                    // the id's (created items) and server side changes (all items) of the models afterwards.
+                    // An updated db object can occur more than once in one batch.
+                    var batchPairs = new Dictionary<TDBModel, List<TModel>>();
+                    System.Collections.ICollection? prefetched = null;
                     try
                     {
-                        ValidationResult validationResult = default!;
-                        DataMode dataMode = DataMode.Create;
+                        if (mode != StoreMode.Create)
+                            prefetched = XPOPrefetchByKeys(items.Where(i => i != null).Select(i => ModelKey(i)), wrk);
+
                         foreach (var item in items)
                         {
                             currentItem = item;
                             var modelKey = ModelKey(item);
                             TDBModel dbItem = null!;
-                            if (modelKey == null || modelKey.Equals(EmptyKeyValue) || mode == StoreMode.Create)
+                            if (mode == StoreMode.Create || (mode == StoreMode.Store && IsEmptyKey(modelKey)))
                             {
                                 dataMode = DataMode.Create;
-                                dbItem = (Activator.CreateInstance(typeof(TDBModel), wrk) as TDBModel)!;
-                                batchPairs.Add(dbItem, new InsertHelper(item, validationResult, new DataResult<TKey, TModel>()));
+                                dbItem = CreateDBModel(wrk);
                             }
-                            else if (!modelKey.Equals(EmptyKeyValue) && (mode != StoreMode.Create))
+                            else
                             {
                                 dataMode = DataMode.Update;
-                                dbItem = XPOGetByKey(modelKey, wrk)!;
+                                dbItem = IsEmptyKey(modelKey) ? null! : XPOGetByKey(modelKey, wrk)!;
                                 if (dbItem == null)
                                     throw new ValidationException($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
                             }
-                            //Mapper.Map(item, dbItem);
+                            if (!batchPairs.TryGetValue(dbItem, out var models))
+                                batchPairs.Add(dbItem, models = new List<TModel>(1));
+                            models.Add(item);
+
                             ToDBModel(item, dbItem);
-                            validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
+                            var validationResult = await ValidateDBModelAsync(dbItem, dataMode, s);
                             if (!validationResult.IsValid)
                                 throw CreateValidationException(item, validationResult);
                             await wrk.SaveAsync(dbItem);
                         }
+                        // the prefetched objects must stay alive until every XPOGetByKey above has run
+                        GC.KeepAlive(prefetched);
 
 
                         wrk.ObjectSaved += (s, e) =>
                         {
-                            // sync the model ids with the newly generated xpo id's
-                            if (e.Object is TDBModel xpoItem && batchPairs.ContainsKey(xpoItem))
+                            // sync the model ids with the newly generated xpo id's and
+                            // map back the XPO Item into the model (OnSaving etc.)
+                            if (e.Object is TDBModel xpoItem && batchPairs.TryGetValue(xpoItem, out var models))
                             {
                                 TKey k = (TKey)xpoItem.Session.GetKeyValue(xpoItem);
-                                SetModelKey(batchPairs[xpoItem].Model, k);
-                                if (batchPairs[xpoItem].InsertedResult != null)
-                                    batchPairs[xpoItem].InsertedResult.Key = k;
-                                // INFO: We need to map back the XPO Item into the model.							
-                                ToModel(xpoItem, batchPairs[xpoItem].Model);                                
+                                foreach (var model in models)
+                                {
+                                    SetModelKey(model, k);
+                                    ToModel(xpoItem, model);
+                                }
                             }
                         };
                         ValidationException commitFailure = null!;
@@ -237,13 +292,13 @@ namespace DX.Data.Xpo
                             return new DataResult<TKey, TModel> { 
                                 Success = true, 
                                 Mode = dataMode,
-                                Data = batchPairs.Select(p => p.Value.Model).ToArray()
+                                Data = items.ToArray()
                             };
                     }
                     catch (Exception err)
                     {
                         wrk.RollbackTransaction();
-                        return new DataResult<TKey, TModel>(DataMode.Create, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
+                        return new DataResult<TKey, TModel>(dataMode, typeof(TDBModel).Name, err) { Data = new[] { currentItem } };
                     }
                 },
                 true, false);
@@ -278,42 +333,79 @@ namespace DX.Data.Xpo
         {
             ThrowIfNull(ids);
 
-            var result = await TransactionalExecAsync(async (s, wrk) =>
+            // on a pooled database, the delete runs in a database level transaction on a connection of its own, so
+            // BeforeDeleteAsync can flush work (e.g. removing association links) that is still rolled back on failure
+            using (var exclusive = XPExclusiveConnection.TryAcquire(DataLayer))
             {
-                try
+                if (exclusive != null)
                 {
-                    foreach (var id in ids)
-                    {
-                        var dbModel = XPOGetByKey(id, wrk);
-                        if (dbModel != null)
-                        {
-                            var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
-                            if (!validationResult.IsValid)
-                                throw new ValidationException(validationResult.Errors);
+                    using (var wrk = new ExplicitUnitOfWork(exclusive.DataLayer))
+                        return await DeleteInAsync(wrk, ids);
+                }
+            }
+            return await TransactionalExecAsync((s, wrk) => DeleteInAsync(wrk, ids), true, false);
+        }
 
-                            await wrk.DeleteAsync(dbModel);
-                        }
+        /// <summary>
+        /// Called for each object just before it is deleted, in the session of the delete. When that session is an
+        /// <see cref="ExplicitUnitOfWork"/> it holds a database level transaction: changes flushed here are rolled back
+        /// with the delete if it fails.
+        /// </summary>
+        protected virtual Task BeforeDeleteAsync(TDBModel dbModel, Session session) => Task.FromResult(0);
+
+        private async Task<IDataResult<TKey, TModel>> DeleteInAsync(Session wrk, TKey[] ids)
+        {
+            try
+            {
+                var prefetched = XPOPrefetchByKeys(ids, wrk);
+                foreach (var id in ids)
+                {
+                    var dbModel = XPOGetByKey(id, wrk);
+                    if (dbModel != null)
+                    {
+                        var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, this);
+                        if (!validationResult.IsValid)
+                            throw new ValidationException(validationResult.Errors);
+
+                        await BeforeDeleteAsync(dbModel, wrk);
+                        await wrk.DeleteAsync(dbModel);
                     }
-                    ValidationException commitFailure = null!;
-                    wrk.FailedCommitTransaction += (s, e) =>
-                    {
-                        commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
-                        e.Handled = true;
-                    };
-
-                    await wrk.CommitTransactionAsync();
-                    if (commitFailure != null)
-                        return new DataResult<TKey, TModel> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
-                    else
-                        return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
                 }
-                catch (ValidationException err)
+                // the prefetched objects must stay alive until every XPOGetByKey above has run
+                GC.KeepAlive(prefetched);
+                ValidationException commitFailure = null!;
+                wrk.FailedCommitTransaction += (s, e) =>
                 {
-                    wrk.RollbackTransaction();
-                    return new DataResult<TKey, TModel>(DataMode.Delete, nameof(TDBModel), err);
+                    commitFailure = new ValidationException(e.Exception.InnerException != null ? e.Exception.InnerException.Message : e.Exception.Message);
+                    e.Handled = true;
+                };
+
+                await wrk.CommitTransactionAsync();
+                if (commitFailure != null)
+                {
+                    RollbackQuietly(wrk);
+                    return new DataResult<TKey, TModel> { Success = false, Mode = DataMode.Delete, Exception = commitFailure };
                 }
-            }, true, false);
-            return result;
+                return new DataResult<TKey, TModel> { Success = true, Mode = DataMode.Delete };
+            }
+            catch (Exception err)
+            {
+                RollbackQuietly(wrk);
+                return new DataResult<TKey, TModel>(DataMode.Delete, typeof(TDBModel).Name, err);
+            }
+        }
+
+        private static void RollbackQuietly(Session wrk)
+        {
+            try
+            {
+                if (wrk.InTransaction)
+                    wrk.RollbackTransaction();
+            }
+            catch
+            {
+                // the failure being reported is the one that matters
+            }
         }
 
         protected void ThrowIfDisposed()

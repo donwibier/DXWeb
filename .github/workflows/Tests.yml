@@ -42,3 +42,12 @@ jobs:
 
       - name: DX.Data.Xpo.Identity.Tests
         run: dotnet test DX.Data.Xpo.Identity.Tests --configuration Release --no-build --verbosity normal
+
+      - name: DX.Utils.Tests
+        run: dotnet test DX.Utils.Tests --configuration Release --no-build --verbosity normal
+
+      - name: DX.Data.Xpo.Tests
+        run: dotnet test DX.Data.Xpo.Tests --configuration Release --no-build --verbosity normal
+
+      - name: DX.Data.EF.Tests
+        run: dotnet test DX.Data.EF.Tests --configuration Release --no-build --verbosity normal

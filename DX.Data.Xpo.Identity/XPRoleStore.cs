@@ -49,7 +49,7 @@ namespace DX.Data.Xpo.Identity
 #endif
         }
 
-        public override IQueryable<TRole> Roles => throw new NotImplementedException();
+        public override IQueryable<TRole> Roles => _RoleStore.Query();
 
         public async override Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
@@ -71,9 +71,22 @@ namespace DX.Data.Xpo.Identity
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             ThrowIfNull(role);
-            //TODO: Check appropriate error
-            var r = await _RoleStore.UpdateAsync(role);
-            return r.Success ? IdentityResult.Success : IdentityResult.Failed(ErrorDescriber.DefaultError());
+            DX.Data.IDataResult<TKey, TRole> r;
+            if (_RoleStore is IXPConcurrencyStampStore<TKey, TRole> checkedStore)
+            {
+                // as the EF Core RoleStore: a stale ConcurrencyStamp fails, a successful update gets a new stamp
+                r = await checkedStore.UpdateWithConcurrencyCheckAsync(role, cancellationToken);
+            }
+            else
+            {
+                role.ConcurrencyStamp = Guid.NewGuid().ToString();
+                r = await _RoleStore.UpdateAsync(role);
+            }
+            if (r.Success)
+                return IdentityResult.Success;
+            return IdentityResult.Failed(r.Exception is XPConcurrencyException
+                ? ErrorDescriber.ConcurrencyFailure()
+                : ErrorDescriber.DefaultError());
         }
 
         public async override Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
@@ -99,6 +112,9 @@ namespace DX.Data.Xpo.Identity
 
         public async override Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(role);
 			var results = await _ClaimStore.GetRoleClaimsAsync(role.Id, cancellationToken);
 			return results;			
         }

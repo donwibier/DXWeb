@@ -18,7 +18,7 @@ namespace DX.Data.Xpo.Mapster
 
 		public IMapper Mapper { get; }
 		protected override TDestination MapTo<TSource, TDestination>(TSource source, TDestination target) => Mapper.Map<TSource, TDestination>(source, target);
-		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>();
+		public override IQueryable<T> Query<T>() => DBQuery(UnitOfWork).ProjectToType<T>(Mapper.Config);
 
 		public override TModel GetByKey(TKey key)
 		{

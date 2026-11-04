@@ -30,6 +30,10 @@ namespace DX.Data.EF.AutoMapper
         protected override TDBModel ToDBModel(TModel source, TDBModel target) => Mapper.Map(source, target);
 		protected override TModel ToModel(TDBModel source, TModel target) => Mapper.Map(source, target);
 		public override IQueryable<T> Query<T>() => EFQuery().ProjectTo<T>(Mapper.ConfigurationProvider);
-        public override TModel GetByKey(TKey key) => Mapper.Map(EFGetByKey(key), CreateModel());
+        public override TModel GetByKey(TKey key)
+        {
+            var dbModel = EFGetByKeyNoTracking(key);
+            return dbModel == null ? null : Mapper.Map(dbModel, CreateModel());
+        }
 	}
 }

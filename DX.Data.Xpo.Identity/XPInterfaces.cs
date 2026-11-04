@@ -222,6 +222,38 @@ namespace DX.Data.Xpo.Identity
 		Task<IList<UserLoginInfo>> GetLoginsAsync(TKey userId, CancellationToken cancellationToken = default);
 	}
 
+	/// <summary>
+	/// Optional for a user or role store: an update that compares the ConcurrencyStamp of the model with the one in the
+	/// database and fails with an <see cref="XPConcurrencyException"/> when they differ (a stale copy). On success the model
+	/// gets, and the database stores, a new ConcurrencyStamp. XPUserStore and XPRoleStore use it when the store offers it.
+	/// </summary>
+	public interface IXPConcurrencyStampStore<TKey, TModel>
+		where TKey : IEquatable<TKey>
+		where TModel : class
+	{
+		Task<IDataResult<TKey, TModel>> UpdateWithConcurrencyCheckAsync(TModel model, CancellationToken cancellationToken = default);
+	}
+
+	/// <summary>
+	/// The failure of <see cref="IXPConcurrencyStampStore{TKey, TModel}.UpdateWithConcurrencyCheckAsync"/> when the
+	/// record was changed since the model was loaded
+	/// </summary>
+	public class XPConcurrencyException : FluentValidation.ValidationException
+	{
+		public XPConcurrencyException(string message) : base(message) { }
+	}
+
+	/// <summary>
+	/// Optional for a user token store: changes the value of an existing token in place. XPUserStore uses it so that
+	/// SetTokenAsync on an existing token (authenticator key, recovery codes, ...) is persisted.
+	/// </summary>
+	public interface IXPUserTokenValueStore<TKey>
+		where TKey : IEquatable<TKey>
+	{
+		/// <returns>false if the user has no such token</returns>
+		Task<bool> SetTokenValueAsync(TKey userId, string loginProvider, string name, string? value, CancellationToken cancellationToken = default);
+	}
+
 	public interface IQueryableUserTokenStore<TKey, TUserToken> : IQueryableDataStore<TKey, TUserToken>
 		where TKey : IEquatable<TKey>
 #if (NETCOREAPP)

@@ -26,7 +26,11 @@ namespace DX.Data.EF.Mapster
 		public IMapper Mapper { get; }
 		protected override TDBModel ToDBModel(TModel source, TDBModel target) => Mapper.Map(source, target);
 		protected override TModel ToModel(TDBModel source, TModel target) => Mapper.Map(source, target);
-		public override IQueryable<T> Query<T>() => EFQuery().ProjectToType<T>();
-		public override TModel GetByKey(TKey key) => Mapper.Map(EFGetByKey(key), CreateModel());
+		public override IQueryable<T> Query<T>() => EFQuery().ProjectToType<T>(Mapper.Config);
+		public override TModel GetByKey(TKey key)
+		{
+			var dbModel = EFGetByKeyNoTracking(key);
+			return dbModel == null ? null : Mapper.Map(dbModel, CreateModel());
+		}
 	}
 }

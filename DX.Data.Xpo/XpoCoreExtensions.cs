@@ -35,7 +35,15 @@ namespace DX.Data.Xpo
         }
         public static IServiceCollection AddXpoUnitOfWork(this IServiceCollection serviceCollection, string connectionName)
         {
-            return serviceCollection.AddScoped<UnitOfWork>((sp) => sp.GetRequiredService<XpoDatabase>().GetUnitOfWork());
+            return serviceCollection.AddScoped<UnitOfWork>((sp) =>
+            {
+                var db = sp.GetRequiredService<XpoDatabase>();
+                // a name that is not one of the registered database's data layers falls back to its default
+                // (first) data layer, as before
+                if (!string.IsNullOrEmpty(connectionName) && connectionName != db.DataLayerName && db.IsConfiguredDataLayer(connectionName))
+                    return new UnitOfWork(db.GetDataLayer(connectionName));
+                return db.GetUnitOfWork();
+            });
         }
     }
 #endif

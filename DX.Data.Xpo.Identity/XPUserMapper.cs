@@ -35,8 +35,8 @@ namespace DX.Data.Xpo.Identity
 			NormalizedEmail = source.NormalizedEmail,
 			RefreshToken = source.RefreshToken,
 			RefreshTokenExpiryTime = source.RefreshTokenExpiryTime,
-			AccessFailedCount = source.AccessFailedCount
-			
+			AccessFailedCount = source.AccessFailedCount,
+			ConcurrencyStamp = source.ConcurrencyStamp
 		};
 
 		public override TXPOUser Assign(TUser source, TXPOUser destination)
@@ -57,6 +57,7 @@ namespace DX.Data.Xpo.Identity
 			destination.NormalizedEmail = source.NormalizedEmail;
 			destination.RefreshToken = source.RefreshToken;
 			destination.RefreshTokenExpiryTime = source.RefreshTokenExpiryTime;
+			destination.ConcurrencyStamp = source.ConcurrencyStamp;
 			if (destination is IAssignable)
 				((IAssignable)destination)!.Assign(source);
 
