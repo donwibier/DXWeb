@@ -399,7 +399,7 @@ namespace DX.Data.Xpo.Tests
             Assert.Equal(0, Store.Query().Count());
         }
 
-        [Fact(Skip = "BUG: PredicateBuilder.And/Or compose with Expression.Invoke, which the XPO LINQ provider rejects (NotSupportedException)")]
+        [Fact]
         public async Task Query_SupportsPredicateBuilderComposition()
         {
             Db.AddProduct("A", 1m);
