@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using DX.Data;
@@ -50,6 +51,117 @@ namespace DX.Data.EF
         protected virtual TDBModel EFGetByKey(TKey key) => DbContext.Find<TDBModel>(key);
 #else
         protected virtual TDBModel EFGetByKey(TKey key) => DbContext.Set<TDBModel>().Find(key);            
+#endif
+
+        /// <summary>
+        /// Loads an entity for read-only use. On EF Core this is an AsNoTracking query, so reads do not grow
+        /// the change tracker; it falls back to <see cref="EFGetByKey"/> when that is overridden, when the
+        /// primary key is not a single <typeparamref name="TKey"/> property, and on EF6.
+        /// </summary>
+        protected virtual TDBModel EFGetByKeyNoTracking(TKey key)
+        {
+#if (NETCOREAPP)
+            if (key != null)
+            {
+                var predicate = KeyPredicate(new[] { key });
+                if (predicate != null)
+                    return DbContext.Set<TDBModel>().AsNoTracking().FirstOrDefault(predicate);
+            }
+#endif
+            return EFGetByKey(key);
+        }
+
+        /// <summary>
+        /// Loads the tracked entities for a set of keys, keyed by <see cref="DBModelKey"/>; missing keys are absent.
+        /// On EF Core several keys are loaded with one query per 64 keys; otherwise (EF6, an overridden
+        /// <see cref="EFGetByKey"/>, a composite or differently typed key) it calls <see cref="EFGetByKey"/> per key.
+        /// </summary>
+        protected async virtual Task<IDictionary<TKey, TDBModel>> EFGetByKeysAsync(IEnumerable<TKey> keys)
+        {
+            var distinctKeys = keys.Where(k => k != null).Distinct().ToList();
+            var result = new Dictionary<TKey, TDBModel>(distinctKeys.Count);
+#if (NETCOREAPP)
+            if (distinctKeys.Count > 1 && KeyPredicate(distinctKeys.Take(1).ToList()) != null)
+            {
+                for (int offset = 0; offset < distinctKeys.Count; offset += KeyBatchSize)
+                {
+                    var chunk = distinctKeys.Skip(offset).Take(KeyBatchSize).ToList();
+                    // Pad to a power of two so only a handful of distinct SQL shapes reach the query cache.
+                    int padded = 1;
+                    while (padded < chunk.Count) padded <<= 1;
+                    while (chunk.Count < padded) chunk.Add(chunk[chunk.Count - 1]);
+
+                    var entities = await DbContext.Set<TDBModel>().Where(KeyPredicate(chunk)).ToListAsync();
+                    foreach (var entity in entities)
+                        result[DBModelKey(entity)] = entity;
+                }
+                // Keys the query did not match exactly (e.g. string keys under a case-insensitive collation)
+                // get the same per-key lookup as before, so the outcome never differs from EFGetByKey.
+                foreach (var key in distinctKeys.Where(k => !result.ContainsKey(k)).ToList())
+                {
+                    var entity = EFGetByKey(key);
+                    if (entity != null)
+                        result[key] = entity;
+                }
+                return result;
+            }
+#endif
+            foreach (var key in distinctKeys)
+            {
+                var entity = EFGetByKey(key);
+                if (entity != null)
+                    result[key] = entity;
+            }
+            return await Task.FromResult<IDictionary<TKey, TDBModel>>(result);
+        }
+
+#if (NETCOREAPP)
+        const int KeyBatchSize = 64;
+        static readonly ConcurrentDictionary<Type, bool> getByKeyOverridden = new ConcurrentDictionary<Type, bool>();
+
+        sealed class KeyHolder
+        {
+            public KeyHolder(TKey value) { Value = value; }
+            public TKey Value { get; }
+        }
+
+        /// <summary>
+        /// Builds e => e.Key == k1 || e.Key == k2 ... with every key as a SQL parameter, or returns null when
+        /// a key query cannot replace <see cref="EFGetByKey"/>.
+        /// </summary>
+        Expression<Func<TDBModel, bool>> KeyPredicate(IList<TKey> keys)
+        {
+            var overridden = getByKeyOverridden.GetOrAdd(GetType(), t =>
+            {
+                var method = t.GetMethod(nameof(EFGetByKey), BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(TKey) }, null);
+                return method == null || method.DeclaringType != typeof(EFDataStore<TEFContext, TKey, TModel, TDBModel>);
+            });
+            if (overridden)
+                return null;
+
+            var primaryKey = DbContext.Model.FindEntityType(typeof(TDBModel))?.FindPrimaryKey();
+            if (primaryKey == null || primaryKey.Properties.Count != 1 || primaryKey.Properties[0].ClrType != typeof(TKey))
+                return null;
+
+            try
+            {
+                var e = Expression.Parameter(typeof(TDBModel), "e");
+                var property = Expression.Call(typeof(Microsoft.EntityFrameworkCore.EF), nameof(Microsoft.EntityFrameworkCore.EF.Property), new[] { typeof(TKey) },
+                    e, Expression.Constant(primaryKey.Properties[0].Name));
+                Expression body = null;
+                foreach (var key in keys)
+                {
+                    var value = Expression.Property(Expression.Constant(new KeyHolder(key)), nameof(KeyHolder.Value));
+                    var equal = Expression.Equal(property, value);
+                    body = body == null ? equal : Expression.OrElse(body, equal);
+                }
+                return Expression.Lambda<Func<TDBModel, bool>>(body, e);
+            }
+            catch (InvalidOperationException)
+            {
+                return null; // TKey has no equality operator
+            }
+        }
 #endif
 
         protected virtual IQueryable<TDBModel> EFQuery() => DbContext.Set<TDBModel>();
@@ -181,6 +293,30 @@ namespace DX.Data.EF
 
         bool IsEmptyKey(TKey key) => key == null || key.Equals(EmptyKeyValue);
 
+        static IDictionary<TKey, TDBModel> SingleOrEmpty(TKey key, TDBModel entity)
+        {
+            var result = new Dictionary<TKey, TDBModel>(1);
+            if (entity != null)
+                result[key] = entity;
+            return result;
+        }
+
+        /// <summary>
+        /// Updated entities are no longer forced to Modified (which rewrote every column); when automatic change
+        /// detection is switched off, detect their changes explicitly so they are still saved.
+        /// </summary>
+        void DetectChangesIfDisabled(IEnumerable<TDBModel> updated)
+        {
+#if (NETCOREAPP)
+            if (!DbContext.ChangeTracker.AutoDetectChangesEnabled)
+                foreach (var entity in updated)
+                    DbContext.Entry(entity).DetectChanges();
+#else
+            if (!DbContext.Configuration.AutoDetectChangesEnabled && updated.Any())
+                DbContext.ChangeTracker.DetectChanges();
+#endif
+        }
+
         /// <summary>One item of a batch, with the entity it maps to and the operation applied to it.</summary>
         class PendingItem
         {
@@ -254,6 +390,13 @@ namespace DX.Data.EF
                 var pending = new List<PendingItem>(items.Length);
                 try
                 {
+                    // Load all entities to update up front (one query on EF Core instead of one per item).
+                    var updateKeys = mode == StoreMode.Create ? new List<TKey>() : items.Select(ModelKey).Where(k => !IsEmptyKey(k)).ToList();
+                    IDictionary<TKey, TDBModel> existing =
+                        updateKeys.Count == 0 ? new Dictionary<TKey, TDBModel>()
+                        : updateKeys.Count == 1 ? SingleOrEmpty(updateKeys[0], EFGetByKey(updateKeys[0]))
+                        : await EFGetByKeysAsync(updateKeys);
+
                     foreach (var item in items)
                     {
                         currentItem = item;
@@ -280,9 +423,14 @@ namespace DX.Data.EF
                             if (emptyKey)
                                 throw new InvalidOperationException($"Unable to update {typeof(TDBModel).Name}: the item has no key value");
 
-                            var dbModel = EFGetByKey(modelKey);
-                            if (dbModel == null)
+                            TDBModel dbModel;
+                            if (!existing.TryGetValue(modelKey, out dbModel) || dbModel == null)
                                 throw new Exception($"Unable to locate {typeof(TDBModel).Name}({modelKey}) in datastore");
+
+                            // The entity is normally tracked from the load, so EF's change detection updates only
+                            // the columns that really changed. An untracked one (custom EFGetByKey) is attached first.
+                            if (DbContext.Entry(dbModel).State == EntityState.Detached)
+                                DbContext.Set<TDBModel>().Attach(dbModel);
 
                             // Registered before mutating, so a rejected item is detached (reverted) in the catch below.
                             pending.Add(new PendingItem(item, dbModel, DataMode.Update));
@@ -291,10 +439,10 @@ namespace DX.Data.EF
                             var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Update, s);
                             if (!validationResult.IsValid)
                                 throw CreateValidationException(item, validationResult);
-
-                            DbContext.Entry(dbModel).State = EntityState.Modified;
                         }
                     }
+
+                    DetectChangesIfDisabled(pending.Where(p => p.Mode == DataMode.Update).Select(p => p.Entity));
 
                     // One SaveChanges and one commit for the whole batch.
                     await DbContext.SaveChangesAsync();
@@ -368,12 +516,14 @@ namespace DX.Data.EF
                 var deleted = new List<TDBModel>();
                 try
                 {
-                    foreach (var id in ids)
+                    var keys = ids.Where(id => id != null).ToList();
+                    IDictionary<TKey, TDBModel> existing = keys.Count == 1
+                        ? SingleOrEmpty(keys[0], EFGetByKey(keys[0]))
+                        : await EFGetByKeysAsync(keys);
+                    foreach (var id in keys)
                     {
-                        if (id == null)
-                            continue;
-                        var dbModel = EFGetByKey(id);
-                        if (dbModel != null && !deleted.Any(d => ReferenceEquals(d, dbModel)))
+                        TDBModel dbModel;
+                        if (existing.TryGetValue(id, out dbModel) && dbModel != null && !deleted.Any(d => ReferenceEquals(d, dbModel)))
                         {
                             var validationResult = await ValidateDBModelAsync(dbModel, DataMode.Delete, s);
                             if (!validationResult.IsValid)

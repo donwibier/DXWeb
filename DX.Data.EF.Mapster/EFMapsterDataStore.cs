@@ -29,7 +29,7 @@ namespace DX.Data.EF.Mapster
 		public override IQueryable<T> Query<T>() => EFQuery().ProjectToType<T>(Mapper.Config);
 		public override TModel GetByKey(TKey key)
 		{
-			var dbModel = EFGetByKey(key);
+			var dbModel = EFGetByKeyNoTracking(key);
 			return dbModel == null ? null : Mapper.Map(dbModel, CreateModel());
 		}
 	}

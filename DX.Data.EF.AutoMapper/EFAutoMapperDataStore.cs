@@ -32,7 +32,7 @@ namespace DX.Data.EF.AutoMapper
 		public override IQueryable<T> Query<T>() => EFQuery().ProjectTo<T>(Mapper.ConfigurationProvider);
         public override TModel GetByKey(TKey key)
         {
-            var dbModel = EFGetByKey(key);
+            var dbModel = EFGetByKeyNoTracking(key);
             return dbModel == null ? null : Mapper.Map(dbModel, CreateModel());
         }
 	}
