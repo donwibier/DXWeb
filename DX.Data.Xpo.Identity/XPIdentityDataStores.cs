@@ -674,7 +674,7 @@ namespace DX.Data.Xpo.Identity
 	}
 
 	public abstract class XPBaseUserTokenStore<TKey, TUserToken, TXPOUserToken> : XPDataStore<TKey, TUserToken, TXPOUserToken>,
-			IQueryableUserTokenStore<TKey, TUserToken>
+			IQueryableUserTokenStore<TKey, TUserToken>, IXPUserTokenValueStore<TKey>
 		where TKey : IEquatable<TKey>
 #if (NETCOREAPP)
 		where TUserToken : IdentityUserToken<TKey>, new()
@@ -702,6 +702,33 @@ namespace DX.Data.Xpo.Identity
 
 			var results = await FindAsync(CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ?", userId, loginProvider, name));
 			return results.FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Changes the value of the user's token (loginProvider, name) in the database
+		/// </summary>
+		/// <returns>false if the user has no such token</returns>
+		public virtual async Task<bool> SetTokenValueAsync(TKey userId, string loginProvider, string name, string? value, CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			ThrowIfDisposed();
+			ThrowIfNull(userId);
+			ThrowIfNullOrEmpty(loginProvider);
+			ThrowIfNullOrEmpty(name);
+
+			var result = await TransactionalExecAsync(async (s, w) =>
+			{
+				var tokens = new XPCollection<TXPOUserToken>(w,
+					CriteriaOperator.Parse("[User.Id] == ? AND [LoginProvider] == ? AND [Name] == ?", userId, loginProvider, name));
+				await tokens.LoadAsync(cancellationToken);
+				foreach (var tk in tokens)
+				{
+					tk.Value = value!;
+					await w.SaveAsync(tk, cancellationToken);
+				}
+				return tokens.Count > 0;
+			});
+			return result;
 		}
 
 	}

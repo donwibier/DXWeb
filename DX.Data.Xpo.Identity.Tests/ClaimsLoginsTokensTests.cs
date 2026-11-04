@@ -230,7 +230,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.Equal("ms-access", await users.GetAuthenticationTokenAsync(user, "Microsoft", "access_token"));
         }
 
-        [Fact(Skip = "BUG: SetTokenAsync on an existing token only changes the DTO from FindTokenAsync; XPUserStore never writes it back, so the old value stays")]
+        [Fact]
         public async Task Tokens_SetTwice_KeepsTheNewValue()
         {
             var user = await CreateUserAsync();
@@ -251,7 +251,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False(string.IsNullOrEmpty(await FreshUsers().GetAuthenticatorKeyAsync(user)));
         }
 
-        [Fact(Skip = "BUG: same as Tokens_SetTwice: a second ResetAuthenticatorKeyAsync keeps the old key, so a leaked authenticator key cannot be rotated")]
+        [Fact]
         public async Task Authenticator_ResetKeyTwice_GivesANewKey()
         {
             var user = await CreateUserAsync();
@@ -283,7 +283,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False((await Users.RedeemTwoFactorRecoveryCodeAsync(user, "not-a-code")).Succeeded);
         }
 
-        [Fact(Skip = "BUG: RedeemCodeAsync rewrites the RecoveryCodes token via SetTokenAsync, which XPUserStore never persists: a redeemed recovery code stays valid and can be reused")]
+        [Fact]
         public async Task RecoveryCodes_ARedeemedCode_CannotBeUsedAgain()
         {
             var user = await CreateUserAsync();
@@ -297,7 +297,7 @@ namespace DX.Data.Xpo.Identity.Tests
             Assert.False((await next.RedeemTwoFactorRecoveryCodeAsync(reloaded, code)).Succeeded);
         }
 
-        [Fact(Skip = "BUG: same as Tokens_SetTwice: generating new recovery codes keeps the old set, so the new codes do not work and the old ones still do")]
+        [Fact]
         public async Task RecoveryCodes_GenerateAgain_ReplacesTheOldSet()
         {
             var user = await CreateUserAsync();

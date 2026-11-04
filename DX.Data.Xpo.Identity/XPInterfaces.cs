@@ -222,6 +222,17 @@ namespace DX.Data.Xpo.Identity
 		Task<IList<UserLoginInfo>> GetLoginsAsync(TKey userId, CancellationToken cancellationToken = default);
 	}
 
+	/// <summary>
+	/// Optional for a user token store: changes the value of an existing token in place. XPUserStore uses it so that
+	/// SetTokenAsync on an existing token (authenticator key, recovery codes, ...) is persisted.
+	/// </summary>
+	public interface IXPUserTokenValueStore<TKey>
+		where TKey : IEquatable<TKey>
+	{
+		/// <returns>false if the user has no such token</returns>
+		Task<bool> SetTokenValueAsync(TKey userId, string loginProvider, string name, string? value, CancellationToken cancellationToken = default);
+	}
+
 	public interface IQueryableUserTokenStore<TKey, TUserToken> : IQueryableDataStore<TKey, TUserToken>
 		where TKey : IEquatable<TKey>
 #if (NETCOREAPP)

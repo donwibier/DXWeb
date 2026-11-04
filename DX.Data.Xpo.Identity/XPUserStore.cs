@@ -202,6 +202,34 @@ namespace DX.Data.Xpo.Identity
                     $"The token {token.LoginProvider}/{token.Name} could not be stored for user {token.UserId}: {r.Exception?.Message}", r.Exception);
         }
 
+        /// <summary>
+        /// Sets a token. The base implementation changes an existing token only on the object FindTokenAsync returned and
+        /// relies on an EF change tracker to save it; here the new value is written to the database.
+        /// </summary>
+        public override async Task SetTokenAsync(TUser user, string loginProvider, string name, string? value, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            ThrowIfNull(user);
+
+            var token = await FindTokenAsync(user, loginProvider, name, cancellationToken);
+            if (token == null)
+            {
+                await AddUserTokenAsync(CreateUserToken(user, loginProvider, name, value));
+            }
+            else if (_TokenStore is IXPUserTokenValueStore<TKey> valueStore)
+            {
+                if (!await valueStore.SetTokenValueAsync(user.Id, loginProvider, name, value, cancellationToken))
+                    await AddUserTokenAsync(CreateUserToken(user, loginProvider, name, value)); // removed in the meantime
+            }
+            else
+            {
+                // a token store of its own: replace the token
+                await RemoveUserTokenAsync(token);
+                await AddUserTokenAsync(CreateUserToken(user, loginProvider, name, value));
+            }
+        }
+
         protected async override Task<TRole?> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
 			return await _RoleStore.FindByNameAsync(normalizedRoleName);
