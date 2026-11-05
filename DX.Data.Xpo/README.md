@@ -8,6 +8,7 @@ XPO (DevExpress eXpressPersistent Objects) database configuration and the abstra
 ## Behaviour changes in 26.1.3.41
 
 - `XpoDatabase` no longer sets the process-wide `XpoDefault.DataLayer` implicitly (up to 26.1.3.40 it did, but only with `UpdateSchema = AutoCreateOption.DatabaseAndSchema`, and to whichever database was created last). Opt in with `XpoDatabaseOptions.SetAsXpoDefault = true`.
+- Without a default data layer such code does not fail on reads: XPO falls back to a stub provider, so queries return no rows; `CommitChanges()` throws `NotSupportedException` ("the stub database provider is currently used"). If queries through `new UnitOfWork()` / `new Session()` suddenly return nothing after upgrading, set `SetAsXpoDefault = true`.
 
 ## Behaviour changes in 26.1.3.40
 
