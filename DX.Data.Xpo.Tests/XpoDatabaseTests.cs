@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -301,12 +301,83 @@ namespace DX.Data.Xpo.Tests
             Assert.All(counts, c => Assert.Equal(1, c));
         }
 
-        [Fact(Skip = "BY DESIGN?: constructing an XpoDatabase with DatabaseAndSchema replaces the process-wide XpoDefault.DataLayer (XpoDatabase.cs:319), so new Session()/new UnitOfWork() silently use the last database created. Kept because existing apps may rely on it; owner to decide")]
+        [Fact]
         public void Ctor_DoesNotReplaceXpoDefaultDataLayer()
         {
             var before = XpoDefault.DataLayer;
-            NewDb();
+            NewDb(); // DatabaseAndSchema, which used to set XpoDefault.DataLayer implicitly
             Assert.Same(before, XpoDefault.DataLayer);
+        }
+
+        [Fact]
+        public void SetAsXpoDefault_MakesTheDatabasesOwnDataLayerTheDefault()
+        {
+            var before = XpoDefault.DataLayer;
+            try
+            {
+                var name = NewName();
+                var db = new XpoDatabase(o => { InMemory(name)(o); o.SetAsXpoDefault = true; });
+
+                Assert.Same(db.GetDataLayer(name), XpoDefault.DataLayer);
+                // so a session created without a data layer works on this database
+                using (var uow = db.GetUnitOfWork())
+                {
+                    new Product(uow) { Name = "default" };
+                    uow.CommitChanges();
+                }
+                using var session = new UnitOfWork();
+                Assert.Equal(1, session.Query<Product>().Count(p => p.Name == "default"));
+            }
+            finally
+            {
+                XpoDefault.DataLayer = before;
+            }
+        }
+
+        [Fact]
+        public void SetAsXpoDefault_DoesNotDependOnTheSchemaOption()
+        {
+            var before = XpoDefault.DataLayer;
+            try
+            {
+                var name = NewName();
+                // create the database first, then open it as an application in production would: no schema updates
+                new XpoDatabase(InMemory(name));
+                var db = new XpoDatabase(o =>
+                {
+                    InMemory(name)(o);
+                    o.UpdateSchema = AutoCreateOption.SchemaAlreadyExists;
+                    o.SetAsXpoDefault = true;
+                });
+
+                Assert.Same(db.GetDataLayer(name), XpoDefault.DataLayer);
+            }
+            finally
+            {
+                XpoDefault.DataLayer = before;
+            }
+        }
+
+        [Fact]
+        public void SetAsXpoDefault_WithSeveralDatabases_OnlyTheOneThatAsksForIt()
+        {
+            var before = XpoDefault.DataLayer;
+            try
+            {
+                var first = NewName();
+                var second = NewName();
+                var db = new XpoDatabase(new Action<XpoDatabaseOptions>[]
+                {
+                    o => { InMemory(first)(o); o.SetAsXpoDefault = true; },
+                    InMemory(second),
+                });
+
+                Assert.Same(db.GetDataLayer(first), XpoDefault.DataLayer);
+            }
+            finally
+            {
+                XpoDefault.DataLayer = before;
+            }
         }
 
         [Fact]

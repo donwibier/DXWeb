@@ -38,7 +38,12 @@ A new unit test suite (`DX.Utils.Tests`, `DX.Data.Xpo.Tests`, `DX.Data.EF.Tests`
 | DX.Data (26.1.3.37) | `PredicateBuilder.And/Or` no longer use `Expression.Invoke` (composed predicates now work with XPO). |
 | DX.Utils (26.1.3.41) | `PropertyExtensions` ignores private properties and indexers, and `Assign` skips read-only destination properties. `AsQueryParameters` encodes values once (not twice); `AppendQueryParameters` keeps the existing query. `StripHTMLTags` keeps escaped markup (`&lt;b&gt;`) as text instead of deleting it, and keeps plain `&` text. `DetermineMimeType`/`GetMimeType` fall back to the file extension, so they return types where they returned `""`/`null`. `GetConfigOption` with duplicate keys returns the last value instead of throwing. `RequiredIf`'s default message reads "The X field is required.". `DateMin`/`DateMax` keep `DateTimeKind`. `Log` timestamps use a 24-hour clock. |
 
-Two pinned behaviours were left unchanged on purpose: creating an `XpoDatabase` with `AutoCreateOption.DatabaseAndSchema` still sets the process-wide `XpoDefault.DataLayer`, and `Conversion.ParseEnum("99", ...)` still returns an undefined numeric value (rejecting it would also reject valid `[Flags]` combinations).
+Follow-up release:
+
+| Package (version) | Change you may notice |
+|---|---|
+| DX.Data.Xpo (26.1.3.41) | `XpoDatabase` no longer sets the process-wide `XpoDefault.DataLayer` implicitly. Before, it did so only when `UpdateSchema` was `AutoCreateOption.DatabaseAndSchema` (typical in development, rare in production), and to whichever database was created last. Code that creates sessions without a data layer (`new UnitOfWork()`, `new Session()`, an `XPCollection` without a session) must opt in with `XpoDatabaseOptions.SetAsXpoDefault = true`, which now sets the database's own data layer whatever the schema option. Without a default data layer such code does not fail on reads: XPO falls back to a stub provider, so queries return no rows; `CommitChanges()` throws `NotSupportedException` ("the stub database provider is currently used"). If queries through `new UnitOfWork()` / `new Session()` suddenly return nothing after upgrading, set `SetAsXpoDefault = true`. |
+| DX.Utils (26.1.3.42) | No behaviour change: `Conversion.ParseEnum(value, defaultValue)` still follows `Enum.TryParse` and accepts any number (`"99"` gives `(TEnum)99`). New overload `ParseEnum(value, defaultValue, definedOnly, ignoreCase = false)`: with `definedOnly` a value must be one of the enum's members or, for a `[Flags]` enum, a combination of its flags. New helper `Conversion.IsDefinedEnumValue(value)`. |
 
 ## Installation
 

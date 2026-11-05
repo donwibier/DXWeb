@@ -301,6 +301,56 @@ namespace DX.Utils
             return result;
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary>   Parses an object into an Enum, optionally accepting defined values only. </summary>
+		///
+		/// <remarks>
+		/// Like <see cref="ParseEnum{TEnum}(object, TEnum)"/>, which follows <see cref="Enum.TryParse{TEnum}(string, out TEnum)"/>
+		/// and so accepts any number (<c>"99"</c> gives <c>(TEnum)99</c>). With <paramref name="definedOnly"/> a value must
+		/// be defined: one of the enum's members, or for a <see cref="FlagsAttribute"/> enum a combination of its flags.
+		/// </remarks>
+		///
+		/// <typeparam name="TEnum">    Type of the enum. </typeparam>
+		/// <param name="value">        The object to parse (converted to a string with <c>$"{value}"</c>). </param>
+		/// <param name="defaultValue"> The value returned when <paramref name="value"/> cannot be parsed or is not defined. </param>
+		/// <param name="definedOnly">  true to return <paramref name="defaultValue"/> for values the enum does not define. </param>
+		/// <param name="ignoreCase">   true to match member names case-insensitively. </param>
+		///
+		/// <returns>   The Enum value, or <paramref name="defaultValue"/>. </returns>
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		public static TEnum ParseEnum<TEnum>(object value, TEnum defaultValue, bool definedOnly, bool ignoreCase = false)
+			where TEnum : struct, IConvertible
+		{
+			if (!Enum.TryParse<TEnum>($"{value}", ignoreCase, out TEnum result))
+				return defaultValue;
+			if (definedOnly && !IsDefinedEnumValue(result))
+				return defaultValue;
+			return result;
+		}
+
+		/// <summary>
+		/// Whether <paramref name="value"/> is a member of its enum, or for a [Flags] enum a combination of its flags
+		/// </summary>
+		public static bool IsDefinedEnumValue<TEnum>(TEnum value)
+			where TEnum : struct, IConvertible
+		{
+			var type = typeof(TEnum);
+			if (Enum.IsDefined(type, value))
+				return true;
+			if (!type.IsDefined(typeof(FlagsAttribute), false))
+				return false;
+			ulong all = 0;
+			foreach (var flag in Enum.GetValues(type))
+				all |= EnumBits(flag);
+			return (EnumBits(value) & ~all) == 0;
+		}
+
+		private static ulong EnumBits(object value)
+			=> Type.GetTypeCode(Enum.GetUnderlyingType(value.GetType())) == TypeCode.UInt64
+				? Convert.ToUInt64(value)
+				: unchecked((ulong)Convert.ToInt64(value));
+
 		static readonly char[] configOptionSeparators = new char[] { ';' };
         static readonly char[] configOptionValueSeparators = new char[] { '=' };
 

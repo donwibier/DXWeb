@@ -5,6 +5,11 @@ XPO (DevExpress eXpressPersistent Objects) database configuration and the abstra
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** `DevExpress.Xpo` `26.1.*`
 
+## Behaviour changes in 26.1.3.41
+
+- `XpoDatabase` no longer sets the process-wide `XpoDefault.DataLayer` implicitly (up to 26.1.3.40 it did, but only with `UpdateSchema = AutoCreateOption.DatabaseAndSchema`, and to whichever database was created last). Opt in with `XpoDatabaseOptions.SetAsXpoDefault = true`.
+- Without a default data layer such code does not fail on reads: XPO falls back to a stub provider, so queries return no rows; `CommitChanges()` throws `NotSupportedException` ("the stub database provider is currently used"). If queries through `new UnitOfWork()` / `new Session()` suddenly return nothing after upgrading, set `SetAsXpoDefault = true`.
+
 ## Behaviour changes in 26.1.3.40
 
 - `XPDataStore.UpdateAsync` with a default key fails instead of inserting a new row.
@@ -30,7 +35,8 @@ public class XpoDatabaseOptions
     public string Name { get; set; }
     public string ConnectionString { get; set; }
     public bool EnableCaching { get; set; }
-    public bool UpdateSchema { get; set; }
+    public AutoCreateOption UpdateSchema { get; set; } = AutoCreateOption.None;
+    public bool SetAsXpoDefault { get; set; } = false; // also make it XpoDefault.DataLayer
 }
 
 public class XpoDatabase
@@ -56,6 +62,8 @@ public class XpoDatabase
 ```
 
 `XpoDatabase` wraps DevExpress's `IDataLayer` creation so you don't have to hand-build connection strings and data layers yourself. It supports **multiple named data layers in the same process** — pass an array of `XpoDatabaseOptions` (each with its own `Name`) to register more than one database, then resolve sessions/units of work for a specific one via the static `GetSession(name)`/`GetUnitOfWork(name)` overloads. `CreateDataLayer` (internal) reads `AutoCreateOption` and the `EnableCaching` node straight off the connection string, so schema auto-update and second-level caching are configured the same way DevExpress's own tooling expects.
+
+`XpoDatabase` does not touch `XpoDefault.DataLayer` unless you ask for it: set `SetAsXpoDefault = true` on the options of the database that code creating sessions without a data layer (`new UnitOfWork()`, `new Session()`, an `XPCollection` without a session) should use. It sets `XpoDefault.DataLayer` to that database's own data layer, whatever `UpdateSchema` is. `XpoDefault.Session` is set to `null`, so the default session cannot be picked up by accident.
 
 `Clone`/`CloneCollection` do an object-graph copy of XPO persistent objects from one `XpoDatabase` into another — useful for seeding a test/staging database from production data without a full export/import round-trip.
 

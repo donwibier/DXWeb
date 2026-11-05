@@ -73,6 +73,8 @@ public static class Conversion
     public static decimal ParseDecimal(object value, decimal defaultValue = 0);
     public static bool ParseBool(object value, bool defaultValue = false);
     public static TEnum ParseEnum<TEnum>(object value, TEnum defaultValue) where TEnum : struct;
+    public static TEnum ParseEnum<TEnum>(object value, TEnum defaultValue, bool definedOnly, bool ignoreCase = false) where TEnum : struct;
+    public static bool IsDefinedEnumValue<TEnum>(TEnum value) where TEnum : struct;
     public static string GetConfigOption(string key, string defaultValue = "");
     public static T MinValue<T>(T a, T b);
     public static T MaxValue<T>(T a, T b);
@@ -80,6 +82,8 @@ public static class Conversion
 ```
 
 All the `Parse*` methods swallow format/overflow exceptions and fall back to `defaultValue` — handy for reading loosely-typed data (query strings, `DataRow` cells, config values) without wrapping every call in a `try/catch`.
+
+`ParseEnum(value, defaultValue)` follows `Enum.TryParse`: it is case-sensitive and accepts any number, so `"99"` gives `(TEnum)99` even if the enum has no such member. Pass `definedOnly: true` to get `defaultValue` for undefined values instead; a `[Flags]` enum accepts any combination of its flags (`"Read, Write"`, `"3"`). `ignoreCase: true` matches member names case-insensitively.
 
 ### CronJobs — a self-contained cron scheduler
 
