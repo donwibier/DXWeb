@@ -145,6 +145,32 @@ namespace DX.Data.Xpo.Tests
             }
         }
 
+        /// <summary>The data layer name of <see cref="OtherLayerNote"/> (a prefix: every test still uses a unique name)</summary>
+        internal const string OtherLayer = "XpoDbOtherLayer";
+
+        private static string[] Tables(XpoDatabase db, string name) =>
+            ((IDataStoreSchemaExplorer)((ThreadSafeDataLayer)db.GetDataLayer(name)).ConnectionProvider).GetStorageTablesList(false);
+
+        [Fact]
+        public void UpdateSchema_CreatesTheTablesOfItsOwnDataLayerOnly()
+        {
+            var name = NewName();
+            var db = new XpoDatabase(InMemory(name));
+            var tables = Tables(db, name);
+            Assert.Contains("TestProduct", tables);
+            Assert.Contains("PlainNote", tables); // classes without [Persistent] still get a table
+            Assert.DoesNotContain("TestOtherLayerNote", tables); // [XpoDataLayer] of another data layer
+        }
+
+        [Fact]
+        public void UpdateSchema_CreatesTheTablesOfClassesAssignedToIt()
+        {
+            var db = new XpoDatabase(InMemory(OtherLayer));
+            Assert.Contains("TestOtherLayerNote", Tables(db, OtherLayer));
+            db.Execute((d, s) => { new OtherLayerNote(s) { Text = "here" }; });
+            Assert.Equal("here", db.Execute((d, s) => s.Query<OtherLayerNote>().Single().Text));
+        }
+
         [Fact]
         public void PlainXPObjectWithoutPersistentAttribute_IsUsable()
         {
