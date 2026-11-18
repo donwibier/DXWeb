@@ -52,6 +52,16 @@ namespace DX.Data.Xpo.Tests
         public string Text { get => _text; set => SetPropertyValue(nameof(Text), ref _text, value); }
     }
 
+    /// <summary>A class of another data layer: other data layers must not create its table</summary>
+    [Persistent("TestOtherLayerNote"), XpoDataLayer(XpoDatabaseTests.OtherLayer)]
+    public class OtherLayerNote : XPObject
+    {
+        public OtherLayerNote(Session session) : base(session) { }
+
+        private string _text;
+        public string Text { get => _text; set => SetPropertyValue(nameof(Text), ref _text, value); }
+    }
+
     [Persistent("TestUniqueCode")]
     public class UniqueCode : XPObject
     {

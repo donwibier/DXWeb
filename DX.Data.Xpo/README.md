@@ -5,6 +5,12 @@ XPO (DevExpress eXpressPersistent Objects) database configuration and the abstra
 **Target frameworks:** net462, net8.0, net9.0, net10.0
 **DevExpress dependency:** `DevExpress.Xpo` `26.1.*`
 
+## Behaviour changes in 26.1.3.42
+
+- With `UpdateSchema = AutoCreateOption.DatabaseAndSchema`, `XpoDatabase` creates only the tables of its own data layer. Up to 26.1.3.41 the schema update ran on XPO's process-wide default dictionary, so every database got a table for every persistent class of every loaded assembly, also for classes that `[XpoDataLayer("other")]` assigns to another data layer. Classes without `[XpoDataLayer]` (with or without `[Persistent]`) still get their tables in every data layer.
+- The schema update uses a dictionary of its own and no longer adds classes to `XpoDefault`'s dictionary. Assemblies loaded twice (plugins in separate `AssemblyLoadContext`s) no longer make it throw "Dictionary already contains ClassInfo", as long as their classes carry `[XpoDataLayer]` for another data layer.
+- Tables that older versions created for other data layers stay in the database; drop them yourself if you want them gone.
+
 ## Behaviour changes in 26.1.3.41
 
 - `XpoDatabase` no longer sets the process-wide `XpoDefault.DataLayer` implicitly (up to 26.1.3.40 it did, but only with `UpdateSchema = AutoCreateOption.DatabaseAndSchema`, and to whichever database was created last). Opt in with `XpoDatabaseOptions.SetAsXpoDefault = true`.

@@ -317,16 +317,23 @@ namespace DX.Data.Xpo
 			// Initialize the XPO dictionary
 			dataDictionary.GetDataStoreSchema(GetDataTypes(options.Name));
 
-			// make sure everything exists in the db
+			// make sure everything exists in the db: the tables of this data layer only, with a dictionary of its own. A plain
+			// UpdateSchema() would use XPO's process-wide default dictionary and create tables for every persistent class of
+			// every loaded assembly, including classes of other data layers ([XpoDataLayer]); with two copies of an assembly
+			// loaded (plugins in their own load contexts) it throws.
 			if (createOption == AutoCreateOption.DatabaseAndSchema)
 			{
-				using (SimpleDataLayer dataLayer = new SimpleDataLayer(dataStore))
+				XPDictionary schemaDictionary = new ReflectionDictionary();
+				Type[] schemaTypes = GetSchemaTypes(options.Name);
+				schemaDictionary.GetDataStoreSchema(schemaTypes);
+				XPClassInfo[] classInfos = schemaTypes.Select(t => schemaDictionary.GetClassInfo(t)).Where(ci => ci.IsPersistent).ToArray();
+				using (SimpleDataLayer dataLayer = new SimpleDataLayer(schemaDictionary, dataStore))
 				{
 					using (Session session = new Session(dataLayer))
 					{
-						// place code here to patch metadata              
-						session.UpdateSchema();
-						session.CreateObjectTypeRecords();
+						// place code here to patch metadata
+						session.UpdateSchema(false, classInfos);
+						session.CreateObjectTypeRecords(classInfos);
 					}
 				}
 			}
@@ -353,6 +360,43 @@ namespace DX.Data.Xpo
 		}
 
 		static readonly string xpoName = XPClassInfo.GetShortAssemblyName(typeof(XPDictionary).Assembly);
+
+		/// <summary>
+		/// The classes whose tables a data layer creates: the persistent classes XPO finds in the loaded assemblies (also those
+		/// without [Persistent], as XPO's UpdateSchema() did), except classes that [XpoDataLayer] assigns to other data layers.
+		/// Each assembly is read with a dictionary of its own, so two copies of one assembly (plugins) do not clash here.
+		/// </summary>
+		private static Type[] GetSchemaTypes(string name)
+		{
+			List<Type> result = new List<Type>();
+			foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				if (asm.IsDynamic ||
+					(XPClassInfo.GetShortAssemblyName(asm) != xpoName && asm.GetReferencedAssemblies().All(a => a.Name != xpoName)))
+					continue;
+				XPClassInfo[] classInfos;
+				try
+				{
+					classInfos = new ReflectionDictionary().CollectClassInfos(false, new[] { asm });
+				}
+				catch (ReflectionTypeLoadException)
+				{
+					continue; // an assembly with a missing dependency has no usable classes
+				}
+				result.AddRange(classInfos.Select(ci => ci.ClassType).Where(t => t != null && BelongsTo(t, name)));
+			}
+			return result.Distinct().ToArray();
+		}
+
+		/// <summary>Whether a class is used by the data layer <paramref name="name"/>: no [XpoDataLayer], or one with that name.</summary>
+		private static bool BelongsTo(Type type, string name)
+		{
+			if (String.IsNullOrEmpty(name))
+				return true;
+			object[] layers = type.GetCustomAttributes(typeof(XpoDataLayerAttribute), true);
+			return layers.Length == 0 || layers.Any(attr => ((XpoDataLayerAttribute)attr).DataLayerName == name);
+		}
+
 		private static Type[] GetDataTypes(string name = "")
 		{
 			List<Type> result = new List<Type>();
